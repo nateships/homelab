@@ -6,7 +6,7 @@
 set -eu
 
 # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
-VERSION=1.18.1
+VERSION=1.20.1
 OUT="$(dirname "$0")/../infra/stacks/cluster/manifests/cilium-bootstrap.yaml"
 
 helm template cilium cilium \
