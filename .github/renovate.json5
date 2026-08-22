@@ -26,6 +26,17 @@
       "versioningTemplate": "semver-coerced"
     },
     {
+      // op CLI pin in mise.toml. The mise manager cannot look this dep up
+      // (no GitHub releases), so a dedicated regex tracks it via the
+      // 1password/op Docker image tags. Anchored to the exact line because
+      // the generic annotation regex would stop at the colon in "aqua:".
+      "customType": "regex",
+      "managerFilePatterns": ["/^mise\\.toml$/"],
+      "matchStrings": ["\"aqua:1password/cli\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "1password/op",
+      "datasourceTemplate": "docker"
+    },
+    {
       // ArgoCD install manifest URL in the bootstrap kustomization. Separate
       // manager because the version sits inside a URL, where the annotation
       // regex's `(?:=|:)` anchor would stop at "https:".
@@ -38,9 +49,14 @@
   ],
   "packageRules": [
     {
-      "description": "op CLI has no GitHub releases; lookups always fail. Bump manually (mise.toml + runner/Dockerfile together).",
+      "description": "Silence the mise manager's doomed lookup for the op CLI (no GitHub releases). The 1password/op regex manager owns this pin.",
       "matchDepNames": ["1password/cli"],
       "enabled": false
+    },
+    {
+      "description": "op CLI pins (mise.toml + runner Dockerfile) move together",
+      "matchDepNames": ["1password/op"],
+      "groupName": "op-cli"
     },
     {
       "description": "Major updates: manual review, never automerge",

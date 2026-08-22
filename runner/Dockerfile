@@ -4,7 +4,9 @@ FROM ghcr.io/spacelift-io/runner-terraform:latest@sha256:2b363c9f75f5e0f2aa9d445
 
 USER root
 
-# 1Password CLI has no GitHub releases; bump manually with mise.toml's pin.
+# op has no GitHub releases; the 1password/op Docker image tags mirror the
+# CLI versions, so Renovate tracks those.
+# renovate: datasource=docker depName=1password/op
 ARG OP_VERSION=2.32.0
 # renovate: datasource=github-releases depName=tailscale/tailscale extractVersion=^v(?<version>.+)$
 ARG TAILSCALE_VERSION=1.102.3
