@@ -34,7 +34,7 @@ variable "omni_ct_vlan" {
 variable "ct_datastore" {
   description = "Datastore for the LXC rootfs"
   type        = string
-  default     = "local-lvm"
+  default     = "zpool"
 }
 
 variable "ssh_public_key" {
