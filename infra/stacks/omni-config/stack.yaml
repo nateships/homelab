@@ -4,3 +4,7 @@ type: ansible
 playbook: site.yml
 labels: [op]
 depends_on: [omni]
+env:
+  # Spacelift's workspace is world-writable, so ansible ignores a cwd
+  # ansible.cfg; an explicit path is honored.
+  ANSIBLE_CONFIG: ansible.cfg
