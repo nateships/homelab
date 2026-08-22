@@ -29,6 +29,10 @@ resource "auth0_client" "omni" {
   description = "Self-hosted Sidero Omni (managed by the auth0 stack)"
   app_type    = "spa"
 
+  # The provider defaults this to false (legacy pipeline); auth0-spa-js
+  # then never completes the PKCE code exchange and login loops.
+  oidc_conformant = true
+
   callbacks           = [var.omni_url]
   allowed_logout_urls = [var.omni_url]
   web_origins         = [var.omni_url]
