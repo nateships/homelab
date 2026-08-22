@@ -1,6 +1,6 @@
 ---
 # Configures the Omni LXC (created by infra/stacks/omni) and deploys Omni.
-# Targets only the PVE host over Tailscale SSH; all container work goes
+# Targets only the PVE host over Tailscale SSH; all LXC work goes
 # through pct. Secrets render on the runner with op and are pushed in.
 - name: Omni LXC configuration and deployment
   hosts: pve1
@@ -11,7 +11,7 @@
     omni_domain: "{{ lookup('pipe', 'op read op://homelab/omni/domain') }}"
     admin_email: "{{ lookup('pipe', 'op read op://homelab/omni/admin-email') }}"
   tasks:
-    - name: Pass /dev/net/tun into the container
+    - name: Pass /dev/net/tun into the LXC
       ansible.builtin.lineinfile:
         path: "/etc/pve/lxc/{{ ct_id }}.conf"
         regexp: "^dev0:"
@@ -25,13 +25,13 @@
         line: "features: keyctl=1,nesting=1"
       register: feat
 
-    - name: Reboot the container to apply device and features
+    - name: Reboot the LXC to apply device and features
       ansible.builtin.command: "pct reboot {{ ct_id }}"
       when: tun is changed or feat is changed
 
     # Read-only probes run even in check mode (skipped probes register no
     # stdout/rc and break the conditions that use them).
-    - name: Wait until the container runs
+    - name: Wait until the LXC runs
       ansible.builtin.command: "pct status {{ ct_id }}"
       register: ct_status
       until: "'running' in ct_status.stdout"
@@ -40,14 +40,14 @@
       changed_when: false
       check_mode: false
 
-    - name: Install packages in the container
+    - name: Install packages in the LXC
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
         'apt-get update -q && apt-get install -qy curl ca-certificates certbot python3-certbot-dns-cloudflare gpg'
       register: apt_result
       changed_when: "'0 newly installed' not in apt_result.stdout"
 
-    - name: Check for Docker in the container
+    - name: Check for Docker in the LXC
       ansible.builtin.command: "pct exec {{ ct_id }} -- sh -c 'command -v docker'"
       register: docker_bin
       failed_when: false
@@ -55,13 +55,13 @@
       check_mode: false
 
     # The trailing `command -v docker` makes a silent curl/sh failure fatal.
-    - name: Install Docker in the container
+    - name: Install Docker in the LXC
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
         'curl -fsSL https://get.docker.com | sh && command -v docker'
       when: docker_bin.rc != 0
 
-    - name: Create the Omni directories in the container
+    - name: Create the Omni directories in the LXC
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
         'mkdir -p /etc/omni/sqlite /etc/etcd && chown 1000:1000 /etc/etcd && chmod 700 /etc/etcd'
@@ -86,7 +86,7 @@
         label: "{{ item.name }}"
       no_log: true
 
-    - name: Push the files into the container
+    - name: Push the files into the LXC
       ansible.builtin.command: >-
         pct push {{ ct_id }} /tmp/omni-stage-{{ item.src }} {{ item.dest }}
         --perms {{ item.perms }}
