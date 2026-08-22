@@ -22,3 +22,5 @@ trufflehog = "3.97.0"
 # uv powers the pipx backend
 uv = "0.12.5"
 "pipx:ansible-core" = "2.21.3"
+# Spacelift's ansible workflow drives playbooks through ansible-runner
+"pipx:ansible-runner" = "2.4.3"
