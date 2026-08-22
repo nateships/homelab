@@ -9,7 +9,9 @@ ARG OP_VERSION=2.32.0
 # renovate: datasource=github-releases depName=tailscale/tailscale extractVersion=^v(?<version>.+)$
 ARG TAILSCALE_VERSION=1.102.3
 
-RUN apk add --no-cache unzip \
+# gcompat: glibc loader shim. The 1Password provider v3 binary is
+# glibc-linked and cannot start on musl without it.
+RUN apk add --no-cache unzip gcompat \
     && curl -sSfo /tmp/op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v${OP_VERSION}/op_linux_amd64_v${OP_VERSION}.zip" \
     && unzip -o /tmp/op.zip op -d /usr/local/bin \
     && curl -sSf "https://pkgs.tailscale.com/stable/tailscale_${TAILSCALE_VERSION}_amd64.tgz" \
