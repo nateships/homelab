@@ -1,9 +1,3 @@
-variable "auth0_domain" {
-  description = "Auth0 tenant domain (public: it appears in every login redirect)"
-  type        = string
-  default     = "CHANGE_ME.us.auth0.com"
-}
-
 variable "omni_url" {
   description = "Omni base URL, used for callback/logout/origin"
   type        = string
@@ -15,6 +9,8 @@ data "onepassword_vault" "homelab" {
 }
 
 # M2M application authorized for the Auth0 Management API (see BOOTSTRAP).
+# username = client ID, password = secret, website = tenant domain (kept
+# out of this public repo).
 data "onepassword_item" "auth0" {
   vault = data.onepassword_vault.homelab.uuid
   title = "auth0-terraform"
@@ -23,7 +19,7 @@ data "onepassword_item" "auth0" {
 provider "onepassword" {}
 
 provider "auth0" {
-  domain        = var.auth0_domain
+  domain        = data.onepassword_item.auth0.url
   client_id     = data.onepassword_item.auth0.username
   client_secret = data.onepassword_item.auth0.password
 }

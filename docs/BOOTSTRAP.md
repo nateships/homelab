@@ -115,11 +115,10 @@ Auth0 is code too (`infra/stacks/auth0`). One-time preparation:
 1. Create an Auth0 tenant (free plan).
 2. Create an M2M application authorized for the **Auth0 Management API**
    with the client scopes (`read:clients`, `create:clients`,
-   `update:clients`, `delete:clients`). Store its client ID (username) and
-   secret (password) in the `auth0-terraform` item.
-3. Commit your tenant domain as the `auth0_domain` default in
-   `infra/stacks/auth0/main.tf`, and set the same value in the `omni`
-   item's `auth0-domain` field.
+   `update:clients`, `delete:clients`). Store it in the `auth0-terraform`
+   item: client ID as username, secret as password, and the tenant domain
+   as the website field (the domain stays out of this public repo).
+3. Set the same tenant domain in the `omni` item's `auth0-domain` field.
 4. Confirm the `homelab-auth0` run. Copy the `omni_client_id` output into
    the `omni` item's `auth0-client-id` field (a one-time copy; the ID
    never changes).
