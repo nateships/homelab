@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - runner/**
+      - mise.toml
       - .github/workflows/runner-image.yaml
 
 permissions:
@@ -23,7 +24,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
-          context: runner
+          # repo root: the Dockerfile copies mise.toml
+          context: .
+          file: runner/Dockerfile
           push: true
           tags: |
             ghcr.io/nateships/spacelift-runner:latest

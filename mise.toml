@@ -12,7 +12,13 @@ kubectl = "1.36"
 kubeconform = "0.8.0"
 # exact version required: this aqua package can't enumerate releases.
 # Renovate tracks it through the 1password/op Docker image tags (see
-# .github/renovate.json5), grouped with the runner Dockerfile's OP_VERSION.
+# .github/renovate.json5).
 "aqua:1password/cli" = "2.32.0"
 prek = "0.4.14"
 trufflehog = "3.97.0"
+
+# Runner-image tools (runner/Dockerfile installs this whole file via mise)
+"aqua:tailscale/tailscale" = "1.102.3"
+# uv powers the pipx backend
+uv = "0.12.5"
+"pipx:ansible-core" = "2.21.3"

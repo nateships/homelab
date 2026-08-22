@@ -1,27 +1,33 @@
-# Single Spacelift runner for both stack types: Spacelift injects the tofu
-# binary at run time, and the ansible base carries Ansible for the config
-# stacks. Adds op (1Password CLI) and Tailscale.
-FROM ghcr.io/spacelift-io/runner-ansible:latest
+# Spacelift runner built from scratch. mise installs the whole repo
+# toolchain from mise.toml, so tool versions live in exactly one file.
+# Spacelift's launcher mounts the tofu binary and the workspace itself;
+# the image only has to provide the environment and the spacelift user.
+FROM debian:13-slim
 
-USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       ca-certificates curl git openssh-client unzip xz-utils python3 \
+    && rm -rf /var/lib/apt/lists/* \
+    # Spacelift runner contract: unprivileged user "spacelift", UID 1983
+    && useradd --uid 1983 --create-home --shell /bin/bash spacelift
 
-# op has no GitHub releases; the 1password/op Docker image tags mirror the
-# CLI versions, so Renovate tracks those.
-# renovate: datasource=docker depName=1password/op
-ARG OP_VERSION=2.32.0
-# renovate: datasource=github-releases depName=tailscale/tailscale extractVersion=^v(?<version>.+)$
-ARG TAILSCALE_VERSION=1.102.3
+# renovate: datasource=github-releases depName=jdx/mise extractVersion=^v(?<version>.+)$
+ARG MISE_VERSION=2026.8.10
 
-# gcompat: glibc loader shim. The 1Password provider v3 binary is
-# glibc-linked and cannot start on musl without it.
-RUN apk add --no-cache curl unzip gcompat \
-    && curl -sSfo /tmp/op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v${OP_VERSION}/op_linux_amd64_v${OP_VERSION}.zip" \
-    && unzip -o /tmp/op.zip op -d /usr/local/bin \
-    && curl -sSf "https://pkgs.tailscale.com/stable/tailscale_${TAILSCALE_VERSION}_amd64.tgz" \
-       | tar xz -C /usr/local/bin --strip-components=1 \
-         "tailscale_${TAILSCALE_VERSION}_amd64/tailscale" \
-         "tailscale_${TAILSCALE_VERSION}_amd64/tailscaled" \
-    && rm -f /tmp/op.zip \
-    && op --version && tailscale --version
+ENV MISE_DATA_DIR=/usr/local/share/mise \
+    MISE_CONFIG_DIR=/etc/mise \
+    MISE_CACHE_DIR=/tmp/mise-cache \
+    MISE_INSTALL_PATH=/usr/local/bin/mise \
+    PATH=/usr/local/share/mise/shims:/usr/local/bin:/usr/bin:/bin
+
+COPY mise.toml /etc/mise/config.toml
+
+RUN curl -fsSL https://mise.run | MISE_VERSION="v${MISE_VERSION}" sh \
+    && mise trust /etc/mise/config.toml \
+    && mise install \
+    && chmod -R a+rX "${MISE_DATA_DIR}" \
+    # smoke-test the tools the stacks depend on
+    && op --version && tailscale --version \
+    && ansible-playbook --version && omnictl --version
 
 USER spacelift
