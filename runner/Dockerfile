@@ -6,7 +6,7 @@ FROM debian:13-slim
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       ca-certificates curl git openssh-client unzip xz-utils python3 \
+       ca-certificates curl git jq openssh-client procps unzip xz-utils python3 \
     && rm -rf /var/lib/apt/lists/* \
     # Spacelift runner contract: unprivileged user "spacelift", UID 1983
     && useradd --uid 1983 --create-home --shell /bin/bash spacelift
