@@ -29,6 +29,8 @@
       ansible.builtin.command: "pct reboot {{ ct_id }}"
       when: tun is changed or feat is changed
 
+    # Read-only probes run even in check mode (skipped probes register no
+    # stdout/rc and break the conditions that use them).
     - name: Wait until the container runs
       ansible.builtin.command: "pct status {{ ct_id }}"
       register: ct_status
@@ -36,12 +38,14 @@
       retries: 10
       delay: 3
       changed_when: false
+      check_mode: false
 
     - name: Check for Docker in the container
       ansible.builtin.command: "pct exec {{ ct_id }} -- sh -c 'command -v docker'"
       register: docker_bin
       failed_when: false
       changed_when: false
+      check_mode: false
 
     - name: Install Docker in the container
       ansible.builtin.command: >-
@@ -104,6 +108,7 @@
       register: cert
       failed_when: false
       changed_when: false
+      check_mode: false
 
     - name: Issue the TLS certificate
       ansible.builtin.command: >-
