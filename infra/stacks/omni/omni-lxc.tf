@@ -31,7 +31,7 @@ resource "proxmox_virtual_environment_container" "omni" {
   }
 
   lifecycle {
-    ignore_changes = [features]
+    ignore_changes = [features, device_passthrough]
   }
 
   cpu {
