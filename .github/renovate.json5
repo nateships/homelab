@@ -38,6 +38,11 @@
   ],
   "packageRules": [
     {
+      "description": "op CLI has no GitHub releases; lookups always fail. Bump manually (mise.toml + runner/Dockerfile together).",
+      "matchDepNames": ["1password/cli"],
+      "enabled": false
+    },
+    {
       "description": "Major updates: manual review, never automerge",
       "matchUpdateTypes": ["major"],
       "automerge": false,
