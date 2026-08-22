@@ -1,7 +1,7 @@
 # Repo toolchain: `mise install` gets you everything.
 # CI installs from this same file (jdx/mise-action), so versions live here only.
 [tools]
-opentofu = "1.12"
+opentofu = "1.12.6"
 # MUST match OMNI_IMG_TAG in omni/omni.env.example; mismatched omnictl fails
 # with obscure gRPC errors
 omnictl = "1.10.4"
