@@ -137,15 +137,20 @@ the admin email.
 3. Run `mise install`. It installs `omnictl` at the same version as
    `OMNI_IMG_TAG`. A version mismatch causes obscure gRPC errors. Bump
    mise.toml and omni.env together.
-4. Apply machine classes and the cluster template:
+4. Apply the machine classes (the one omnictl step; download the omnictl
+   config from the Omni UI first):
    ```bash
    omnictl apply -f omni/machine-classes/control-plane.yaml
    omnictl apply -f omni/machine-classes/worker.yaml
-   omnictl cluster template sync -v -f omni/cluster-template/cluster.yaml
    ```
-   The `install-disk` patch in the template is mandatory on Talos 1.13+.
-   Without it, VMs stop at `stage=UPGRADING` and show no error.
-5. Wait until the VMs provision and the cluster reports Ready. Nodes stay
+5. Create an Omni service account (Omni UI → Settings → Service Accounts,
+   Admin role). Store the key as the password of the `omni-service-account`
+   item.
+6. Confirm the `homelab-cluster` run. It creates the cluster, machine sets,
+   patches, and extensions through the Omni terraform provider. The
+   `install-disk` patch is mandatory on Talos 1.13+; without it VMs stop at
+   `stage=UPGRADING` and show no error.
+7. Wait until the VMs provision and the cluster reports Ready. Nodes stay
    `NotReady` until Cilium installs in stage 5. That is expected.
 
 ## 5. ArgoCD and apps
