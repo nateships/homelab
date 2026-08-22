@@ -4,7 +4,7 @@ kind: Cluster
 name: homelab
 kubernetes:
   # renovate: datasource=github-releases depName=kubernetes/kubernetes
-  version: v1.36.2
+  version: v1.36.4
 talos:
   # renovate: datasource=github-releases depName=siderolabs/talos
   version: v1.13.5
