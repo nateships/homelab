@@ -45,6 +45,13 @@
 					{
 						"allow_admin_ui": true,
 						"allow_dcr": true,
+
+						// Omni rejects tokens without a verified email;
+						// tailnet identities are verified by definition.
+						"extraClaims": {
+							"email_verified": true,
+						},
+						"includeInUserInfo": true,
 					},
 				],
 			},
