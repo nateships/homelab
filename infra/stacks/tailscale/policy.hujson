@@ -7,6 +7,14 @@
 		"tag:pve": ["autogroup:admin"],
 	},
 
+	// The PVE host is the subnet router for the k8s VLAN; approve its
+	// advertisement automatically, no console click.
+	"autoApprovers": {
+		"routes": {
+			"10.16.101.0/24": ["tag:pve"],
+		},
+	},
+
 	"acls": [
 		// Spacelift runs reach the Proxmox API and SSH (Ansible stack).
 		// (Bare machine names are not valid in dst; the PVE host carries
