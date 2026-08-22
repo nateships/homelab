@@ -1,0 +1,17 @@
+// Tailnet policy file (HuJSON). This file is the source of truth; edit here,
+// not in the admin console. The first apply replaces the console policy.
+{
+	// Who may apply each tag to devices.
+	"tagOwners": {
+		"tag:spacelift": ["autogroup:admin"],
+	},
+
+	"acls": [
+		// Spacelift runs reach only the Proxmox API.
+		{"action": "accept", "src": ["tag:spacelift"], "dst": ["pve1:8006"]},
+
+		// Default allow for everything else (Tailscale's default posture).
+		// Tighten by replacing this rule with explicit ones.
+		{"action": "accept", "src": ["*"], "dst": ["*:*"]},
+	],
+}

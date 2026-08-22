@@ -127,6 +127,7 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 #   description: ...
 #   autodeploy: true          # default false: plan on push, apply on confirm
 #   labels: [op]              # extra labels; "op" opts into the 1Password token
+#   depends_on: [omni]        # run ordering; values are other stacks' dir keys
 # Adding a stack = new directory + stack.yaml + push. Note: the admin stack
 # must have project glob "infra/stacks/**/stack.yaml" set so manifest
 # changes trigger it.
@@ -139,6 +140,7 @@ locals {
     description = null
     autodeploy  = false
     labels      = []
+    depends_on  = []
   }
 
   stacks = {
@@ -167,4 +169,20 @@ resource "spacelift_stack" "this" {
   # Baseline "homelab" pulls in the managed context (Proxmox + Tailscale);
   # manifest labels add more (e.g. "op" for the 1Password token).
   labels = concat(["homelab"], each.value.labels)
+}
+
+# Run ordering from the manifests' depends_on lists.
+locals {
+  stack_dependencies = merge([
+    for name, s in local.stacks : {
+      for dep in s.depends_on : "${name}->${dep}" => { child = name, parent = dep }
+    }
+  ]...)
+}
+
+resource "spacelift_stack_dependency" "this" {
+  for_each = local.stack_dependencies
+
+  stack_id            = spacelift_stack.this[each.value.child].id
+  depends_on_stack_id = spacelift_stack.this[each.value.parent].id
 }
