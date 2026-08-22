@@ -21,11 +21,10 @@ variable "proxmox_endpoint" {
   type        = string
 }
 
-variable "tailscale_version" {
-  description = "Tailscale static binary version for run hooks; https://pkgs.tailscale.com/stable/"
+variable "runner_image" {
+  description = "Runner image with op and Tailscale baked in (built by .github/workflows/runner-image.yaml)"
   type        = string
-  # renovate: datasource=github-releases depName=tailscale/tailscale extractVersion=^v(?<version>.+)$
-  default = "1.88.1"
+  default     = "ghcr.io/nateships/spacelift-runner:latest"
 }
 
 # Non-secret values passed to stacks as TF_VAR_* through the homelab context.
