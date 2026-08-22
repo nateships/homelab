@@ -177,7 +177,7 @@ resource "spacelift_stack" "this" {
   project_root            = "infra/stacks/${each.value.dir}"
   terraform_workflow_tool = each.value.type == "ansible" ? null : "OPEN_TOFU"
   autodeploy              = each.value.autodeploy
-  runner_image            = each.value.type == "ansible" ? var.ansible_runner_image : var.runner_image
+  runner_image            = var.runner_image
 
   dynamic "ansible" {
     for_each = each.value.type == "ansible" ? [each.value.playbook] : []
