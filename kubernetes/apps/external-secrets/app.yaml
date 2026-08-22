@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-secrets
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  project: default
+  sources:
+    # Operator (Helm)
+    - repoURL: https://charts.external-secrets.io
+      chart: external-secrets
+      # Check https://github.com/external-secrets/external-secrets/releases
+      targetRevision: 0.15.1
+      helm:
+        valuesObject:
+          installCRDs: true
+    # ClusterSecretStore pointing at 1Password (git dir alongside this file)
+    - repoURL: https://github.com/nateships/homelab
+      targetRevision: main
+      path: kubernetes/apps/external-secrets/config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-secrets
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2

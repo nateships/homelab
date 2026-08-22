@@ -1,0 +1,4 @@
+# Stack manifest: this file's presence makes the admin stack (infra/spacelift)
+# hydrate this directory into a Spacelift stack. Must be a non-empty YAML map.
+description: Omni LXC on Proxmox (self-hosted Sidero Omni)
+autodeploy: false
