@@ -50,6 +50,8 @@ services:
       TAILSCALE_USE_WIP_CODE: "1"
       TS_HOSTNAME: tsidp
       TS_AUTHKEY: ${TSIDP_AUTHKEY}
+      # Required when TS_AUTHKEY is an OAuth client secret
+      TS_ADVERTISE_TAGS: tag:tsidp
     volumes:
       - tsidp-data:/var/lib/tsidp
     command: --dir=/var/lib/tsidp
