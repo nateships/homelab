@@ -16,7 +16,7 @@ spec:
       memory: 16384
       disk_size: 100
       network_bridge: vmbr0
-      storage_selector: name == "local-lvm"
+      storage_selector: name == "zpool"
       disk_ssd: true
       disk_discard: true
       disk_iothread: true

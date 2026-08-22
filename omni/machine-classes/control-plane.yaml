@@ -16,8 +16,8 @@ spec:
       memory: 8192
       disk_size: 60
       network_bridge: vmbr0
-      # Adjust to your Proxmox storage; CEL expression
-      storage_selector: name == "local-lvm"
+      # CEL expression selecting the Proxmox datastore
+      storage_selector: name == "zpool"
       disk_ssd: true
       disk_discard: true
       disk_iothread: true
