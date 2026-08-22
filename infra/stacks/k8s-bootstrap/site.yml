@@ -21,9 +21,9 @@
       changed_when: false
 
     - name: Install ArgoCD
-      ansible.builtin.command: kubectl apply -k "{{ repo_root }}/kubernetes/bootstrap/argocd"
+      ansible.builtin.command: kubectl apply --server-side --force-conflicts -k "{{ repo_root }}/kubernetes/bootstrap/argocd"
       register: argocd
-      changed_when: "'created' in argocd.stdout or 'configured' in argocd.stdout"
+      changed_when: "'serverside-applied' in argocd.stdout"
 
     - name: Apply the root app-of-apps
       ansible.builtin.command: kubectl apply -f "{{ repo_root }}/kubernetes/bootstrap/root.yaml"

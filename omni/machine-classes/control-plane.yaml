@@ -15,6 +15,7 @@ spec:
       sockets: 1
       memory: 8192
       disk_size: 60
+      cpu_type: host
       network_bridge: vmbr0
       # Same VLAN as the Omni LXC; SideroLink stays on one L2 segment
       vlan: 101
