@@ -55,12 +55,21 @@ resource "spacelift_context" "homelab" {
 
   # Spacelift's hosted workers have no route to the LAN. These hooks join the
   # run to the tailnet: userspace tailscaled (no root, no TUN device) exposing
-  # a SOCKS5 proxy that the ALL_PROXY env var (below) points Go HTTP clients
-  # at. Proxmox is reached at its ts.net address. The binaries come from the
-  # custom runner image (runner/Dockerfile).
-  # Spacelift joins hooks with &&, so the backgrounded daemon needs a
-  # subshell; a trailing bare & would produce "& &&" and a syntax error.
-  before_init = [
+  # a SOCKS5 proxy and an HTTP proxy that the ALL_PROXY/HTTPS_PROXY env vars
+  # (below) point clients at. Proxmox is reached at its ts.net address. The
+  # binaries come from the custom runner image (runner/Dockerfile).
+  # Each phase can run in a fresh container, so every phase starts the
+  # daemon. Spacelift joins hooks with &&, so the backgrounded daemon needs
+  # a subshell; a trailing bare & would produce "& &&" and a syntax error.
+  before_init    = local.tailscale_up
+  before_plan    = local.tailscale_up
+  before_apply   = local.tailscale_up
+  before_destroy = local.tailscale_up
+  before_perform = local.tailscale_up
+}
+
+locals {
+  tailscale_up = [
     "(tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --outbound-http-proxy-listen=localhost:1056 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &)",
     "sleep 2",
     "tailscale --socket=/tmp/tailscaled.sock up --auth-key=\"$${TAILSCALE_AUTH_KEY}?ephemeral=true&preauthorized=true\" --advertise-tags=tag:spacelift --hostname=spacelift-run --accept-routes",
