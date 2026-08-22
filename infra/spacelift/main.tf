@@ -156,6 +156,10 @@ locals {
   stacks_dir      = "${path.module}/../stacks"
   stack_manifests = fileset(local.stacks_dir, "**/stack.yaml")
 
+  # Single source for the tofu version: the opentofu pin in mise.toml.
+  # Renovate bumps mise.toml; the next admin-stack run rolls it out.
+  tofu_version = regex("(?m)^opentofu = \"([0-9.]+)\"", file("${path.module}/../../mise.toml"))[0]
+
   stack_defaults = {
     description = null
     autodeploy  = false
@@ -185,6 +189,7 @@ resource "spacelift_stack" "this" {
   branch                  = var.branch
   project_root            = "infra/stacks/${each.value.dir}"
   terraform_workflow_tool = each.value.type == "ansible" ? null : "OPEN_TOFU"
+  terraform_version       = each.value.type == "ansible" ? null : local.tofu_version
   autodeploy              = each.value.autodeploy
   runner_image            = var.runner_image
 
