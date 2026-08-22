@@ -9,7 +9,7 @@ omnictl = "1.9.0"
 talosctl = "1.13.9"
 # within one minor of kubernetes.version in the cluster template
 kubectl = "1.36"
-kubeconform = "0.7"
+kubeconform = "0.8.0"
 # exact version required: this aqua package can't enumerate releases
 "aqua:1password/cli" = "2.32.0"
 prek = "0.4.14"
