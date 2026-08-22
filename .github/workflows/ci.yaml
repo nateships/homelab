@@ -32,6 +32,8 @@ jobs:
         run: |
           sh scripts/render-cilium-bootstrap.sh
           git diff --exit-code infra/stacks/cluster/manifests/
+      - name: bootstrap kustomization renders
+        run: kubectl kustomize kubernetes/bootstrap/argocd > /dev/null
       - name: kubeconform
         run: |
           # Application/ClusterSecretStore are CRDs; skip unknown schemas

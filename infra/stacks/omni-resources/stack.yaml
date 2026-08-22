@@ -8,3 +8,4 @@ labels: [op]
 depends_on: [omni-config]
 env:
   ANSIBLE_CONFIG: ansible.cfg
+project_globs: [omni/machine-classes/**]

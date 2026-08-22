@@ -6,3 +6,4 @@ labels: [op]
 depends_on: [cluster]
 env:
   ANSIBLE_CONFIG: ansible.cfg
+project_globs: [kubernetes/bootstrap/**]

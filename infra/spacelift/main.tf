@@ -149,6 +149,7 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 #   type: ansible             # default terraform; ansible runs playbook below
 #   playbook: site.yml        # ansible only; path inside the stack dir
 #   env: {NAME: value}        # plain env vars set on this stack only
+#   project_globs: [omni/**]  # extra paths whose changes trigger this stack
 # Adding a stack = new directory + stack.yaml + push. Note: the admin stack
 # must have project glob "infra/stacks/**/stack.yaml" set so manifest
 # changes trigger it.
@@ -162,13 +163,14 @@ locals {
   tofu_version = regex("(?m)^opentofu = \"([0-9.]+)\"", file("${path.module}/../../mise.toml"))[0]
 
   stack_defaults = {
-    description = null
-    autodeploy  = false
-    labels      = []
-    depends_on  = []
-    type        = "terraform"
-    playbook    = "site.yml"
-    env         = {}
+    description   = null
+    autodeploy    = false
+    labels        = []
+    depends_on    = []
+    type          = "terraform"
+    playbook      = "site.yml"
+    env           = {}
+    project_globs = []
   }
 
   stacks = {
@@ -184,16 +186,17 @@ locals {
 resource "spacelift_stack" "this" {
   for_each = local.stacks
 
-  name                    = "homelab-${each.key}"
-  description             = each.value.description
-  space_id                = spacelift_space.homelab.id
-  repository              = var.repository
-  branch                  = var.branch
-  project_root            = "infra/stacks/${each.value.dir}"
-  terraform_workflow_tool = each.value.type == "ansible" ? null : "OPEN_TOFU"
-  terraform_version       = each.value.type == "ansible" ? null : local.tofu_version
-  autodeploy              = each.value.autodeploy
-  runner_image            = var.runner_image
+  name                     = "homelab-${each.key}"
+  description              = each.value.description
+  space_id                 = spacelift_space.homelab.id
+  repository               = var.repository
+  branch                   = var.branch
+  project_root             = "infra/stacks/${each.value.dir}"
+  terraform_workflow_tool  = each.value.type == "ansible" ? null : "OPEN_TOFU"
+  terraform_version        = each.value.type == "ansible" ? null : local.tofu_version
+  autodeploy               = each.value.autodeploy
+  runner_image             = var.runner_image
+  additional_project_globs = each.value.project_globs
 
   dynamic "ansible" {
     for_each = each.value.type == "ansible" ? [each.value.playbook] : []
