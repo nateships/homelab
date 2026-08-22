@@ -57,8 +57,10 @@ resource "spacelift_context" "homelab" {
   # a SOCKS5 proxy that the ALL_PROXY env var (below) points Go HTTP clients
   # at. Proxmox is reached at its ts.net address. The binaries come from the
   # custom runner image (runner/Dockerfile).
+  # Spacelift joins hooks with &&, so the backgrounded daemon needs a
+  # subshell; a trailing bare & would produce "& &&" and a syntax error.
   before_init = [
-    "tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &",
+    "(tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &)",
     "sleep 2",
     "tailscale --socket=/tmp/tailscaled.sock up --auth-key=$TAILSCALE_AUTH_KEY --hostname=spacelift-run --accept-routes",
   ]
