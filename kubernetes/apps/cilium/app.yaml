@@ -17,6 +17,10 @@ spec:
         ipam:
           mode: kubernetes
         kubeProxyReplacement: true
+        # Off until enabled properly (certs via cronJob method, not
+        # render-time generation, which churns secrets every sync)
+        hubble:
+          enabled: false
         # Talos-specific settings
         k8sServiceHost: localhost
         k8sServicePort: 7445
