@@ -40,6 +40,13 @@
       changed_when: false
       check_mode: false
 
+    - name: Install packages in the container
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c
+        'apt-get update -q && apt-get install -qy curl ca-certificates certbot python3-certbot-dns-cloudflare gpg'
+      register: apt_result
+      changed_when: "'0 newly installed' not in apt_result.stdout"
+
     - name: Check for Docker in the container
       ansible.builtin.command: "pct exec {{ ct_id }} -- sh -c 'command -v docker'"
       register: docker_bin
@@ -47,23 +54,17 @@
       changed_when: false
       check_mode: false
 
+    # The trailing `command -v docker` makes a silent curl/sh failure fatal.
     - name: Install Docker in the container
       ansible.builtin.command: >-
-        pct exec {{ ct_id }} -- sh -c 'curl -fsSL https://get.docker.com | sh'
-      when: docker_bin.rc != 0
-
-    - name: Install certbot and gpg in the container
-      ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
-        'apt-get update -q && apt-get install -qy certbot python3-certbot-dns-cloudflare gpg'
-      register: apt_result
-      changed_when: "'0 newly installed' not in apt_result.stdout"
+        'curl -fsSL https://get.docker.com | sh && command -v docker'
+      when: docker_bin.rc != 0
 
     - name: Create the Omni directories in the container
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
-        'mkdir -p /etc/omni/sqlite /etc/etcd
-         && chown 1000:1000 /etc/etcd && chmod 700 /etc/etcd'
+        'mkdir -p /etc/omni/sqlite /etc/etcd && chown 1000:1000 /etc/etcd && chmod 700 /etc/etcd'
       changed_when: false
 
     - name: Stage secrets and config on the PVE host
