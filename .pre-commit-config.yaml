@@ -1,0 +1,38 @@
+# Run with prek (pinned in mise.toml): `prek install` once, then automatic.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      # Public repo: block committed secrets before they ever reach GitHub.
+      # Binary comes from mise.toml, like the other local hooks.
+      - id: trufflehog
+        name: trufflehog
+        entry: trufflehog git file://. --since-commit HEAD --results=verified,unknown --fail
+        language: system
+        pass_filenames: false
+      - id: tofu-fmt
+        name: tofu fmt
+        entry: tofu fmt -recursive infra/
+        language: system
+        files: \.tf$
+        pass_filenames: false
+      - id: kubeconform
+        name: kubeconform
+        entry: >-
+          kubeconform -strict -ignore-missing-schemas
+          kubernetes/bootstrap/argocd/namespace.yaml
+          kubernetes/bootstrap/root.yaml
+          kubernetes/apps/
+        language: system
+        files: ^kubernetes/.*\.yaml$
+        pass_filenames: false

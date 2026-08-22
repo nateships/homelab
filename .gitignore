@@ -1,0 +1,24 @@
+# Secrets and local-only files. This repo is public: nothing sensitive gets committed.
+*.env
+!*.env.example
+omni.asc
+*.asc
+cloudflare.ini
+kubeconfig*
+omniconfig*
+talosconfig*
+*.tfvars
+!*.tfvars.example
+
+# OpenTofu/Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+
+# mise per-machine overrides
+mise.local.toml
+
+# OS noise
+.DS_Store

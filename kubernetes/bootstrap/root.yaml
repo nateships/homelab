@@ -1,0 +1,23 @@
+# One-time: kubectl apply -f kubernetes/bootstrap/root.yaml
+# App-of-apps: syncs every Application manifest under kubernetes/apps/.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nateships/homelab
+    targetRevision: main
+    path: kubernetes/apps
+    directory:
+      recurse: true
+      include: "*/app.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

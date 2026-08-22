@@ -1,0 +1,63 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:best-practices"],
+  "timezone": "America/New_York",
+  "labels": ["renovate"],
+  "assignees": ["nateships"],
+  // Automerge non-major once CI passes; majors stay manual via the rule below.
+  "automerge": true,
+  "platformAutomerge": true,
+  "customManagers": [
+    {
+      // Agnostic annotation manager: track any pinned version that carries a
+      //   # renovate: datasource=<ds> depName=<name> [versioning=<v>] [extractVersion=<re>]
+      // comment on the line above it (env templates, cluster template, tf
+      // defaults). Annotate a new pin and Renovate tracks it; no per-dependency
+      // config needed.
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^omni/.*\\.(ya?ml|example)$/",
+        "/^infra/.*\\.tf$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)(?: versioning=(?<versioning>[^\\s]+))?(?: extractVersion=(?<extractVersion>[^\\s]+))?\\s+.*?(?:=|:)\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+      ],
+      "versioningTemplate": "semver-coerced"
+    },
+    {
+      // ArgoCD install manifest URL in the bootstrap kustomization. Separate
+      // manager because the version sits inside a URL, where the annotation
+      // regex's `(?:=|:)` anchor would stop at "https:".
+      "customType": "regex",
+      "managerFilePatterns": ["/^kubernetes/bootstrap/argocd/kustomization\\.yaml$/"],
+      "matchStrings": ["argoproj/argo-cd/(?<currentValue>v[\\d.]+)/manifests/install\\.yaml"],
+      "depNameTemplate": "argoproj/argo-cd",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Major updates: manual review, never automerge",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "addLabels": ["major-update"]
+    },
+    // Coupled pins move together, one PR each: server/CLI mismatches break
+    // omnictl (gRPC errors) and violate kubectl version skew.
+    {
+      "description": "Omni server + omnictl",
+      "matchDepNames": ["siderolabs/omni", "omnictl"],
+      "groupName": "omni"
+    },
+    {
+      "description": "Talos + talosctl",
+      "matchDepNames": ["siderolabs/talos", "talosctl"],
+      "groupName": "talos"
+    },
+    {
+      "description": "Kubernetes + kubectl",
+      "matchDepNames": ["kubernetes/kubernetes", "kubectl"],
+      "groupName": "kubernetes"
+    }
+  ]
+}

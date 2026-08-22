@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  opentofu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - name: fmt
+        run: tofu fmt -check -recursive infra/
+      - name: validate
+        run: |
+          for d in infra/spacelift infra/stacks/*/; do
+            tofu -chdir="$d" init -backend=false
+            tofu -chdir="$d" validate
+          done
+
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - name: kubeconform
+        run: |
+          # Application/ClusterSecretStore are CRDs; skip unknown schemas
+          kubeconform -strict -ignore-missing-schemas -summary \
+            kubernetes/bootstrap/argocd/namespace.yaml \
+            kubernetes/bootstrap/root.yaml \
+            kubernetes/apps/

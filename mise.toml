@@ -1,0 +1,16 @@
+# Repo toolchain: `mise install` gets you everything.
+# CI installs from this same file (jdx/mise-action), so versions live here only.
+[tools]
+opentofu = "1.12"
+# MUST match OMNI_IMG_TAG in omni/omni.env.example; mismatched omnictl fails
+# with obscure gRPC errors
+omnictl = "1.9.0"
+# match talos.version in omni/cluster-template/cluster.yaml
+talosctl = "1.13.5"
+# within one minor of kubernetes.version in the cluster template
+kubectl = "1.36"
+kubeconform = "0.7"
+# exact version required: this aqua package can't enumerate releases
+"aqua:1password/cli" = "2.32.0"
+prek = "0.4.14"
+trufflehog = "3.97.0"

@@ -1,0 +1,9 @@
+# One-time: kubectl apply -k kubernetes/bootstrap/argocd
+# After this, ArgoCD manages everything (including itself if you add it to apps/).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+resources:
+  - namespace.yaml
+  # Pin to a release; check https://github.com/argoproj/argo-cd/releases
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.1.0/manifests/install.yaml
