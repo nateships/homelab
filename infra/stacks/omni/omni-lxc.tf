@@ -8,7 +8,7 @@
 #        pct set <vmid> --dev0 path=/dev/net/tun
 #   2. Docker install inside the container.
 # The LXC template. Tofu downloads it to the node, so no manual pveam step.
-resource "proxmox_virtual_environment_download_file" "ubuntu_template" {
+resource "proxmox_download_file" "ubuntu_template" {
   node_name    = var.proxmox_node
   datastore_id = "local" # must have "Container templates" content enabled
   content_type = "vztmpl"
@@ -43,7 +43,7 @@ resource "proxmox_virtual_environment_container" "omni" {
   }
 
   operating_system {
-    template_file_id = proxmox_virtual_environment_download_file.ubuntu_template.id
+    template_file_id = proxmox_download_file.ubuntu_template.id
     type             = "ubuntu"
   }
 
