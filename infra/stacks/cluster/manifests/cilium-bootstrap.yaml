@@ -33,30 +33,6 @@ metadata:
   namespace: kube-system
 
 ---
-# Source: cilium/templates/cilium-ca-secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: cilium-ca
-  namespace: kube-system
-data:
-  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURGRENDQWZ5Z0F3SUJBZ0lSQUlHQk55M1d3MHVFL0hRajVmMzhaR2d3RFFZSktvWklodmNOQVFFTEJRQXcKRkRFU01CQUdBMVVFQXhNSlEybHNhWFZ0SUVOQk1CNFhEVEkyTURneU1qRTNOREV5TkZvWERUSTVNRGd5TVRFMwpOREV5TkZvd0ZERVNNQkFHQTFVRUF4TUpRMmxzYVhWdElFTkJNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DCkFROEFNSUlCQ2dLQ0FRRUEyQ1BIZG1iVmswUFgxd3RlZWJTZTk3eVhveEVmd1N6ZGE5VWFnOEprVDRTeGhnWkgKOEo5eElHWkh2aGY1Q2JKYUdYekNCKzdkU3VJS05EWFl3UkdVMmU2elZEb1l5bURIRUxvSFRyWFdEcmRjQ0N6agpVL2JsSVAza2d0S3BWRVlQekN6ZFBMeVI0RTdUbUI2WmVzLy9QQ2RUbk1MdHhwWGVySU10bGhBdHVnYlpoc1lkCnUwbDRHRWNrNFBPendWeCttWk10WVFqM0JhS255UW1tdHIwUWhreDFDcmp1ZE45c09hRXdYZm9DWVpzNmV4aVIKYTVnQ0FLUGRjeWdYY054S0NFOGNubDJHdEVyOXBOeFZBMm1CN2NLbmxjMGI5U2RBcllJWGd6SmJNZ0xkbGFyZApZdVFHTlg4Nk9FMlp4enhlK3dic1hIWDVHdVJ4dHk2bm5VdWQrd0lEQVFBQm8yRXdYekFPQmdOVkhROEJBZjhFCkJBTUNBcVF3SFFZRFZSMGxCQll3RkFZSUt3WUJCUVVIQXdFR0NDc0dBUVVGQndNQ01BOEdBMVVkRXdFQi93UUYKTUFNQkFmOHdIUVlEVlIwT0JCWUVGTWYxMko0WCswUWZwODFDbmkrVHZtTXlDcWpDTUEwR0NTcUdTSWIzRFFFQgpDd1VBQTRJQkFRQVdkallmTEdxV1dwWGVWWE1vb1NpaXcrM1JEejVKNGRYb1RxdUFOQWFPRDNUY0J3RDluZ0NtCk1wQnJiT0hudE1Xa0NHU00xOFJ3N1VRTjF4SzhRTlYyQW1KdnV4di9CeHoxSXpCQ2NnRzBtTmlITml0NUlGdEgKTXc5M3VOSERLcUdBc0sxa25pMjBZQlUyUWg0SEZhTWtBdkxyUWUySStIR0ZoRzlOd2UvVkdOOUJVOEp6dUx3SQpaaXcxaURvbHNMUThRQ3h6em9QZXkzWWxXbCtzQU9DUmg3ZmMwSStKMmNTRHo1c0NOYTIrVVlEcTRIVWlDbG9JCmpSa3FYZTlvMCtVN0xCajdYTkx1L3ZOL1hKeGF3QWoyeWlDRnowdFpOeGlETXIxYXZNcTIvKzIySmNXK3VXRWUKNis2VmJuRDhFZHJkYmM3N0dUbC84OHMyc0x4ZnVlbU0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
-  ca.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBMkNQSGRtYlZrMFBYMXd0ZWViU2U5N3lYb3hFZndTemRhOVVhZzhKa1Q0U3hoZ1pICjhKOXhJR1pIdmhmNUNiSmFHWHpDQis3ZFN1SUtORFhZd1JHVTJlNnpWRG9ZeW1ESEVMb0hUclhXRHJkY0NDemoKVS9ibElQM2tndEtwVkVZUHpDemRQTHlSNEU3VG1CNlplcy8vUENkVG5NTHR4cFhlcklNdGxoQXR1Z2JaaHNZZAp1MGw0R0VjazRQT3p3VngrbVpNdFlRajNCYUtueVFtbXRyMFFoa3gxQ3JqdWROOXNPYUV3WGZvQ1laczZleGlSCmE1Z0NBS1BkY3lnWGNOeEtDRThjbmwyR3RFcjlwTnhWQTJtQjdjS25sYzBiOVNkQXJZSVhnekpiTWdMZGxhcmQKWXVRR05YODZPRTJaeHp4ZSt3YnNYSFg1R3VSeHR5Nm5uVXVkK3dJREFRQUJBb0lCQUFXdldOVW82N3pZMVNPTgpPTE9PLzV6ZkhQbUhaWnZKdzJpQWNia3hBYlNobUVuaS9ua1QyaDVoclB4RVRaNnZMQ1JnVjdYQ0NsT3cvcXhRCkptVWZmaGdvcmRKK04zLzUzelNwSDJ3bUFQallMNW1ibE9rZmZvQ2FldGNHTDBISmtEeStBSzdCeVBpWnNyVmwKcnNibW5Cc3NHa3gyOHVHamhRbWRDUUN2TllVNUVhY0RCOFI3SVhHWkRPYmhoSTNhVUJmMXNYb21uWXRzZEtQSApyYjJucHYyaXgwdm9HN0s0SlloNDJqSTY1aVIra0Z3LzF5QVVoNnZ2TThidTdsc05Bc1lxVERGUVdiRmx6c2FQCnhnREhRQVl0TXpFSlcvK0ZXdzdncHgyeHhSODZIVndvbjJZZzZHYW1PQ0xJRFpZMjJNMlJiRk5FU3NNRytGVzUKWGEzbGI2MENnWUVBNCs0SlAyRUJsaU1NOTlKZDNtRXdyQUFDcVVjejVnVkN6VTJrTmllenJKMytqeUZwOEs1TAp6d1lXVTZSc1RZUExBdndjSGYwUGRTTlV0b05pRGlVQS90Vm1nQjZQbHZKVFFQV1dZS3JlbWNpM2NRSWYxK2VMClYydUZJOGgra3ZjTjVwV1NGMjJ3SnNoWDhIMmRwQ0Q3VTl1VTJKejJzcFdSRFZlWkZLT0RqYjBDZ1lFQThzSUoKWERtTFNKcnNSWWcwS3JTQzFyNFNHaUxSZ0xkZHE3bWp5L2tIMjlldmR6VXhTY2V3VXRRbWdLVWlSR0VvQ0orcAo0dzlyQ2NYM2pGSUpyTjE2UXlEWlRSR0F6dTN0V3VZbXF4S0FYTEtwUjN0a2V0dGs0cmtuQ1UrY3crdEFBVUwxCm5ldlpycGVVa0xrS1hsU2FKZWcvN2pyL1JoRkUwRmVySUs1NmloY0NnWUVBaWxOaXYxa0MybmZwSGRsSWFIWTUKVUprdEJFaVhBWWk5MHRURXpLenBpTi9WcGsyVCtxSDhsZVpPMUhJYjNDc1lvSFlhSmtUM0JaTHNqVnRNdmVMTgpLTnFmdXk5UTJ6MnpNdUFZWkJBdXljdWJNSFVtbUNRSVY0U0VKNFE4OUxvRWNLVGpKVjdISWJKQ1ZFd1h5SXpQCm1rUFBvR29aK2FWMWcxQmZNYnhPVVUwQ2dZRUF2alFrQzF1Vzh6TlhqbjlTaUdkWTRKS2FNbG8zbGtlVm9CaGEKNjFWYXYvaTFwWXhLNndrSDhVNENRT2VoK3J1NUYxQ3FWcHJjL2hKYmpGazI5WGV1OU92Rzl1aVE2UkZvMk1EZAphVXFjd29URnQ1bEp1QzB3VmFoR21yZ0RGMHE2b29KcFdldlNha2FnQStqSDQvTWJ1RG5KNVluYU8zY0tXTWRuCjhMcGtqczhDZ1lFQXlVa2Fva2w5RkJYQ251YUpIeExveG4xZCszWjlsL0dFSFFFam55UXVIZ1dUeXliUWtaSXgKYjBJUCtOVXNKOFpFWi91UExZZXdJTkdMUWZJLzRtSGpncnV5eFFzQWxucFBDZktiQlFFdkZMQXlzaWk1RW9zYQoyU1c3R1ptOG1KTDlsK0dObU5KcEUxTC9pRjNJcDdrMUZDRkIzaXpXVk40OWRnVzNDRGlQNkRFPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
-
----
-# Source: cilium/templates/hubble/tls-helm/server-secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: hubble-server-certs
-  namespace: kube-system
-type: kubernetes.io/tls
-data:
-  ca.crt:  LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURGRENDQWZ5Z0F3SUJBZ0lSQUlHQk55M1d3MHVFL0hRajVmMzhaR2d3RFFZSktvWklodmNOQVFFTEJRQXcKRkRFU01CQUdBMVVFQXhNSlEybHNhWFZ0SUVOQk1CNFhEVEkyTURneU1qRTNOREV5TkZvWERUSTVNRGd5TVRFMwpOREV5TkZvd0ZERVNNQkFHQTFVRUF4TUpRMmxzYVhWdElFTkJNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DCkFROEFNSUlCQ2dLQ0FRRUEyQ1BIZG1iVmswUFgxd3RlZWJTZTk3eVhveEVmd1N6ZGE5VWFnOEprVDRTeGhnWkgKOEo5eElHWkh2aGY1Q2JKYUdYekNCKzdkU3VJS05EWFl3UkdVMmU2elZEb1l5bURIRUxvSFRyWFdEcmRjQ0N6agpVL2JsSVAza2d0S3BWRVlQekN6ZFBMeVI0RTdUbUI2WmVzLy9QQ2RUbk1MdHhwWGVySU10bGhBdHVnYlpoc1lkCnUwbDRHRWNrNFBPendWeCttWk10WVFqM0JhS255UW1tdHIwUWhreDFDcmp1ZE45c09hRXdYZm9DWVpzNmV4aVIKYTVnQ0FLUGRjeWdYY054S0NFOGNubDJHdEVyOXBOeFZBMm1CN2NLbmxjMGI5U2RBcllJWGd6SmJNZ0xkbGFyZApZdVFHTlg4Nk9FMlp4enhlK3dic1hIWDVHdVJ4dHk2bm5VdWQrd0lEQVFBQm8yRXdYekFPQmdOVkhROEJBZjhFCkJBTUNBcVF3SFFZRFZSMGxCQll3RkFZSUt3WUJCUVVIQXdFR0NDc0dBUVVGQndNQ01BOEdBMVVkRXdFQi93UUYKTUFNQkFmOHdIUVlEVlIwT0JCWUVGTWYxMko0WCswUWZwODFDbmkrVHZtTXlDcWpDTUEwR0NTcUdTSWIzRFFFQgpDd1VBQTRJQkFRQVdkallmTEdxV1dwWGVWWE1vb1NpaXcrM1JEejVKNGRYb1RxdUFOQWFPRDNUY0J3RDluZ0NtCk1wQnJiT0hudE1Xa0NHU00xOFJ3N1VRTjF4SzhRTlYyQW1KdnV4di9CeHoxSXpCQ2NnRzBtTmlITml0NUlGdEgKTXc5M3VOSERLcUdBc0sxa25pMjBZQlUyUWg0SEZhTWtBdkxyUWUySStIR0ZoRzlOd2UvVkdOOUJVOEp6dUx3SQpaaXcxaURvbHNMUThRQ3h6em9QZXkzWWxXbCtzQU9DUmg3ZmMwSStKMmNTRHo1c0NOYTIrVVlEcTRIVWlDbG9JCmpSa3FYZTlvMCtVN0xCajdYTkx1L3ZOL1hKeGF3QWoyeWlDRnowdFpOeGlETXIxYXZNcTIvKzIySmNXK3VXRWUKNis2VmJuRDhFZHJkYmM3N0dUbC84OHMyc0x4ZnVlbU0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURWakNDQWo2Z0F3SUJBZ0lRQ1lBZE1WTzQyS0FkRkNvMm9HVkhhVEFOQmdrcWhraUc5dzBCQVFzRkFEQVUKTVJJd0VBWURWUVFERXdsRGFXeHBkVzBnUTBFd0hoY05Nall3T0RJeU1UYzBNVEkwV2hjTk1qY3dPREl5TVRjMApNVEkwV2pBcU1TZ3dKZ1lEVlFRRERCOHFMbVJsWm1GMWJIUXVhSFZpWW14bExXZHljR011WTJsc2FYVnRMbWx2Ck1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBelVqRGFwK3p5NGtLS1VlanNVNU8KU2RiVlZHdGNwVWFOTFovMkNJcnR2MWpVa21hTzJsZm5tQnRGL0c4SHNmNUJDSk5TVkRkcUkrN0IrbFRMbzZIdwo0a3BpTFhmMjhBanlLZERqUXNaazlMdGJtYXpRUUZIL21BcEVNaklxeGdNOFEvU0tFb0NGTk9pRnFpVW1JbUFICllYNjNqYVZZRHUxQjFLTWdBeHRQWHlWNVVBR28rR2N4V2d1ZUd1OVZla21mbzRub0ptOHNZU1g1YWU3N0dacHYKajZjaFBRUXVoSmpkaXhDbG5rdGorYWZyalFEa1BDTXZReEFHMXZkaHBFS0wveFo3WEg0V3RtWHpUYnlMQzF0RwpkSTl1QklVZ3dIUkQ2M3dqNFVrT3hwS04wS0UzWjJXb2lrTHZ3SWc5cm9ZVHFmMW5OdHpCSXNNOVZRYlJhWWJxCjVRSURBUUFCbzRHTk1JR0tNQTRHQTFVZER3RUIvd1FFQXdJRm9EQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0QKQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFIL0JBSXdBREFmQmdOVkhTTUVHREFXZ0JUSDlkaWVGL3RFSDZmTgpRcDR2azc1ak1ncW93akFxQmdOVkhSRUVJekFoZ2g4cUxtUmxabUYxYkhRdWFIVmlZbXhsTFdkeWNHTXVZMmxzCmFYVnRMbWx2TUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFDeEhMWm83aEY1eDdjL3dJN0FzOHdmYWx5bVhsQ0MKdDd6SFd2UlFKTzZoY1VxaVc5QTI3aCtUemdWZ2x4NVJiY1hUZDdrdHNSWkdSMlBXZlFOcVlVWm1JQ1d4Y2R1aQo1OEtTOVFxVmU3Y2lWaGZYUDN1UUx4MHJTN0tKTFVMYjhJUmw5NXJibThteEZIU0JTWEwwS1NBMGVmajBYSmtDCkhzNGcxR2NySENxbDZYNXYvb0dPb084V0RlMTc1MXN4YWo3UzZJR3FYL05nQVJxTlRBSlRydGZZSTVtc1VBejAKQW40cW5rOHc5SUxPZUZaaW1TR2g1eDlubVRIRHNUbWM5bTJPdEV2blhmWCs0NjlzYzFWSXkzSVQ1RFR2NkRFTwp4VnIwQzZSaGpMZ2hDYnNKUGF6cG0yb2NpUWFyV0M2QkF1T2RObWNhd3pjK3V3cjFkWnkrVkxOOQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
-  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBelVqRGFwK3p5NGtLS1VlanNVNU9TZGJWVkd0Y3BVYU5MWi8yQ0lydHYxalVrbWFPCjJsZm5tQnRGL0c4SHNmNUJDSk5TVkRkcUkrN0IrbFRMbzZIdzRrcGlMWGYyOEFqeUtkRGpRc1prOUx0Ym1helEKUUZIL21BcEVNaklxeGdNOFEvU0tFb0NGTk9pRnFpVW1JbUFIWVg2M2phVllEdTFCMUtNZ0F4dFBYeVY1VUFHbworR2N4V2d1ZUd1OVZla21mbzRub0ptOHNZU1g1YWU3N0dacHZqNmNoUFFRdWhKamRpeENsbmt0aithZnJqUURrClBDTXZReEFHMXZkaHBFS0wveFo3WEg0V3RtWHpUYnlMQzF0R2RJOXVCSVVnd0hSRDYzd2o0VWtPeHBLTjBLRTMKWjJXb2lrTHZ3SWc5cm9ZVHFmMW5OdHpCSXNNOVZRYlJhWWJxNVFJREFRQUJBb0lCQUF0WE5EaDlOeDBNNW90TwpRbHhHczZ0L20weHRHL0tqZWFRbUhKenZNK0FvdzZHTTJlSjFEYjNJNys1WW9lZXk0SnZkSzZTc1pRZzBKZkl5CjRnY1pxS21QcTJuUW9VczBhMUJsRWxEN2pkTTVVSCttWE9EWXh0SjY2cmFOTC9DOWVBUlhDNU9uRnZUTHphcVAKSDlLeFZHY043WXo5TCthdk03NVAvckk5UFg3SGhWU0pocFNjcjdwY3gvVjBmdUVKMlBLOVhvaEhVTTcvR3JMcApBNlVtVTFqRkt6MEVCd0hyaERPYStsNFh6RjREY0ZxYkd3OGNqZDlaRG1UWnQyeXgrTU4rcHRxRXdBZEN1dmZ3CmtTeTRqbVZTQmM4VDBrQ3NpQ1hrQTVHOExzWktYQXoxVnlPR3luQ2FwdE9uLzVTR0dYT1djaEJVeU5xdjlzM1kKTHpvLzI5RUNnWUVBOGthOWJqZ1QwK1plaE1RTm9rWVBMTnB6QjZuWjNMa0M1STlXME0yUXZjTkp4MDBDR3F0VQpieGUvV1hiN2Q3U05vRWE0T3dSaGs0Ni9vYlpzbW5rQUkrcnFSN3ZiMXlLVlJ6bEQ5QWRZV3RkSFQ2N3k0UUU1CitIcHdSZkJiTittOVdVdzBsUHdnMDc5NkU0R29scDBnTUtlUHFXbzNWS3VjWFN0RmQvSm5WamtDZ1lFQTJPbVoKYk1TTW5XZDZjdklYQnFNNWZxaUtnRmtaTFNFRThpS1BmK0RHYzNaR3B6NkMxZ1NURmdWYWE3aEp4aXZmbllwcQpEeUR4M2kxZk9nbHlycXk3NHZqMHRNeS9uOWlocTVLdTRzdDJzbjJjTG9UNDIrZ3U0MHNpbWtGcHJ6dUFnZlMzCmxCd21yU3JlOWl5QWRsa25oZ3pMZEd0MzFzY1F0WW9ZcTFtejJnMENnWUFlaUNHcE9USHVlMUtnQXFFQk9Ua0MKV3dreUJ3cW9rVHczRjRWR1RSR1hpSHZNdlB5dDViZC9SSXZkdDJ2Yld3cWFEeTk2YUlQdmQ0YlkxMGQ2ZEJNNwpjNGhRdi9EbGZMczVQWk05dG90QTcyNVNNV2IwU2haSEpRN3ZFV285Y3B4bEc0Qm80aGswOWlWcFBlYkVERXNaCk5wU1pNZ1NGREJkcGVtR0h5eW1RcVFLQmdRQ2N1a1RDSTA0YW1WOFBXTDZzYkJtcDI2dWZTMEYycXlvQXJsb1QKSXQwaEppK3N2ZTBaS0ZzQ2lVR3BIWklvbnlER212RkJGeVBMemVyRmEzZ3luOXB1Q0VYL3NRVXdRUDJuazZmTApkUW5CdENLNk5oZitCTWlFTUpEQzlrcWZjNVhKMElFb2dpS3I4cE1CT214amxzMkkvUXV3aGNva0pOZDg1RmdvCnp2cTFyUUtCZ0duaTlnSzJvWmxiU3JZRDlIUExSeGg1Y2xiL3pDR0JqZVZycTFWbFovUHQ0UVFvQXVmeXQra08Ka2tHLzNsdmt2cmNhVjNsK3FKNUdjV25SeFViaXBrK0s3NktPd3R3TmdvTlVWN2xwT29Majg3alVjQVQxaHpnRwpkZnlqVHZBVGFNQ1d3Wk5GNkNMWWdXUjJSOHhzTENaOWVYUVdmQS9wa2dzZVdtNm1ERTI1Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
-
----
 # Source: cilium/templates/cilium-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -232,16 +208,7 @@ data:
   synchronize-k8s-nodes: "true"
   operator-api-serve-addr: "127.0.0.1:9234"
 
-  enable-hubble: "true"
-  # UNIX domain socket for Hubble server to listen to.
-  hubble-socket-path: "/var/run/cilium/hubble.sock"
-  hubble-network-policy-correlation-enabled: "true"
-  # An additional address for Hubble server to listen to (e.g. ":4244").
-  hubble-listen-address: ":4244"
-  hubble-disable-tls: "false"
-  hubble-tls-cert-file: /var/lib/cilium/tls/hubble/server.crt
-  hubble-tls-key-file: /var/lib/cilium/tls/hubble/server.key
-  hubble-tls-client-ca-files: /var/lib/cilium/tls/hubble/client-ca.crt
+  enable-hubble: "false"
   ipam: "kubernetes"
   ipam-cilium-node-update-rate: "15s"
 
@@ -847,28 +814,6 @@ spec:
     targetPort: envoy-metrics
 
 ---
-# Source: cilium/templates/hubble/peer-service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hubble-peer
-  namespace: kube-system
-  labels:
-    k8s-app: cilium
-    app.kubernetes.io/part-of: cilium
-    app.kubernetes.io/name: hubble-peer
-
-spec:
-  selector:
-    k8s-app: cilium
-  ports:
-  - name: peer-service
-    port: 443
-    protocol: TCP
-    targetPort: 4244
-  internalTrafficPolicy: Local
-
----
 # Source: cilium/templates/cilium-agent/daemonset.yaml
 apiVersion: apps/v1
 kind: DaemonSet
@@ -986,7 +931,7 @@ spec:
                     set -o errexit
                     set -o pipefail
                     set -o nounset
-                    
+
                     # When running in AWS ENI mode, it's likely that 'aws-node' has
                     # had a chance to install SNAT iptables rules. These can result
                     # in dropped traffic, so we should attempt to remove them.
@@ -1002,7 +947,7 @@ spec:
                         iptables-save | grep -E -v 'AWS-SNAT-CHAIN|AWS-CONNMARK-CHAIN' | iptables-restore
                     fi
                     echo 'Done!'
-                    
+
           preStop:
             exec:
               command:
@@ -1065,12 +1010,9 @@ spec:
           readOnly: true
         - name: xtables-lock
           mountPath: /run/xtables.lock
-        - name: hubble-tls
-          mountPath: /var/lib/cilium/tls/hubble
-          readOnly: true
         - name: tmp
           mountPath: /tmp
-        
+
       initContainers:
       - name: config
         image: "quay.io/cilium/cilium:v1.18.1@sha256:65ab17c052d8758b2ad157ce766285e04173722df59bdee1ea6d5fda7149f0e9"
@@ -1336,22 +1278,7 @@ spec:
         hostPath:
           path: /proc/sys/kernel
           type: Directory
-      - name: hubble-tls
-        projected:
-          # note: the leading zero means this number is in octal representation: do not remove it
-          defaultMode: 0400
-          sources:
-          - secret:
-              name: hubble-server-certs
-              optional: true
-              items:
-              - key: tls.crt
-                path: server.crt
-              - key: tls.key
-                path: server.key
-              - key: ca.crt
-                path: client-ca.crt
-      
+
 
 ---
 # Source: cilium/templates/cilium-envoy/daemonset.yaml
@@ -1657,7 +1584,7 @@ spec:
           operator: Exists
         - key: node.cilium.io/agent-not-ready
           operator: Exists
-      
+
       volumes:
         # To read the configuration from the config map
       - name: cilium-config-path

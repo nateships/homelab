@@ -18,10 +18,11 @@
       "managerFilePatterns": [
         "/^omni/.*\\.(ya?ml|example)$/",
         "/^infra/.*\\.tf$/",
+        "/^scripts/.*\\.sh$/",
         "/(^|/)Dockerfile(\\..+)?$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)(?: versioning=(?<versioning>[^\\s]+))?(?: extractVersion=(?<extractVersion>[^\\s]+))?\\s+.*?(?:=|:)\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+        "# renovate: datasource=(?<datasource>[^\\s]+)(?: registryUrl=(?<registryUrl>[^\\s]+))? depName=(?<depName>[^\\s]+)(?: versioning=(?<versioning>[^\\s]+))?(?: extractVersion=(?<extractVersion>[^\\s]+))?\\s+.*?(?:=|:)\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
       ],
       "versioningTemplate": "semver-coerced"
     },
@@ -80,6 +81,11 @@
       "description": "Kubernetes + kubectl",
       "matchDepNames": ["kubernetes/kubernetes", "kubectl"],
       "groupName": "kubernetes"
+    },
+    {
+      "description": "Cilium: ArgoCD app + bootstrap render script move together. CI fails the PR until scripts/render-cilium-bootstrap.sh is re-run.",
+      "matchDepNames": ["cilium"],
+      "groupName": "cilium"
     }
   ]
 }
