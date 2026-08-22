@@ -37,11 +37,6 @@ variable "ct_datastore" {
   default     = "local-lvm"
 }
 
-variable "ct_template_file_id" {
-  description = "LXC template, e.g. local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-  type        = string
-}
-
 variable "ssh_public_key" {
   description = "SSH public key for root inside the LXC"
   type        = string
