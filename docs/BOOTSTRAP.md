@@ -49,8 +49,9 @@ connects to Proxmox at its ts.net address.
    ```bash
    pveum user token add root@pam spacelift --privsep=0
    ```
-   Only root can set LXC `features` (nesting, keyctl), so the token must be on
-   `root@pam`. Store `root@pam!spacelift=<uuid>` in the `proxmox` item.
+   Keep the token on `root@pam`. Note: even a root token can only set the
+   `nesting` feature flag; the Ansible stack sets `keyctl` as real root.
+   Store `root@pam!spacelift=<uuid>` in the `proxmox` item.
 
 ## 2. Spacelift
 
