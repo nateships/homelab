@@ -38,6 +38,7 @@ services:
       --sqlite-storage-path=/_out/sqlite/omni.db
       --workload-proxying-enabled
       --workload-proxying-use-omni-subdomain
+      --workload-proxying-subdomain=
       --etcd-backup-s3
       ${AUTH}
 
