@@ -1,0 +1,6 @@
+all:
+  hosts:
+    pve1:
+      # The PVE host's ts.net name, taken from the shared context env.
+      ansible_host: "{{ lookup('env', 'PROXMOX_VE_ENDPOINT') | urlsplit('hostname') }}"
+      ansible_user: root

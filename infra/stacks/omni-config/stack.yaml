@@ -1,0 +1,6 @@
+# Stack manifest: hydrated by the admin stack (infra/spacelift).
+description: Omni LXC configuration and deployment (Ansible over Tailscale SSH)
+type: ansible
+playbook: site.yml
+labels: [op]
+depends_on: [omni]

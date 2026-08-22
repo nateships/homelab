@@ -1,0 +1,119 @@
+---
+# Configures the Omni LXC (created by infra/stacks/omni) and deploys Omni.
+# Targets only the PVE host over Tailscale SSH; all container work goes
+# through pct. Secrets render on the runner with op and are pushed in.
+- name: Omni LXC configuration and deployment
+  hosts: pve1
+  gather_facts: false
+  vars:
+    ct_id: 200 # matches the omni_ct_id default in infra/stacks/omni
+    repo_root: "{{ playbook_dir }}/../../.."
+    omni_domain: "{{ lookup('pipe', 'op read op://homelab/omni/domain') }}"
+    admin_email: "{{ lookup('pipe', 'op read op://homelab/omni/admin-email') }}"
+  tasks:
+    - name: Pass /dev/net/tun into the container
+      ansible.builtin.lineinfile:
+        path: "/etc/pve/lxc/{{ ct_id }}.conf"
+        regexp: "^dev0:"
+        line: "dev0: path=/dev/net/tun"
+      register: tun
+
+    - name: Reboot the container to apply the device
+      ansible.builtin.command: "pct reboot {{ ct_id }}"
+      when: tun is changed
+
+    - name: Wait until the container runs
+      ansible.builtin.command: "pct status {{ ct_id }}"
+      register: ct_status
+      until: "'running' in ct_status.stdout"
+      retries: 10
+      delay: 3
+      changed_when: false
+
+    - name: Check for Docker in the container
+      ansible.builtin.command: "pct exec {{ ct_id }} -- sh -c 'command -v docker'"
+      register: docker_bin
+      failed_when: false
+      changed_when: false
+
+    - name: Install Docker in the container
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c 'curl -fsSL https://get.docker.com | sh'
+      when: docker_bin.rc != 0
+
+    - name: Install certbot and gpg in the container
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c
+        'apt-get update -q && apt-get install -qy certbot python3-certbot-dns-cloudflare gpg'
+      register: apt_result
+      changed_when: "'0 newly installed' not in apt_result.stdout"
+
+    - name: Create the Omni directories in the container
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c
+        'mkdir -p /etc/omni/sqlite /etc/etcd
+         && chown 1000:1000 /etc/etcd && chmod 700 /etc/etcd'
+      changed_when: false
+
+    - name: Stage secrets and config on the PVE host
+      ansible.builtin.copy:
+        dest: "/tmp/omni-stage-{{ item.name }}"
+        content: "{{ item.content }}"
+        mode: "0600"
+      loop:
+        - name: cloudflare.ini
+          content: |
+            dns_cloudflare_api_token = {{ lookup('pipe', 'op read op://homelab/cloudflare/dns-api-token') }}
+        - name: omni.asc
+          content: "{{ lookup('pipe', 'op document get omni-gpg --vault homelab') }}"
+        - name: omni.env
+          content: "{{ lookup('pipe', 'op inject -i ' ~ repo_root ~ '/omni/omni.env.example') }}"
+        - name: docker-compose.yml
+          content: "{{ lookup('file', repo_root ~ '/omni/docker-compose.yml') }}"
+      loop_control:
+        label: "{{ item.name }}"
+      no_log: true
+
+    - name: Push the files into the container
+      ansible.builtin.command: >-
+        pct push {{ ct_id }} /tmp/omni-stage-{{ item.src }} {{ item.dest }}
+        --perms {{ item.perms }}
+      loop:
+        - { src: cloudflare.ini, dest: /root/cloudflare.ini, perms: "600" }
+        - { src: omni.asc, dest: /etc/omni/omni.asc, perms: "600" }
+        - { src: omni.env, dest: /etc/omni/omni.env, perms: "600" }
+        - { src: docker-compose.yml, dest: /etc/omni/docker-compose.yml, perms: "644" }
+
+    - name: Remove the staged files from the PVE host
+      ansible.builtin.file:
+        path: "/tmp/omni-stage-{{ item }}"
+        state: absent
+      loop: [cloudflare.ini, omni.asc, omni.env, docker-compose.yml]
+
+    - name: Check for the TLS certificate
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- test -e
+        /etc/letsencrypt/live/{{ omni_domain }}/fullchain.pem
+      register: cert
+      failed_when: false
+      changed_when: false
+
+    - name: Issue the TLS certificate
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- certbot certonly --dns-cloudflare
+        --dns-cloudflare-credentials /root/cloudflare.ini
+        -d {{ omni_domain }} -m {{ admin_email }} --agree-tos -n
+      when: cert.rc != 0
+
+    - name: Install the certbot deploy hook (restart Omni on renewal)
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c
+        'printf "#!/bin/sh\ncd /etc/omni && docker compose restart omni\n"
+         > /etc/letsencrypt/renewal-hooks/deploy/restart-omni.sh
+         && chmod 755 /etc/letsencrypt/renewal-hooks/deploy/restart-omni.sh'
+      changed_when: false
+
+    - name: Deploy Omni (compose pull and up)
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c
+        'cd /etc/omni && docker compose pull -q && docker compose up -d'

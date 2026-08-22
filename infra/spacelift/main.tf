@@ -61,7 +61,7 @@ resource "spacelift_context" "homelab" {
   # Spacelift joins hooks with &&, so the backgrounded daemon needs a
   # subshell; a trailing bare & would produce "& &&" and a syntax error.
   before_init = [
-    "(tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &)",
+    "(tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --outbound-http-proxy-listen=localhost:1056 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &)",
     "sleep 2",
     "tailscale --socket=/tmp/tailscaled.sock up --auth-key=\"$${TAILSCALE_AUTH_KEY}?ephemeral=true&preauthorized=true\" --advertise-tags=tag:spacelift --hostname=spacelift-run --accept-routes",
   ]
@@ -75,11 +75,20 @@ resource "spacelift_environment_variable" "tailscale_auth_key" {
 }
 
 # tailscaled's netstack dials non-tailnet destinations directly, so routing
-# everything through the SOCKS proxy is safe (registry downloads included).
+# everything through the proxies is safe (registry downloads included).
+# ALL_PROXY covers curl-style tools; Go HTTP clients (the tofu providers)
+# only honor HTTPS_PROXY, served by tailscaled's outbound HTTP proxy.
 resource "spacelift_environment_variable" "all_proxy" {
   context_id = spacelift_context.homelab.id
   name       = "ALL_PROXY"
   value      = "socks5://localhost:1055"
+  write_only = false
+}
+
+resource "spacelift_environment_variable" "https_proxy" {
+  context_id = spacelift_context.homelab.id
+  name       = "HTTPS_PROXY"
+  value      = "http://localhost:1056"
   write_only = false
 }
 
@@ -128,6 +137,8 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 #   autodeploy: true          # default false: plan on push, apply on confirm
 #   labels: [op]              # extra labels; "op" opts into the 1Password token
 #   depends_on: [omni]        # run ordering; values are other stacks' dir keys
+#   type: ansible             # default terraform; ansible runs playbook below
+#   playbook: site.yml        # ansible only; path inside the stack dir
 # Adding a stack = new directory + stack.yaml + push. Note: the admin stack
 # must have project glob "infra/stacks/**/stack.yaml" set so manifest
 # changes trigger it.
@@ -141,6 +152,8 @@ locals {
     autodeploy  = false
     labels      = []
     depends_on  = []
+    type        = "terraform"
+    playbook    = "site.yml"
   }
 
   stacks = {
@@ -162,9 +175,16 @@ resource "spacelift_stack" "this" {
   repository              = var.repository
   branch                  = var.branch
   project_root            = "infra/stacks/${each.value.dir}"
-  terraform_workflow_tool = "OPEN_TOFU"
+  terraform_workflow_tool = each.value.type == "ansible" ? null : "OPEN_TOFU"
   autodeploy              = each.value.autodeploy
-  runner_image            = var.runner_image
+  runner_image            = each.value.type == "ansible" ? var.ansible_runner_image : var.runner_image
+
+  dynamic "ansible" {
+    for_each = each.value.type == "ansible" ? [each.value.playbook] : []
+    content {
+      playbook = ansible.value
+    }
+  }
 
   # Baseline "homelab" pulls in the managed context (Proxmox + Tailscale);
   # manifest labels add more (e.g. "op" for the 1Password token).

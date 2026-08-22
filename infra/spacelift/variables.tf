@@ -27,6 +27,12 @@ variable "runner_image" {
   default     = "ghcr.io/nateships/spacelift-runner:latest"
 }
 
+variable "ansible_runner_image" {
+  description = "Ansible runner image with op and Tailscale baked in"
+  type        = string
+  default     = "ghcr.io/nateships/spacelift-runner-ansible:latest"
+}
+
 # Non-secret values passed to stacks as TF_VAR_* through the homelab context.
 # Set each one as an individual TF_VAR_* env on the admin stack.
 variable "proxmox_node" {
