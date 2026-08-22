@@ -1,6 +1,6 @@
 # Spacelift runner with op (1Password CLI) and Tailscale baked in.
 # The 1Password tofu provider shells out to op; the run hooks start tailscaled.
-FROM ghcr.io/spacelift-io/runner-terraform:latest
+FROM ghcr.io/spacelift-io/runner-terraform:latest@sha256:2b363c9f75f5e0f2aa9d4454d0cd6a6064aadaf4866c3e2fe7ceccb19f6916b1
 
 USER root
 
