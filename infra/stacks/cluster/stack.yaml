@@ -1,4 +1,4 @@
 # Stack manifest: hydrated by the admin stack (infra/spacelift).
 description: Talos cluster on Omni (cluster, machine sets, patches)
 labels: [op]
-depends_on: [omni-config]
+depends_on: [omni-resources]

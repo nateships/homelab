@@ -1,0 +1,8 @@
+# Stack manifest: hydrated by the admin stack (infra/spacelift).
+description: Kubernetes bootstrap (ArgoCD, root app, ESO secret)
+type: ansible
+playbook: site.yml
+labels: [op]
+depends_on: [cluster]
+env:
+  ANSIBLE_CONFIG: ansible.cfg

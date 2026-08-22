@@ -105,21 +105,20 @@
         state: absent
       loop: [cloudflare.ini, omni.asc, omni.env, docker-compose.yml, provider-config.yaml]
 
-    - name: Check for the TLS certificate
-      ansible.builtin.command: >-
-        pct exec {{ ct_id }} -- test -e
-        /etc/letsencrypt/live/{{ omni_domain }}/fullchain.pem
-      register: cert
-      failed_when: false
-      changed_when: false
-      check_mode: false
-
-    - name: Issue the TLS certificate
+    # Wildcard included: the workload service proxy serves apps on
+    # <name>.{{ omni_domain }}. --keep-until-expiring makes this a no-op
+    # when the cert already covers both names; --expand reissues when the
+    # name set grows.
+    - name: Issue the TLS certificate (idempotent)
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- certbot certonly --dns-cloudflare
         --dns-cloudflare-credentials /root/cloudflare.ini
-        -d {{ omni_domain }} -m {{ admin_email }} --agree-tos -n
-      when: cert.rc != 0
+        --cert-name {{ omni_domain }}
+        -d {{ omni_domain }} -d '*.{{ omni_domain }}'
+        --expand --keep-until-expiring
+        -m {{ admin_email }} --agree-tos -n
+      register: cert
+      changed_when: "'not yet due' not in cert.stdout"
 
     - name: Install the certbot deploy hook (restart Omni on renewal)
       ansible.builtin.command: >-

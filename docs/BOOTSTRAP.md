@@ -94,7 +94,8 @@ One-time preparation:
 
 1. Enable Tailscale SSH on the PVE host: `tailscale set --ssh`
 2. Fill the `omni` item: `domain` (the Omni FQDN) and `admin-email`.
-   Point a DNS A record for that domain at the LXC IP.
+   Point two DNS A records at the LXC IP: the domain itself and a
+   wildcard (`*.` prefix) for the workload service proxy. Proxy off.
 3. Fill `cloudflare/dns-api-token` (Zone:DNS:Edit) for the certbot
    DNS challenge.
 4. Generate the etcd encryption key locally and store it in 1Password:
@@ -128,51 +129,39 @@ the admin email.
 
 ## 4. Proxmox infra provider and cluster
 
-1. Omni UI → Infrastructure Providers → Create Provider. Copy the key. This
-   is an **infrastructure provider key**, not a service account key. Store
-   it as the password of the `omni-infra-provider` item.
-2. Re-run `homelab-omni-config`. It deploys the
+1. Omni UI → Infrastructure Providers → Create Provider (id `proxmox`).
+   Copy the key. This is an **infrastructure provider key**, not a service
+   account key. Store it as the password of the `omni-infra-provider` item.
+2. Omni UI → Settings → Service Accounts → create one with the Admin role.
+   Store the key as the password of the `omni-service-account` item.
+3. Re-run `homelab-omni-config`. It deploys the
    [provider container](https://github.com/siderolabs/omni-infra-provider-proxmox)
    next to Omni, configured from 1Password.
-3. Run `mise install`. It installs `omnictl` at the same version as
-   `OMNI_IMG_TAG`. A version mismatch causes obscure gRPC errors. Bump
-   mise.toml and omni.env together.
-4. Apply the machine classes (the one omnictl step; download the omnictl
-   config from the Omni UI first):
-   ```bash
-   omnictl apply -f omni/machine-classes/control-plane.yaml
-   omnictl apply -f omni/machine-classes/worker.yaml
-   ```
-5. Create an Omni service account (Omni UI → Settings → Service Accounts,
-   Admin role). Store the key as the password of the `omni-service-account`
-   item.
-6. Confirm the `homelab-cluster` run. It creates the cluster, machine sets,
-   patches, and extensions through the Omni terraform provider. The
-   `install-disk` patch is mandatory on Talos 1.13+; without it VMs stop at
-   `stage=UPGRADING` and show no error.
-7. Wait until the VMs provision and the cluster reports Ready. Nodes stay
-   `NotReady` until Cilium installs in stage 5. That is expected.
+4. Confirm the `homelab-omni-resources` run. It applies the machine classes
+   with omnictl.
+5. Confirm the `homelab-cluster` run. It creates the cluster, machine sets,
+   config patches, extensions, and the one-time Cilium bootstrap manifest.
+   The `install-disk` patch is mandatory on Talos 1.13+; without it VMs stop
+   at `stage=UPGRADING` and show no error.
+6. Wait until the VMs provision and the cluster reports Ready in Omni.
 
 ## 5. ArgoCD and apps
 
+Confirm the `homelab-k8s-bootstrap` run. It fetches a service-account
+kubeconfig from Omni, installs ArgoCD, applies the root app-of-apps, and
+creates the one secret ESO needs (the 1Password token, taken from the run
+environment). Nothing here is manual.
+
+The root app then syncs `kubernetes/apps/`: external-secrets and its
+ClusterSecretStore first, then everything you add later. ArgoCD adopts the
+bootstrapped Cilium.
+
+For your own kubectl access:
 ```bash
-# kubeconfig via Omni
 omnictl kubeconfig --cluster homelab
-
-kubectl apply -k kubernetes/bootstrap/argocd
-kubectl apply -f kubernetes/bootstrap/root.yaml
-
-# The one manual k8s secret: 1Password service account token for ESO
-kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n external-secrets create secret generic onepassword-service-account \
-  --from-literal=token='ops_...'
 ```
 
-The root app syncs `kubernetes/apps/` in this order: Cilium (wave -10), then
-external-secrets and its ClusterSecretStore (wave -5), then everything you add
-later.
-
-To add a secret after this point: put an item in the `homelab` vault, then
+To add a secret from here on: put an item in the `homelab` vault, then
 commit an `ExternalSecret`:
 
 ```yaml

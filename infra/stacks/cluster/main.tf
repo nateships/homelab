@@ -27,6 +27,12 @@ resource "omni_cluster" "homelab" {
   talos_version      = local.talos_version
 
   backup_interval = "1h"
+
+  features = {
+    # Authenticated access to in-cluster UIs at <name>.omni.nate.cx,
+    # via annotated Services (omni-kube-service-exposer.sidero.dev/*).
+    enable_workload_proxy = true
+  }
 }
 
 resource "omni_machine_set" "control_planes" {

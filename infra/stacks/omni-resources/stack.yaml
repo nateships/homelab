@@ -1,0 +1,10 @@
+# Stack manifest: hydrated by the admin stack (infra/spacelift).
+# Sits between omni-config (Omni must run) and cluster (machine sets
+# reference the classes this stack applies).
+description: Omni machine classes (omnictl)
+type: ansible
+playbook: site.yml
+labels: [op]
+depends_on: [omni-config]
+env:
+  ANSIBLE_CONFIG: ansible.cfg

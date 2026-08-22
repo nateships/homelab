@@ -1,0 +1,48 @@
+---
+# Bootstraps GitOps onto the cluster: ArgoCD, the root app-of-apps, and the
+# one secret ESO needs. Runs on the runner against an Omni service-account
+# kubeconfig; re-running on a healthy cluster is a no-op.
+- name: Kubernetes bootstrap
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    repo_root: "{{ playbook_dir }}/../../.."
+    kubeconfig: /tmp/omni-kubeconfig
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  tasks:
+    - name: Fetch a service-account kubeconfig from Omni
+      ansible.builtin.shell: |
+        set -eu
+        export OMNI_ENDPOINT=https://omni.nate.cx
+        export OMNI_SERVICE_ACCOUNT_KEY="$(op read op://homelab/omni-service-account/password)"
+        omnictl kubeconfig --cluster homelab --service-account --force "{{ kubeconfig }}"
+      changed_when: false
+
+    - name: Install ArgoCD
+      ansible.builtin.command: kubectl apply -k "{{ repo_root }}/kubernetes/bootstrap/argocd"
+      register: argocd
+      changed_when: "'created' in argocd.stdout or 'configured' in argocd.stdout"
+
+    - name: Apply the root app-of-apps
+      ansible.builtin.command: kubectl apply -f "{{ repo_root }}/kubernetes/bootstrap/root.yaml"
+      register: rootapp
+      changed_when: "'created' in rootapp.stdout or 'configured' in rootapp.stdout"
+
+    - name: Create the external-secrets namespace
+      ansible.builtin.shell: >-
+        kubectl create namespace external-secrets --dry-run=client -o yaml
+        | kubectl apply -f -
+      register: ns
+      changed_when: "'created' in ns.stdout or 'configured' in ns.stdout"
+
+    - name: Create the 1Password token secret for ESO
+      ansible.builtin.shell: >-
+        kubectl create secret generic onepassword-service-account
+        --namespace external-secrets
+        --from-literal=token="$OP_SERVICE_ACCOUNT_TOKEN"
+        --dry-run=client -o yaml | kubectl apply -f -
+      register: eso_secret
+      changed_when: "'created' in eso_secret.stdout or 'configured' in eso_secret.stdout"
+      no_log: true

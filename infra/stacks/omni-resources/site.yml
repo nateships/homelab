@@ -1,0 +1,17 @@
+---
+# Applies the Omni machine classes from the runner. omnictl authenticates
+# with the service account key from 1Password; the alpha terraform provider
+# has no machine-class resource yet, so this stack owns them.
+- name: Omni machine classes
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Apply the machine classes
+      ansible.builtin.shell: |
+        set -eu
+        export OMNI_ENDPOINT=https://omni.nate.cx
+        export OMNI_SERVICE_ACCOUNT_KEY="$(op read op://homelab/omni-service-account/password)"
+        omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/control-plane.yaml"
+        omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/worker.yaml"
+      changed_when: true
