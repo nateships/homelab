@@ -1,12 +1,12 @@
 # Unprivileged LXC that runs self-hosted Omni (Docker Compose) and the
-# Proxmox infra provider container.
+# Proxmox infra provider Docker container.
 #
 # Two things OpenTofu cannot fully express for LXCs (see docs/BOOTSTRAP.md):
-#   1. /dev/net/tun passthrough, required by the Omni container (SideroLink
+#   1. /dev/net/tun passthrough, required by the Omni Docker container (SideroLink
 #      runs userspace WireGuard over a TUN device). Applied post-create on the
 #      Proxmox host:
 #        pct set <vmid> --dev0 path=/dev/net/tun
-#   2. Docker install inside the container.
+#   2. Docker install inside the LXC.
 # The LXC template. Tofu downloads it to the node, so no manual pveam step.
 resource "proxmox_download_file" "debian_template" {
   node_name    = var.proxmox_node
