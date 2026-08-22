@@ -1,0 +1,3 @@
+# Stack manifest: hydrated by the admin stack (infra/spacelift).
+description: Auth0 tenant configuration (Omni SPA application)
+labels: [op]
