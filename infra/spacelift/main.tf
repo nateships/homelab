@@ -148,6 +148,7 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 #   depends_on: [omni]        # run ordering; values are other stacks' dir keys
 #   type: ansible             # default terraform; ansible runs playbook below
 #   playbook: site.yml        # ansible only; path inside the stack dir
+#   env: {NAME: value}        # plain env vars set on this stack only
 # Adding a stack = new directory + stack.yaml + push. Note: the admin stack
 # must have project glob "infra/stacks/**/stack.yaml" set so manifest
 # changes trigger it.
@@ -167,6 +168,7 @@ locals {
     depends_on  = []
     type        = "terraform"
     playbook    = "site.yml"
+    env         = {}
   }
 
   stacks = {
@@ -203,6 +205,24 @@ resource "spacelift_stack" "this" {
   # Baseline "homelab" pulls in the managed context (Proxmox + Tailscale);
   # manifest labels add more (e.g. "op" for the 1Password token).
   labels = concat(["homelab"], each.value.labels)
+}
+
+# Per-stack env vars from the manifests' env maps.
+locals {
+  stack_envs = merge([
+    for name, s in local.stacks : {
+      for k, v in s.env : "${name}:${k}" => { stack = name, name = k, value = v }
+    }
+  ]...)
+}
+
+resource "spacelift_environment_variable" "stack_env" {
+  for_each = local.stack_envs
+
+  stack_id   = spacelift_stack.this[each.value.stack].id
+  name       = each.value.name
+  value      = each.value.value
+  write_only = false
 }
 
 # Run ordering from the manifests' depends_on lists.
