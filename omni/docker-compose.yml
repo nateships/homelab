@@ -44,6 +44,8 @@ services:
   tsidp:
     container_name: tsidp
     image: ghcr.io/tailscale/tsidp:latest
+    # The image's app user cannot write the root-owned named volume.
+    user: "0"
     environment:
       TAILSCALE_USE_WIP_CODE: "1"
       TS_HOSTNAME: tsidp
