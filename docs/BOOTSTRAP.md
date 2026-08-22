@@ -19,8 +19,13 @@ Do the stages in order. Each stage needs the stage before it.
    - `tailscale-omni`, `tailscale-tsidp`, `tsidp-omni`: see stage 3
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
    - `cloudflare-r2`: see stage 4 (etcd backups)
-   - `github-argocd`: password = a fine-grained PAT for `nateships/homelab`,
-     permission Contents: Read-only. ArgoCD reads the private repo with it.
+   - `github-argocd`: fields `app-id` and `installation-id` of a GitHub App.
+     Create it under Settings → Developer settings → GitHub Apps: permission
+     Contents: Read-only, webhook off, install on `nateships/homelab` only
+     (the installation id is in the installation page URL). Store the App
+     private key (PEM) as a document named `github-argocd-key`. ArgoCD
+     reads the private repo with it. TODO(public): remove the App, both
+     1Password entries, and the bootstrap task that consumes them.
 4. Copy the service account token to three places:
    - GitHub repo secret `OP_SERVICE_ACCOUNT_TOKEN`
    - The Spacelift `bootstrap` context (stage 2)

@@ -31,15 +31,18 @@
       changed_when: "'serverside-applied' in argocd.stdout"
 
     # The repo is private; the git generator and the app sources need this
-    # credential. Fine-grained PAT, Contents read-only, this repo only.
+    # credential. GitHub App auth: Contents read-only, this repo only.
+    # TODO(public): remove this task, the GitHub App, the github-argocd
+    # item, and the github-argocd-key document once the repo is public.
     - name: Create the ArgoCD repo credential
       ansible.builtin.shell: >-
         kubectl create secret generic repo-homelab
         --namespace argocd
         --from-literal=type=git
         --from-literal=url=https://github.com/nateships/homelab
-        --from-literal=username=nateships
-        --from-literal=password="$(op read op://homelab/github-argocd/password)"
+        --from-literal=githubAppID="$(op read 'op://homelab/github-argocd/app-id')"
+        --from-literal=githubAppInstallationID="$(op read 'op://homelab/github-argocd/installation-id')"
+        --from-literal=githubAppPrivateKey="$(op document get github-argocd-key --vault homelab)"
         --dry-run=client -o yaml
         | kubectl label --local -f - argocd.argoproj.io/secret-type=repository -o yaml
         | kubectl apply -f -
