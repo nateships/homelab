@@ -17,7 +17,7 @@
         set -eu
         export OMNI_ENDPOINT=https://omni.nate.cx
         export OMNI_SERVICE_ACCOUNT_KEY="$(op read op://homelab/omni-service-account/password)"
-        omnictl kubeconfig --cluster homelab --service-account --force "{{ kubeconfig }}"
+        omnictl kubeconfig --cluster homelab --service-account --user k8s-bootstrap --force "{{ kubeconfig }}"
       changed_when: false
 
     - name: Install ArgoCD
