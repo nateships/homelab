@@ -4,11 +4,14 @@
 	// Who may apply each tag to devices.
 	"tagOwners": {
 		"tag:spacelift": ["autogroup:admin"],
+		"tag:pve": ["autogroup:admin"],
 	},
 
 	"acls": [
 		// Spacelift runs reach only the Proxmox API.
-		{"action": "accept", "src": ["tag:spacelift"], "dst": ["pve1:8006"]},
+		// (Bare machine names are not valid in dst; the PVE host carries
+		// tag:pve. Tagged devices also never hit key expiry.)
+		{"action": "accept", "src": ["tag:spacelift"], "dst": ["tag:pve:8006"]},
 
 		// Default allow for everything else (Tailscale's default posture).
 		// Tighten by replacing this rule with explicit ones.
