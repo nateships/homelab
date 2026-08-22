@@ -102,6 +102,18 @@ resource "omni_config_patch" "worker_labels" {
   })
 }
 
+# Cilium bootstrap: the cluster ships no CNI (patch above), and ArgoCD's own
+# pods cannot start without one. Omni applies this rendered chart ONE TIME at
+# bootstrap; ArgoCD (kubernetes/apps/cilium) adopts it afterward and owns
+# upgrades. Re-render with scripts/render-cilium-bootstrap.sh.
+resource "omni_kubernetes_manifest" "cilium_bootstrap" {
+  name    = "cilium-bootstrap"
+  cluster = omni_cluster.homelab.name
+  mode    = "one-time"
+
+  data = file("${path.module}/manifests/cilium-bootstrap.yaml")
+}
+
 resource "omni_machine_extensions" "all" {
   cluster = omni_cluster.homelab.name
 
