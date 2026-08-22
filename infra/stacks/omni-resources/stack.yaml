@@ -1,11 +1,11 @@
 # Stack manifest: hydrated by the admin stack (infra/spacelift).
 # Sits between omni-config (Omni must run) and cluster (machine sets
 # reference the classes this stack applies).
-description: Omni machine classes (omnictl)
+description: Omni machine classes and etcd backup config (omnictl)
 type: ansible
 playbook: site.yml
 labels: [op]
 depends_on: [omni-config]
 env:
   ANSIBLE_CONFIG: ansible.cfg
-project_globs: [omni/machine-classes/**]
+project_globs: [omni/machine-classes/**, omni/etcd-backup-s3.yaml]

@@ -15,3 +15,17 @@
         omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/control-plane.yaml"
         omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/worker.yaml"
       changed_when: true
+
+    # Renders R2 credentials into a temp file; Omni validates them by
+    # listing the bucket, so a bad key fails the apply here.
+    - name: Apply the etcd backup S3 configuration
+      ansible.builtin.shell: |
+        set -eu
+        export OMNI_ENDPOINT=https://omni.nate.cx
+        export OMNI_SERVICE_ACCOUNT_KEY="$(op read op://homelab/omni-service-account/password)"
+        tmp=$(mktemp)
+        trap 'rm -f "$tmp"' EXIT
+        op inject -i "{{ playbook_dir }}/../../../omni/etcd-backup-s3.yaml" -o "$tmp" -f
+        omnictl apply -f "$tmp"
+      changed_when: true
+      no_log: true

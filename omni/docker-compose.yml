@@ -38,6 +38,7 @@ services:
       --sqlite-storage-path=/_out/sqlite/omni.db
       --workload-proxying-enabled
       --workload-proxying-use-omni-subdomain
+      --etcd-backup-s3
       ${AUTH}
 
   # OIDC identity provider on the tailnet; Omni authenticates against it.

@@ -1,0 +1,15 @@
+# Omni etcd backup target: Cloudflare R2 (S3-compatible).
+# This is an op inject template; the omni-resources stack renders and
+# applies it with omnictl. R2 ignores the region field; "auto" is the
+# documented value.
+metadata:
+  namespace: default
+  type: EtcdBackupS3Configs.omni.sidero.dev
+  id: etcd-backup-s3-conf
+spec:
+  bucket: {{ op://homelab/cloudflare-r2/bucket }}
+  region: auto
+  endpoint: https://{{ op://homelab/cloudflare-r2/account-id }}.r2.cloudflarestorage.com
+  accesskeyid: {{ op://homelab/cloudflare-r2/username }}
+  secretaccesskey: {{ op://homelab/cloudflare-r2/password }}
+  sessiontoken: ""

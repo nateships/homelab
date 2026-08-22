@@ -18,6 +18,7 @@ Do the stages in order. Each stage needs the stage before it.
      tailscale stack
    - `tailscale-omni`, `tailscale-tsidp`, `tsidp-omni`: see stage 3
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
+   - `cloudflare-r2`: see stage 4 (etcd backups)
 4. Copy the service account token to three places:
    - GitHub repo secret `OP_SERVICE_ACCOUNT_TOKEN`
    - The Spacelift `bootstrap` context (stage 2)
@@ -142,13 +143,25 @@ update the field, then re-run the stack.
 3. Re-run `homelab-omni-config`. It deploys the
    [provider container](https://github.com/siderolabs/omni-infra-provider-proxmox)
    next to Omni, configured from 1Password.
-4. Confirm the `homelab-omni-resources` run. It applies the machine classes
-   with omnictl.
-5. Confirm the `homelab-cluster` run. It creates the cluster, machine sets,
+4. Create the etcd backup target in Cloudflare R2:
+   - R2 → Create bucket, for example `omni-etcd-backups`.
+   - R2 → Manage R2 API Tokens → Create. Permission **Object Read & Write**,
+     scoped to that bucket only.
+   - Fill the `cloudflare-r2` item: `bucket`, `account-id` (from the R2
+     endpoint), username = Access Key ID, password = Secret Access Key.
+   Omni encrypts each backup with a per-cluster key before upload, so R2
+   never holds plaintext cluster data. The key lives in Omni's database;
+   backups are only restorable through Omni.
+5. Confirm the `homelab-omni-resources` run. It applies the machine classes
+   and the etcd backup configuration with omnictl. Omni validates the R2
+   credentials by listing the bucket.
+6. Confirm the `homelab-cluster` run. It creates the cluster, machine sets,
    config patches, extensions, and the one-time Cilium bootstrap manifest.
    The `install-disk` patch is mandatory on Talos 1.13+; without it VMs stop
    at `stage=UPGRADING` and show no error.
-6. Wait until the VMs provision and the cluster reports Ready in Omni.
+7. Wait until the VMs provision and the cluster reports Ready in Omni.
+   Automatic etcd backups start when the cluster is Ready; the cluster
+   stack sets a 1 hour interval. Check: Omni UI → cluster → Backups.
 
 ## 5. ArgoCD and apps
 
