@@ -31,10 +31,16 @@ connects to Proxmox at its ts.net address.
    curl -fsSL https://tailscale.com/install.sh | sh
    tailscale up   # note the MagicDNS name, e.g. pve.tailnet-name.ts.net
    ```
-2. Create a Tailscale auth key: admin console → Settings → Keys → **Auth key**.
-   Make it reusable and ephemeral. Tag it `tag:spacelift`. In your ACLs, let
-   that tag reach only the PVE host on port 8006. Store the key in the
-   `tailscale-spacelift` item.
+2. Create a Tailscale OAuth client for Spacelift runs. First add the tag to
+   your ACLs and let it reach only the PVE host on port 8006:
+   ```jsonc
+   "tagOwners": { "tag:spacelift": ["autogroup:admin"] },
+   "acls": [{ "action": "accept", "src": ["tag:spacelift"], "dst": ["pve1:8006"] }],
+   ```
+   Then: admin console → Settings → **OAuth clients** → Generate. Scope:
+   **Keys → Auth Keys (write)**. Tag: `tag:spacelift`. Store the
+   `tskey-client-...` secret in the `tailscale-spacelift` item. The secret
+   does not expire; the run hook adds `?ephemeral=true&preauthorized=true`.
 3. Create the Proxmox API token:
    ```bash
    pveum user token add root@pam spacelift --privsep=0

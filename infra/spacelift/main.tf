@@ -19,7 +19,8 @@ data "onepassword_item" "proxmox" {
   title = "proxmox"
 }
 
-# Ephemeral + reusable auth key, tagged tag:spacelift (see docs/BOOTSTRAP.md)
+# OAuth client secret (scope auth_keys, tag tag:spacelift); does not expire.
+# The run hook appends ?ephemeral=true&preauthorized=true (see docs/BOOTSTRAP.md).
 data "onepassword_item" "tailscale" {
   vault = data.onepassword_vault.homelab.uuid
   title = "tailscale-spacelift"
@@ -62,7 +63,7 @@ resource "spacelift_context" "homelab" {
   before_init = [
     "(tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &)",
     "sleep 2",
-    "tailscale --socket=/tmp/tailscaled.sock up --auth-key=$TAILSCALE_AUTH_KEY --hostname=spacelift-run --accept-routes",
+    "tailscale --socket=/tmp/tailscaled.sock up --auth-key=\"$${TAILSCALE_AUTH_KEY}?ephemeral=true&preauthorized=true\" --advertise-tags=tag:spacelift --hostname=spacelift-run --accept-routes",
   ]
 }
 
