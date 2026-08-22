@@ -41,10 +41,6 @@ connects to Proxmox at its ts.net address.
    ```
    Only root can set LXC `features` (nesting, keyctl), so the token must be on
    `root@pam`. Store `root@pam!spacelift=<uuid>` in the `proxmox` item.
-4. Download an LXC template on the node:
-   ```bash
-   pveam update && pveam download local ubuntu-24.04-standard_24.04-2_amd64.tar.zst
-   ```
 
 ## 2. Spacelift
 
@@ -61,7 +57,7 @@ Contexts attach through `autoattach:` labels, not clicks.
    Set one `TF_VAR_*` env for each input in
    `infra/spacelift/terraform.tfvars.example`: `proxmox_endpoint`,
    `proxmox_node`, `omni_ct_ip`, `omni_ct_gateway`, `omni_ct_vlan`
-   (optional), `ct_template_file_id`, `ssh_public_key`.
+   (optional), `ssh_public_key`.
 3. Behavior → project globs: add `infra/stacks/**/stack.yaml`. Manifest
    changes then trigger the admin stack. Other files in a stack dir trigger
    only that stack.
