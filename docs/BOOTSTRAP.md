@@ -9,13 +9,14 @@ Do the stages in order. Each stage needs the stage before it.
    read access to the `homelab` vault only. Save the `ops_...` token in your
    Private vault.
 3. Create these items in the `homelab` vault:
-   - `omni`: fields `account-uuid`, `admin-email`, `auth0-domain`, `auth0-client-id`
+   - `omni`: fields `account-uuid`, `admin-email`
    - `proxmox`: password field = the API token from stage 1
    - `tailscale-spacelift`: password field = the Tailscale OAuth client
      secret from stage 1
    - `tailscale-terraform`: username = OAuth client ID, password = secret;
      a second OAuth client with the policy-file write scope, used by the
      tailscale stack
+   - `tailscale-omni`, `tailscale-tsidp`, `tsidp-omni`: see stage 3
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
 4. Copy the service account token to three places:
    - GitHub repo secret `OP_SERVICE_ACCOUNT_TOKEN`
@@ -111,21 +112,25 @@ One-time preparation:
    unrecoverable.
 5. Trigger `homelab-omni-config` and confirm the run.
 
-Auth0 is code too (`infra/stacks/auth0`). One-time preparation:
+Login uses Tailscale identity through tsidp (an OIDC provider that runs
+next to Omni and joins the tailnet). Two-phase, because the OIDC client can
+only be registered once tsidp runs:
 
-1. Create an Auth0 tenant (free plan).
-2. Create an M2M application authorized for the **Auth0 Management API**
-   with the client scopes (`read:clients`, `create:clients`,
-   `update:clients`, `delete:clients`). Store it in the `auth0-terraform`
-   item: client ID as username, secret as password, and the tenant domain
-   as the website field (the domain stays out of this public repo).
-3. Set the same tenant domain in the `omni` item's `auth0-domain` field.
-4. Confirm the `homelab-auth0` run. Copy the `omni_client_id` output into
-   the `omni` item's `auth0-client-id` field (a one-time copy; the ID
-   never changes).
+1. Create two more Tailscale OAuth clients (Trust credentials, scope
+   **Auth keys: write**): one with tag `tag:omni` (the LXC joins the
+   tailnet), one with `tag:tsidp`. Store the secrets in the
+   `tailscale-omni` and `tailscale-tsidp` items. Set the tailnet DNS name
+   in the `tailscale-tsidp` item's `tailnet-dns` field.
+2. Run `homelab-omni-config`. The LXC joins the tailnet and tsidp starts.
+3. Open `https://tsidp.<tailnet>.ts.net` and register a client with
+   redirect URI `https://omni.nate.cx/oidc/consume`. Store the client ID
+   (username) and secret (password) in the `tsidp-omni` item.
+4. Re-run `homelab-omni-config`. Omni restarts with OIDC enabled.
 
-Check the result: open `https://<your domain>`. Log in through Auth0 with
-the admin email.
+Check the result: open `https://omni.nate.cx` from a tailnet device. Log in
+with your Tailscale identity. `admin-email` in the `omni` item must match
+the email tsidp presents; if login fails, compare with the login screen and
+update the field, then re-run the stack.
 
 ## 4. Proxmox infra provider and cluster
 

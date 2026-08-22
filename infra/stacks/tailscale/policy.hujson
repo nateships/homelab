@@ -5,6 +5,8 @@
 	"tagOwners": {
 		"tag:spacelift": ["autogroup:admin"],
 		"tag:pve": ["autogroup:admin"],
+		"tag:omni": ["autogroup:admin"],
+		"tag:tsidp": ["autogroup:admin"],
 	},
 
 	// The PVE host is the subnet router for the k8s VLAN; approve its

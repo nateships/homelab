@@ -61,6 +61,36 @@
         'curl -fsSL https://get.docker.com | sh && command -v docker'
       when: docker_bin.rc != 0
 
+    - name: Check for Tailscale in the LXC
+      ansible.builtin.command: "pct exec {{ ct_id }} -- sh -c 'command -v tailscale'"
+      register: ts_bin
+      failed_when: false
+      changed_when: false
+      check_mode: false
+
+    - name: Install Tailscale in the LXC
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c
+        'curl -fsSL https://tailscale.com/install.sh | sh && command -v tailscale'
+      when: ts_bin.rc != 0
+
+    - name: Check the tailnet connection of the LXC
+      ansible.builtin.command: "pct exec {{ ct_id }} -- tailscale status"
+      register: ts_status
+      failed_when: false
+      changed_when: false
+      check_mode: false
+
+    # Non-ephemeral server node; MagicDNS from the LXC lets the Omni
+    # container resolve the tsidp issuer URL.
+    - name: Join the LXC to the tailnet
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- tailscale up
+        --auth-key="{{ lookup('pipe', 'op read op://homelab/tailscale-omni/password') }}?preauthorized=true"
+        --advertise-tags=tag:omni --hostname=omni
+      when: ts_status.rc != 0
+      no_log: true
+
     - name: Create the Omni directories in the LXC
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
