@@ -19,6 +19,8 @@ Do the stages in order. Each stage needs the stage before it.
    - `tailscale-omni`, `tailscale-tsidp`, `tsidp-omni`: see stage 3
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
    - `cloudflare-r2`: see stage 4 (etcd backups)
+   - `github-argocd`: password = a fine-grained PAT for `nateships/homelab`,
+     permission Contents: Read-only. ArgoCD reads the private repo with it.
 4. Copy the service account token to three places:
    - GitHub repo secret `OP_SERVICE_ACCOUNT_TOKEN`
    - The Spacelift `bootstrap` context (stage 2)
@@ -166,13 +168,18 @@ update the field, then re-run the stack.
 ## 5. ArgoCD and apps
 
 Confirm the `homelab-k8s-bootstrap` run. It fetches a service-account
-kubeconfig from Omni, installs ArgoCD, applies the root app-of-apps, and
-creates the one secret ESO needs (the 1Password token, taken from the run
-environment). Nothing here is manual.
+kubeconfig from Omni, installs ArgoCD together with the ApplicationSet,
+creates the repo credential (`github-argocd`), and creates the one secret
+ESO needs (the 1Password token, taken from the run environment). Nothing
+here is manual.
 
-The root app then syncs `kubernetes/apps/`: external-secrets and its
-ClusterSecretStore first, then everything you add later. ArgoCD adopts the
-bootstrapped Cilium.
+The ApplicationSet generates one Application per
+`kubernetes/apps/<name>/config.yaml`. A config file holds the app name,
+the destination namespace, and the sources; the shared sync policy lives
+in the template (`kubernetes/bootstrap/argocd/appset.yaml`). To add an
+app, commit a new directory with a `config.yaml`. To remove one, delete
+the file; the Application and its resources go with it. ArgoCD adopts the
+bootstrapped Cilium and manages itself, ApplicationSet included.
 
 For your own kubectl access:
 ```bash

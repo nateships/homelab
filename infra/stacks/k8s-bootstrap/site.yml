@@ -1,7 +1,8 @@
 ---
-# Bootstraps GitOps onto the cluster: ArgoCD, the root app-of-apps, and the
-# one secret ESO needs. Runs on the runner against an Omni service-account
-# kubeconfig; re-running on a healthy cluster is a no-op.
+# Bootstraps GitOps onto the cluster: ArgoCD (with the ApplicationSet that
+# generates all apps), its repo credential, and the one secret ESO needs.
+# Runs on the runner against an Omni service-account kubeconfig; re-running
+# on a healthy cluster is a no-op.
 - name: Kubernetes bootstrap
   hosts: localhost
   connection: local
@@ -20,15 +21,31 @@
         omnictl kubeconfig --cluster homelab --service-account --user k8s-bootstrap --force "{{ kubeconfig }}"
       changed_when: false
 
-    - name: Install ArgoCD
+    # The first apply can race the fresh ApplicationSet CRD; retry covers it.
+    - name: Install ArgoCD and the ApplicationSet
       ansible.builtin.command: kubectl apply --server-side --force-conflicts -k "{{ repo_root }}/kubernetes/bootstrap/argocd"
       register: argocd
+      retries: 3
+      delay: 10
+      until: argocd.rc == 0
       changed_when: "'serverside-applied' in argocd.stdout"
 
-    - name: Apply the root app-of-apps
-      ansible.builtin.command: kubectl apply -f "{{ repo_root }}/kubernetes/bootstrap/root.yaml"
-      register: rootapp
-      changed_when: "'created' in rootapp.stdout or 'configured' in rootapp.stdout"
+    # The repo is private; the git generator and the app sources need this
+    # credential. Fine-grained PAT, Contents read-only, this repo only.
+    - name: Create the ArgoCD repo credential
+      ansible.builtin.shell: >-
+        kubectl create secret generic repo-homelab
+        --namespace argocd
+        --from-literal=type=git
+        --from-literal=url=https://github.com/nateships/homelab
+        --from-literal=username=nateships
+        --from-literal=password="$(op read op://homelab/github-argocd/password)"
+        --dry-run=client -o yaml
+        | kubectl label --local -f - argocd.argoproj.io/secret-type=repository -o yaml
+        | kubectl apply -f -
+      register: repo_cred
+      changed_when: "'created' in repo_cred.stdout or 'configured' in repo_cred.stdout"
+      no_log: true
 
     - name: Create the external-secrets namespace
       ansible.builtin.shell: >-

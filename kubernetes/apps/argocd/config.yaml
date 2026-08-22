@@ -1,0 +1,9 @@
+# ArgoCD manages itself: same kustomization the k8s-bootstrap stack applies
+# once, so adoption is a no-op and upgrades flow through GitOps. That
+# kustomization includes the ApplicationSet that generates this Application.
+name: argocd
+namespace: argocd
+sources:
+  - repoURL: https://github.com/nateships/homelab
+    targetRevision: main
+    path: kubernetes/bootstrap/argocd

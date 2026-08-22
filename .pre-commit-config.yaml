@@ -26,13 +26,15 @@ repos:
         language: system
         files: \.tf$
         pass_filenames: false
+      # apps/*/config.yaml files are ApplicationSet generator input, not
+      # Kubernetes manifests; only the raw-manifest config dirs validate.
       - id: kubeconform
         name: kubeconform
         entry: >-
           kubeconform -strict -ignore-missing-schemas
           kubernetes/bootstrap/argocd/namespace.yaml
-          kubernetes/bootstrap/root.yaml
-          kubernetes/apps/
+          kubernetes/bootstrap/argocd/appset.yaml
+          kubernetes/apps/external-secrets/config/
         language: system
         files: ^kubernetes/.*\.yaml$
         pass_filenames: false

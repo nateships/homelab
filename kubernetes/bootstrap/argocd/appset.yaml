@@ -1,0 +1,46 @@
+# Generates one Application per kubernetes/apps/<name>/config.yaml.
+# A config file carries only what differs per app (name, namespace,
+# sources); this template owns the shared sync policy. Deleting a
+# config file deletes the Application and its resources.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/nateships/homelab
+        revision: main
+        files:
+          - path: kubernetes/apps/*/config.yaml
+  template:
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          # Large CRDs (ArgoCD, Cilium, ESO) overflow client-side
+          # apply annotations
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 30s
+            factor: 2
+  # Sources are nested YAML; the flat template fields above cannot
+  # carry them, so this patch injects them verbatim.
+  templatePatch: |
+    spec:
+      sources:
+    {{- .sources | toYaml | nindent 4 }}

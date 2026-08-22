@@ -19,6 +19,7 @@
         "/^omni/.*\\.(ya?ml|example)$/",
         "/^infra/.*\\.tf$/",
         "/^scripts/.*\\.sh$/",
+        "/^kubernetes/apps/.*\\.ya?ml$/",
         "/(^|/)Dockerfile(\\..+)?$/"
       ],
       "matchStrings": [
