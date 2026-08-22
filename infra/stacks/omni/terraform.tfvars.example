@@ -4,6 +4,7 @@ proxmox_node        = "pve"
 omni_ct_id          = 200
 omni_ct_ip          = "192.168.10.15/24"
 omni_ct_gateway     = "192.168.10.1"
+omni_ct_vlan        = 10
 ct_datastore        = "local-lvm"
 ct_template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 ssh_public_key      = "ssh-ed25519 AAAA... you@host"

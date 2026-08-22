@@ -40,8 +40,9 @@ resource "proxmox_virtual_environment_container" "omni" {
   }
 
   network_interface {
-    name   = "eth0"
-    bridge = "vmbr0"
+    name    = "eth0"
+    bridge  = "vmbr0"
+    vlan_id = var.omni_ct_vlan
   }
 
   initialization {
