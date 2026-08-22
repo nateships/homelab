@@ -17,6 +17,7 @@ Do the stages in order. Each stage needs the stage before it.
      a second OAuth client with the policy-file write scope, used by the
      tailscale stack
    - `tailscale-omni`, `tailscale-tsidp`, `tsidp-omni`: see stage 3
+   - `tsidp-argocd`: see stage 5 (ArgoCD OIDC login)
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
    - `cloudflare-r2`: see stage 4 (etcd backups)
    - `github-argocd`: fields `app-id` and `installation-id` of a GitHub App.
@@ -185,6 +186,14 @@ in the template (`kubernetes/bootstrap/argocd/appset.yaml`). To add an
 app, commit a new directory with a `config.yaml`. To remove one, delete
 the file; the Application and its resources go with it. ArgoCD adopts the
 bootstrapped Cilium and manages itself, ApplicationSet included.
+
+ArgoCD UI login uses tsidp directly (no Dex). One-time: open
+`https://tsidp.<tailnet>.ts.net` and register a client with redirect URI
+`https://argocd.omni.nate.cx/auth/callback`. Fill the `tsidp-argocd`
+item: username = client ID, password = client secret, and an `issuer`
+field = `https://tsidp.<tailnet>.ts.net`. ESO delivers these to ArgoCD;
+until then the local admin account works
+(`kubectl -n argocd get secret argocd-initial-admin-secret`).
 
 For your own kubectl access:
 ```bash

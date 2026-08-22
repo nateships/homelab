@@ -1,0 +1,9 @@
+# Any OIDC login gets admin. Access is already double-gated: the Omni
+# workload proxy needs an Omni session, and tsidp only issues tokens to
+# tailnet members.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+data:
+  policy.default: role:admin
