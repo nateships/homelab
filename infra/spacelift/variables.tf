@@ -22,15 +22,9 @@ variable "proxmox_endpoint" {
 }
 
 variable "runner_image" {
-  description = "Runner image with op and Tailscale baked in (built by .github/workflows/runner-image.yaml)"
+  description = "Runner image for all stacks: Ansible, op, and Tailscale baked in (built by .github/workflows/runner-image.yaml)"
   type        = string
   default     = "ghcr.io/nateships/spacelift-runner:latest"
-}
-
-variable "ansible_runner_image" {
-  description = "Ansible runner image with op and Tailscale baked in"
-  type        = string
-  default     = "ghcr.io/nateships/spacelift-runner-ansible:latest"
 }
 
 # Non-secret values passed to stacks as TF_VAR_* through the homelab context.
