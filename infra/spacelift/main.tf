@@ -55,13 +55,12 @@ resource "spacelift_context" "homelab" {
   # Spacelift's hosted workers have no route to the LAN. These hooks join the
   # run to the tailnet: userspace tailscaled (no root, no TUN device) exposing
   # a SOCKS5 proxy that the ALL_PROXY env var (below) points Go HTTP clients
-  # at. Proxmox is reached at its ts.net address.
+  # at. Proxmox is reached at its ts.net address. The binaries come from the
+  # custom runner image (runner/Dockerfile).
   before_init = [
-    "curl -fsSL https://pkgs.tailscale.com/stable/tailscale_${var.tailscale_version}_amd64.tgz -o /tmp/tailscale.tgz",
-    "tar xzf /tmp/tailscale.tgz -C /tmp --strip-components=1",
-    "/tmp/tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &",
+    "tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &",
     "sleep 2",
-    "/tmp/tailscale --socket=/tmp/tailscaled.sock up --auth-key=$TAILSCALE_AUTH_KEY --hostname=spacelift-run --accept-routes",
+    "tailscale --socket=/tmp/tailscaled.sock up --auth-key=$TAILSCALE_AUTH_KEY --hostname=spacelift-run --accept-routes",
   ]
 }
 
@@ -160,6 +159,7 @@ resource "spacelift_stack" "this" {
   project_root            = "infra/stacks/${each.value.dir}"
   terraform_workflow_tool = "OPEN_TOFU"
   autodeploy              = each.value.autodeploy
+  runner_image            = var.runner_image
 
   # Baseline "homelab" pulls in the managed context (Proxmox + Tailscale);
   # manifest labels add more (e.g. "op" for the 1Password token).

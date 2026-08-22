@@ -1,0 +1,30 @@
+name: runner-image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - runner/**
+      - .github/workflows/runner-image.yaml
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: runner
+          push: true
+          tags: |
+            ghcr.io/nateships/spacelift-runner:latest
+            ghcr.io/nateships/spacelift-runner:${{ github.sha }}
