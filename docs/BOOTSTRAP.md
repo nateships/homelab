@@ -58,10 +58,10 @@ Contexts attach through `autoattach:` labels, not clicks.
    `infra/spacelift`, OpenTofu. Add label `op`. Attach the built-in
    **Space Admin** role for the `root` space: Settings → Roles → Manage Roles.
    The role must target `root` because the stack creates a child space.
-   Set env:
-   - `TF_VAR_proxmox_endpoint` = `https://pve.tailnet-name.ts.net:8006`
-   - `TF_VAR_shared_tfvars` = HCL map of non-secret vars (see
-     `infra/spacelift/terraform.tfvars.example`)
+   Set one `TF_VAR_*` env for each input in
+   `infra/spacelift/terraform.tfvars.example`: `proxmox_endpoint`,
+   `proxmox_node`, `omni_ct_ip`, `omni_ct_gateway`, `omni_ct_vlan`
+   (optional), `ct_template_file_id`, `ssh_public_key`.
 3. Behavior → project globs: add `infra/stacks/**/stack.yaml`. Manifest
    changes then trigger the admin stack. Other files in a stack dir trigger
    only that stack.

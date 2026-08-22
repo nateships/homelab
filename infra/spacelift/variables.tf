@@ -28,10 +28,35 @@ variable "tailscale_version" {
   default = "1.88.1"
 }
 
-# Non-secret TF_VAR_* values shared with every stack via the homelab context
-# (see infra/stacks/omni/terraform.tfvars.example for the omni stack's list).
-variable "shared_tfvars" {
-  description = "Map of variable name -> value, exposed to all stacks as TF_VAR_<name>"
-  type        = map(string)
-  default     = {}
+# Non-secret values passed to stacks as TF_VAR_* through the homelab context.
+# Set each one as an individual TF_VAR_* env on the admin stack.
+variable "proxmox_node" {
+  description = "Proxmox node name that hosts the Omni LXC"
+  type        = string
+}
+
+variable "omni_ct_ip" {
+  description = "Static IP/CIDR for the Omni LXC, e.g. 192.168.10.15/24"
+  type        = string
+}
+
+variable "omni_ct_gateway" {
+  description = "Gateway for the Omni LXC"
+  type        = string
+}
+
+variable "omni_ct_vlan" {
+  description = "VLAN tag for the Omni LXC (null = untagged)"
+  type        = number
+  default     = null
+}
+
+variable "ct_template_file_id" {
+  description = "LXC template, e.g. local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+  type        = string
+}
+
+variable "ssh_public_key" {
+  description = "SSH public key for root inside the Omni LXC"
+  type        = string
 }

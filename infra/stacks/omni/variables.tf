@@ -25,6 +25,12 @@ variable "omni_ct_gateway" {
   type        = string
 }
 
+variable "omni_ct_vlan" {
+  description = "VLAN tag for the Omni LXC network interface (null = untagged)"
+  type        = number
+  default     = null
+}
+
 variable "ct_datastore" {
   description = "Datastore for the LXC rootfs"
   type        = string
