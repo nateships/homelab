@@ -52,7 +52,7 @@ interval at 1h.
 ## Tooling
 
 [mise.toml](mise.toml) pins every tool: opentofu, omnictl, talosctl, kubectl,
-kubeconform, prek, and the 1Password CLI. Run `mise install` to get them. CI
+kubeconform, helm, prek, and the 1Password CLI. Run `mise install` to get them. CI
 installs from the same file.
 
 Run `prek install` once to enable the git hooks
