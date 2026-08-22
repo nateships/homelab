@@ -86,7 +86,7 @@
     - name: Join the LXC to the tailnet
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- tailscale up
-        --auth-key="{{ lookup('pipe', 'op read op://homelab/tailscale-omni/password') }}?preauthorized=true"
+        --auth-key="{{ lookup('pipe', 'op read op://homelab/tailscale-omni/password') }}?ephemeral=false&preauthorized=true"
         --advertise-tags=tag:omni --hostname=omni
       when: ts_status.rc != 0
       no_log: true
