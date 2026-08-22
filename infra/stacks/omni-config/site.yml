@@ -18,9 +18,16 @@
         line: "dev0: path=/dev/net/tun"
       register: tun
 
-    - name: Reboot the container to apply the device
+    - name: Enable keyctl and nesting (the API token cannot set keyctl)
+      ansible.builtin.lineinfile:
+        path: "/etc/pve/lxc/{{ ct_id }}.conf"
+        regexp: "^features:"
+        line: "features: keyctl=1,nesting=1"
+      register: feat
+
+    - name: Reboot the container to apply device and features
       ansible.builtin.command: "pct reboot {{ ct_id }}"
-      when: tun is changed
+      when: tun is changed or feat is changed
 
     - name: Wait until the container runs
       ansible.builtin.command: "pct status {{ ct_id }}"

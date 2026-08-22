@@ -22,10 +22,16 @@ resource "proxmox_virtual_environment_container" "omni" {
   unprivileged = true
   started      = true
 
-  # Docker-in-LXC requirements
+  # Docker-in-LXC needs nesting + keyctl. The API can only set nesting
+  # (other feature flags require a real root@pam login; tokens do not
+  # qualify), so the omni-config playbook sets keyctl and this resource
+  # ignores feature drift.
   features {
     nesting = true
-    keyctl  = true
+  }
+
+  lifecycle {
+    ignore_changes = [features]
   }
 
   cpu {
