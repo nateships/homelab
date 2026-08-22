@@ -8,13 +8,19 @@
 	},
 
 	"acls": [
-		// Spacelift runs reach only the Proxmox API.
+		// Spacelift runs reach the Proxmox API and SSH (Ansible stack).
 		// (Bare machine names are not valid in dst; the PVE host carries
 		// tag:pve. Tagged devices also never hit key expiry.)
-		{"action": "accept", "src": ["tag:spacelift"], "dst": ["tag:pve:8006"]},
+		{"action": "accept", "src": ["tag:spacelift"], "dst": ["tag:pve:8006", "tag:pve:22"]},
 
 		// Default allow for everything else (Tailscale's default posture).
 		// Tighten by replacing this rule with explicit ones.
 		{"action": "accept", "src": ["*"], "dst": ["*:*"]},
+	],
+
+	// Tailscale SSH: the Ansible stack logs into the PVE host as root,
+	// authenticated by tailnet identity; no SSH keys exist.
+	"ssh": [
+		{"action": "accept", "src": ["tag:spacelift"], "dst": ["tag:pve"], "users": ["root"]},
 	],
 }

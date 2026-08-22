@@ -20,7 +20,7 @@ Do the stages in order. Each stage needs the stage before it.
 4. Copy the service account token to three places:
    - GitHub repo secret `OP_SERVICE_ACCOUNT_TOKEN`
    - The Spacelift `bootstrap` context (stage 2)
-   - One Kubernetes secret (stage 6)
+   - One Kubernetes secret (stage 5)
 
 > Family-plan service accounts have low API rate limits. Keep ESO
 > `refreshInterval` at `1h` on each ExternalSecret.
@@ -81,60 +81,39 @@ Contexts attach through `autoattach:` labels, not clicks.
    and the `homelab-omni` stack (label `homelab`).
 5. Confirm the `homelab-omni` run. The run creates the Omni LXC.
 
-## 3. Omni LXC post-provision
+## 3. Omni deployment (the Ansible stack)
 
-Run these once on the Proxmox host. OpenTofu cannot set them.
+The `homelab-omni-config` stack configures the container and deploys Omni.
+It connects to the PVE host with Tailscale SSH and does all container work
+through `pct`. Secrets render on the runner with `op`; nothing is stored
+outside 1Password. Re-run the stack to deploy config or image changes
+(for example a Renovate bump of `OMNI_IMG_TAG`).
 
-```bash
-# TUN device for SideroLink (userspace WireGuard)
-pct set 200 --dev0 path=/dev/net/tun
-pct reboot 200
-```
+One-time preparation:
 
-Inside the LXC (`pct enter 200`):
+1. Enable Tailscale SSH on the PVE host: `tailscale set --ssh`
+2. Fill the `omni` item: `domain` (the Omni FQDN) and `admin-email`.
+   Point a DNS A record for that domain at the LXC IP.
+3. Fill `cloudflare/dns-api-token` (Zone:DNS:Edit) for the certbot
+   DNS challenge.
+4. Generate the etcd encryption key locally and store it in 1Password:
+   ```bash
+   gpg --quick-generate-key "Omni (etcd encryption) <you@example.com>" rsa4096 cert never
+   FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
+   gpg --quick-add-key "$FPR" rsa4096 encr never
+   gpg --export-secret-key --armor you@example.com > omni.asc
+   op document create omni.asc --vault homelab --title omni-gpg
+   rm omni.asc
+   ```
+   Keep the key in your GPG keyring too; without it, etcd data is
+   unrecoverable.
+5. Trigger `homelab-omni-config` and confirm the run.
 
-```bash
-# Docker
-curl -fsSL https://get.docker.com | sh
+Check the result: open `https://<your domain>`. Log in through Auth0 with
+the admin email (the `auth0-domain` and `auth0-client-id` fields must be
+filled first).
 
-# Certbot from apt, not snap (snapd is unreliable in unprivileged LXCs)
-apt-get install -y certbot python3-certbot-dns-cloudflare gpg
-
-# Cloudflare DNS challenge cert
-op read "op://homelab/cloudflare/dns-api-token" # or paste by hand
-cat > /root/cloudflare.ini <<'EOF'
-dns_cloudflare_api_token = <token>
-EOF
-chmod 600 /root/cloudflare.ini
-certbot certonly --dns-cloudflare \
-  --dns-cloudflare-credentials /root/cloudflare.ini \
-  -d omni.example.com --agree-tos -m you@example.com -n
-```
-
-## 4. Deploy Omni
-
-Inside the LXC:
-
-```bash
-# Etcd encryption key (no passphrase); back the .asc up to 1Password
-gpg --quick-generate-key "Omni (etcd encryption) <you@example.com>" rsa4096 cert never
-FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
-gpg --quick-add-key "$FPR" rsa4096 encr never
-mkdir -p /etc/omni /etc/etcd /etc/omni/sqlite
-gpg --export-secret-key --armor you@example.com > /etc/omni/omni.asc
-chmod 600 /etc/omni/omni.asc
-chown -R 1000:1000 /etc/etcd && chmod 700 /etc/etcd
-
-# Config + start (clone repo or copy omni/ dir over)
-cd omni
-op inject -i omni.env.example -o omni.env   # or fill by hand
-docker compose up -d
-```
-
-Check the result: open `https://omni.example.com`. Log in through Auth0 with
-the admin email.
-
-## 5. Proxmox infra provider and cluster
+## 4. Proxmox infra provider and cluster
 
 1. Omni UI → Infrastructure Providers → Create Provider. Copy the key. This is
    an **infrastructure provider key**, not a service account key. Store it in
@@ -153,9 +132,9 @@ the admin email.
    The `install-disk` patch in the template is mandatory on Talos 1.13+.
    Without it, VMs stop at `stage=UPGRADING` and show no error.
 5. Wait until the VMs provision and the cluster reports Ready. Nodes stay
-   `NotReady` until Cilium installs in stage 6. That is expected.
+   `NotReady` until Cilium installs in stage 5. That is expected.
 
-## 6. ArgoCD and apps
+## 5. ArgoCD and apps
 
 ```bash
 # kubeconfig via Omni

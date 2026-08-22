@@ -18,7 +18,7 @@
       "managerFilePatterns": [
         "/^omni/.*\\.(ya?ml|example)$/",
         "/^infra/.*\\.tf$/",
-        "/(^|/)Dockerfile$/"
+        "/(^|/)Dockerfile(\\..+)?$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)(?: versioning=(?<versioning>[^\\s]+))?(?: extractVersion=(?<extractVersion>[^\\s]+))?\\s+.*?(?:=|:)\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
