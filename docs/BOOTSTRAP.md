@@ -11,7 +11,11 @@ Do the stages in order. Each stage needs the stage before it.
 3. Create these items in the `homelab` vault:
    - `omni`: fields `account-uuid`, `admin-email`, `auth0-domain`, `auth0-client-id`
    - `proxmox`: password field = the API token from stage 1
-   - `tailscale-spacelift`: password field = the Tailscale auth key from stage 1
+   - `tailscale-spacelift`: password field = the Tailscale OAuth client
+     secret from stage 1
+   - `tailscale-terraform`: username = OAuth client ID, password = secret;
+     a second OAuth client with the policy-file write scope, used by the
+     tailscale stack
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
 4. Copy the service account token to three places:
    - GitHub repo secret `OP_SERVICE_ACCOUNT_TOKEN`
