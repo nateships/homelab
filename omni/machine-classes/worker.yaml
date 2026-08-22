@@ -16,6 +16,8 @@ spec:
       memory: 16384
       disk_size: 100
       network_bridge: vmbr0
+      # Same VLAN as the Omni LXC; SideroLink stays on one L2 segment
+      vlan: 101
       storage_selector: name == "zpool"
       disk_ssd: true
       disk_discard: true
