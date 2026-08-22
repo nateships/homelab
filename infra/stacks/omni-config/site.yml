@@ -82,6 +82,8 @@
           content: "{{ lookup('pipe', 'op inject -i ' ~ repo_root ~ '/omni/omni.env.example') }}"
         - name: docker-compose.yml
           content: "{{ lookup('file', repo_root ~ '/omni/docker-compose.yml') }}"
+        - name: provider-config.yaml
+          content: "{{ lookup('pipe', 'op inject -i ' ~ repo_root ~ '/omni/provider-config.yaml') }}"
       loop_control:
         label: "{{ item.name }}"
       no_log: true
@@ -95,12 +97,13 @@
         - { src: omni.asc, dest: /etc/omni/omni.asc, perms: "600" }
         - { src: omni.env, dest: /etc/omni/omni.env, perms: "600" }
         - { src: docker-compose.yml, dest: /etc/omni/docker-compose.yml, perms: "644" }
+        - { src: provider-config.yaml, dest: /etc/omni/provider-config.yaml, perms: "600" }
 
     - name: Remove the staged files from the PVE host
       ansible.builtin.file:
         path: "/tmp/omni-stage-{{ item }}"
         state: absent
-      loop: [cloudflare.ini, omni.asc, omni.env, docker-compose.yml]
+      loop: [cloudflare.ini, omni.asc, omni.env, docker-compose.yml, provider-config.yaml]
 
     - name: Check for the TLS certificate
       ansible.builtin.command: >-

@@ -1,0 +1,8 @@
+# Proxmox infra provider configuration (template; op inject renders it).
+# The token is the same root@pam!spacelift token, split into the two
+# fields provider 1.3.4+ expects.
+proxmox:
+  url: "{{ op://homelab/proxmox/lan-url }}"
+  insecureSkipVerify: true
+  tokenID: "{{ op://homelab/proxmox/token-id }}"
+  tokenSecret: "{{ op://homelab/proxmox/token-secret }}"
