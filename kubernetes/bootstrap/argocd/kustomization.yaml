@@ -6,4 +6,4 @@ namespace: argocd
 resources:
   - namespace.yaml
   # Pin to a release; check https://github.com/argoproj/argo-cd/releases
-  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.1.0/manifests/install.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.1/manifests/install.yaml
