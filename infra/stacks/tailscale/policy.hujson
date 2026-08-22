@@ -33,4 +33,21 @@
 	"ssh": [
 		{"action": "accept", "src": ["tag:spacelift", "autogroup:member"], "dst": ["tag:pve"], "users": ["root"]},
 	],
+
+	// tsidp denies its admin UI and client registration by default; grant
+	// them to tailnet members (that is: to you).
+	"grants": [
+		{
+			"src": ["autogroup:member"],
+			"dst": ["tag:tsidp"],
+			"app": {
+				"tailscale.com/cap/tsidp": [
+					{
+						"allow_admin_ui": true,
+						"allow_dcr": true,
+					},
+				],
+			},
+		},
+	],
 }
