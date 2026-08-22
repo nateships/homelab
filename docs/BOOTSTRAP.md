@@ -128,11 +128,12 @@ the admin email.
 
 ## 4. Proxmox infra provider and cluster
 
-1. Omni UI → Infrastructure Providers → Create Provider. Copy the key. This is
-   an **infrastructure provider key**, not a service account key. Store it in
-   1Password.
-2. Run the [omni-infra-provider-proxmox](https://github.com/siderolabs/omni-infra-provider-proxmox)
-   container in the same LXC. Point it at Omni and the Proxmox API.
+1. Omni UI → Infrastructure Providers → Create Provider. Copy the key. This
+   is an **infrastructure provider key**, not a service account key. Store
+   it as the password of the `omni-infra-provider` item.
+2. Re-run `homelab-omni-config`. It deploys the
+   [provider container](https://github.com/siderolabs/omni-infra-provider-proxmox)
+   next to Omni, configured from 1Password.
 3. Run `mise install`. It installs `omnictl` at the same version as
    `OMNI_IMG_TAG`. A version mismatch causes obscure gRPC errors. Bump
    mise.toml and omni.env together.

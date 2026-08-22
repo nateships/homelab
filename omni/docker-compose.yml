@@ -37,3 +37,17 @@ services:
       --initial-users=${INITIAL_USER_EMAILS}
       --sqlite-storage-path=/_out/sqlite/omni.db
       ${AUTH}
+
+  omni-infra-provider:
+    container_name: omni-infra-provider
+    image: ghcr.io/siderolabs/omni-infra-provider-proxmox:latest
+    volumes:
+      - ./provider-config.yaml:/config.yaml:ro
+    network_mode: "host"
+    restart: unless-stopped
+    depends_on:
+      - omni
+    command: >
+      --config-file /config.yaml
+      --omni-api-endpoint ${ADVERTISED_API_URL}
+      --omni-service-account-key ${OMNI_INFRA_PROVIDER_KEY}
