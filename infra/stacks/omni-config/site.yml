@@ -121,9 +121,7 @@
     - name: Install the certbot deploy hook (restart Omni on renewal)
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
-        'printf "#!/bin/sh\ncd /etc/omni && docker compose restart omni\n"
-         > /etc/letsencrypt/renewal-hooks/deploy/restart-omni.sh
-         && chmod 755 /etc/letsencrypt/renewal-hooks/deploy/restart-omni.sh'
+        'printf "#!/bin/sh\ncd /etc/omni && docker compose restart omni\n" > /etc/letsencrypt/renewal-hooks/deploy/restart-omni.sh && chmod 755 /etc/letsencrypt/renewal-hooks/deploy/restart-omni.sh'
       changed_when: false
 
     - name: Deploy Omni (compose pull and up)
