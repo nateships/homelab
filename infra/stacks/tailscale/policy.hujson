@@ -26,9 +26,9 @@
 		{"action": "accept", "src": ["*"], "dst": ["*:*"]},
 	],
 
-	// Tailscale SSH: the Ansible stack logs into the PVE host as root,
-	// authenticated by tailnet identity; no SSH keys exist.
+	// Tailscale SSH: the Ansible stack and tailnet members log into the
+	// PVE host as root, authenticated by tailnet identity; no SSH keys.
 	"ssh": [
-		{"action": "accept", "src": ["tag:spacelift"], "dst": ["tag:pve"], "users": ["root"]},
+		{"action": "accept", "src": ["tag:spacelift", "autogroup:member"], "dst": ["tag:pve"], "users": ["root"]},
 	],
 }
