@@ -9,7 +9,8 @@ resource "cloudflare_r2_bucket" "etcd_backups" {
 # Adopt the console-created bucket on first apply.
 import {
   to = cloudflare_r2_bucket.etcd_backups
-  id = "${var.r2_account_id}/${var.r2_bucket}"
+  # Segments: account id, bucket, jurisdiction.
+  id = "${var.r2_account_id}/${var.r2_bucket}/default"
 }
 
 resource "cloudflare_r2_bucket_lifecycle" "etcd_backups" {
