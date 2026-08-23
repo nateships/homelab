@@ -145,9 +145,8 @@ resource "omni_machine_extensions" "all" {
   cluster = omni_cluster.homelab.name
 
   extensions = [
+    # Proxmox guest IP reporting and clean shutdown.
     "siderolabs/qemu-guest-agent",
-    "siderolabs/iscsi-tools",
-    "siderolabs/util-linux-tools",
     # xe drives the iGPU SR-IOV virtual functions (machine class
     # pci_devices). Mainline i915 cannot drive Raptor Lake VFs. Do not
     # add microcode extensions: the PVE host loads microcode.
