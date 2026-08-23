@@ -6,7 +6,9 @@ resource "cloudflare_r2_bucket" "etcd_backups" {
   name       = var.r2_bucket
 }
 
-# Adopt the console-created bucket on first apply.
+# Adopts an existing bucket when the state is fresh; inert otherwise.
+# Keep it: on a disaster-recovery rebuild the bucket survives (it holds
+# the backups) while the state starts empty.
 import {
   to = cloudflare_r2_bucket.etcd_backups
   # Segments: account id, bucket, jurisdiction.
