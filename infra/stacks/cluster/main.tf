@@ -184,7 +184,13 @@ resource "omni_config_patch" "tailscale_authkey" {
     kind: ExtensionServiceConfig
     name: tailscale
     environment:
-      - TS_AUTHKEY=${data.onepassword_item.talos_tailscale_authkey.password}?ephemeral=false&preauthorized=true
+      # Ephemeral: a replaced worker's dead device auto-removes from the
+      # tailnet instead of lingering offline forever (tagged devices
+      # never key-expire). Reboots and upgrades are shorter than the
+      # removal grace period and /var/lib/tailscale persists across
+      # them; a node offline long enough to be removed rejoins on boot
+      # with the never-expiring OAuth secret.
+      - TS_AUTHKEY=${data.onepassword_item.talos_tailscale_authkey.password}?ephemeral=true&preauthorized=true
       - TS_EXTRA_ARGS=--advertise-tags=tag:talos
   EOT
 }
