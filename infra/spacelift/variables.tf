@@ -66,6 +66,16 @@ variable "k8s_vlan_cidr" {
   type        = string
 }
 
+variable "r2_account_id" {
+  description = "Cloudflare account id that holds the R2 etcd-backup bucket"
+  type        = string
+}
+
+variable "r2_bucket" {
+  description = "R2 bucket for Omni etcd backups"
+  type        = string
+}
+
 variable "ssh_public_key" {
   description = "SSH public key for root inside the Omni LXC"
   type        = string

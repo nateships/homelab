@@ -1,0 +1,3 @@
+# Stack manifest: hydrated by the admin stack (infra/spacelift).
+description: Cloudflare DNS records and R2 etcd-backup bucket
+labels: [op]
