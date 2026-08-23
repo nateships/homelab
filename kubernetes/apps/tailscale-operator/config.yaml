@@ -8,15 +8,7 @@ sources:
     chart: tailscale-operator
     # renovate: datasource=helm registryUrl=https://pkgs.tailscale.com/helmcharts depName=tailscale-operator
     targetRevision: 1.102.3
-  # OAuth secret (ESO) and the tsidp egress proxy
+  # OAuth secret (ESO)
   - repoURL: https://github.com/nateships/homelab
     targetRevision: main
     path: kubernetes/apps/tailscale-operator/config
-# The operator rewrites the egress Service's externalName to its proxy;
-# git keeps the placeholder. Ignore it or selfHeal fights the operator.
-ignoreDifferences:
-  - kind: Service
-    name: tsidp
-    namespace: tailscale
-    jsonPointers:
-      - /spec/externalName

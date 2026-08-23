@@ -56,29 +56,6 @@
       changed_when: "'created' in repo_cred.stdout or 'configured' in repo_cred.stdout"
       no_log: true
 
-    # In-cluster clients (ArgoCD OIDC) must resolve the tsidp issuer FQDN
-    # to the tailscale-operator egress proxy. The FQDN carries the tailnet
-    # name, which stays out of git, so the rewrite renders here from
-    # 1Password. Talos upgrades can reset the coredns ConfigMap; the
-    # cluster -> k8s-bootstrap stack dependency re-runs this afterward.
-    - name: Add the tsidp CoreDNS rewrite
-      ansible.builtin.shell: |
-        set -eu
-        tailnet="$(op read op://homelab/tailscale-tsidp/tailnet-dns)"
-        target=tsidp.tailscale.svc.cluster.local
-        kubectl -n kube-system get configmap coredns -o jsonpath='{.data.Corefile}' > /tmp/Corefile
-        if grep -qE "^ +name exact tsidp\.${tailnet} ${target}\$" /tmp/Corefile; then
-          echo unchanged
-        else
-          sed -e "/rewrite stop { name exact tsidp\..* ${target} answer auto }/d" /tmp/Corefile \
-            | sed -e "/^ *rewrite stop {\$/{N;N;N;/${target}/d;}" > /tmp/Corefile.clean
-          awk -v n="tsidp.${tailnet}" -v t="$target" '{print} /^\.:53 \{/ {print "    rewrite stop {"; print "        name exact " n " " t; print "        answer auto"; print "    }"}' /tmp/Corefile.clean > /tmp/Corefile.new
-          kubectl -n kube-system create configmap coredns --from-file=Corefile=/tmp/Corefile.new --dry-run=client -o yaml | kubectl apply --server-side --force-conflicts -f -
-          kubectl -n kube-system rollout restart deployment coredns
-        fi
-      register: coredns
-      changed_when: "'unchanged' not in coredns.stdout"
-
     - name: Create the external-secrets namespace
       ansible.builtin.shell: >-
         kubectl create namespace external-secrets --dry-run=client -o yaml
