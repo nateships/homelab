@@ -35,3 +35,5 @@ Spacelift TF_VAR environment variables and never committed.
 - Spacelift stack environment (TF_VAR_*): set by the admin stack.
 - Tailscale admin console: OAuth clients (scopes and tags are fixed at
   creation and cannot be expressed in the policy file).
+- Proxmox console: the "vGPU" PCI resource mapping (iGPU SR-IOV virtual
+  functions) that the worker machine class references.

@@ -49,6 +49,15 @@
       "matchStrings": ["argoproj/argo-cd/(?<currentValue>v[\\d.]+)/manifests/install\\.yaml"],
       "depNameTemplate": "argoproj/argo-cd",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      // Remote kustomize bases pinned by release tag (?ref=vX.Y.Z) in the
+      // app config dirs. Same URL problem as above: the annotation
+      // regex's `(?:=|:)` anchor would stop at "https:".
+      "customType": "regex",
+      "managerFilePatterns": ["/^kubernetes/apps/.*/kustomization\\.yaml$/"],
+      "matchStrings": ["github\\.com/(?<depName>[^/\\s]+/[^/\\s]+)/[^\\s]*\\?ref=(?<currentValue>v[\\d.]+)"],
+      "datasourceTemplate": "github-releases"
     }
   ],
   "packageRules": [

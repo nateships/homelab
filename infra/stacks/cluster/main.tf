@@ -165,6 +165,11 @@ resource "omni_machine_extensions" "all" {
     # node routes 100.64.0.0/10 via tailscaled. No CoreDNS rewrite needed,
     # so the Talos-managed coredns manifest stays in sync in Omni.
     "siderolabs/tailscale",
+    # i915 firmware + module for the iGPU SR-IOV virtual functions the
+    # workers receive from Proxmox (machine class pci_devices). Loads
+    # nothing on nodes without the hardware. Guest microcode extensions
+    # are pointless in VMs: the PVE host loads microcode.
+    "siderolabs/i915",
   ]
 }
 

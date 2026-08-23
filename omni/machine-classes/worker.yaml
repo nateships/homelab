@@ -25,3 +25,14 @@ spec:
       disk_iothread: true
       disk_cache: none
       disk_aio: io_uring
+      # iGPU SR-IOV: each worker gets one virtual function from the
+      # "vGPU" Proxmox resource mapping (7 VFs on the UHD 770; the host
+      # keeps the physical function). q35 gives native PCIe; ballooning
+      # is off because passthrough pins guest memory anyway.
+      # site-specific: the resource mapping name is created by hand in
+      # the Proxmox console (docs/SITE.md)
+      machine_type: q35
+      balloon: false
+      pci_devices:
+        - mapping: vGPU
+          pcie: true
