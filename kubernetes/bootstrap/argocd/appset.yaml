@@ -15,6 +15,16 @@
 # hand in the UI or CLI. Deleting a config file still deletes the whole
 # Application; preserveResourcesOnDeletion keeps an accidental deletion
 # of this ApplicationSet from cascading into every app's resources.
+#
+# MIGRATION WARNING: the generator reads config.yaml from git instantly,
+# but this template only updates when the argocd app syncs it. A change
+# that touches the templatePatch AND the config.yaml schema together can
+# deadlock the self-management loop (old template + new configs =
+# invalid argocd Application = nothing left to deliver the new
+# template). After merging such a change, run once:
+#   kubectl apply --server-side -n argocd -f kubernetes/bootstrap/argocd/appset.yaml
+# and force a reconcile with the argocd.argoproj.io/application-set-refresh
+# annotation if apps stay stale.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
