@@ -165,15 +165,12 @@ resource "omni_machine_extensions" "all" {
     # node routes 100.64.0.0/10 via tailscaled. No CoreDNS rewrite needed,
     # so the Talos-managed coredns manifest stays in sync in Omni.
     "siderolabs/tailscale",
-    # GPU drivers for the iGPU SR-IOV virtual functions the workers
-    # receive from Proxmox (machine class pci_devices). Mainline i915
-    # cannot drive Raptor Lake VFs (MMIO dead, probe -5); kernel 6.18's
-    # xe driver has experimental VF support for the Alder Lake family,
-    # so the machine class kernelargs steer the VF device to xe and
-    # away from i915. i915 stays for a possible PF-passthrough fallback.
-    # Neither loads on nodes without the hardware. Guest microcode
-    # extensions are pointless in VMs: the PVE host loads microcode.
-    "siderolabs/i915",
+    # xe drives the iGPU SR-IOV virtual functions the workers receive
+    # from Proxmox (machine class pci_devices); verified in VF mode on
+    # 6.18. Mainline i915 cannot drive Raptor Lake VFs, so there is no
+    # i915 extension. Loads nothing on nodes without the hardware.
+    # Guest microcode extensions are pointless in VMs: the PVE host
+    # loads microcode.
     "siderolabs/xe",
   ]
 }
