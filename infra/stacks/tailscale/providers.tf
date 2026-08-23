@@ -5,7 +5,8 @@ provider "onepassword" {}
 # Tailscale API credentials come from the "tailscale-terraform" 1Password
 # item: username = OAuth client ID, password = OAuth client secret.
 # This is a separate OAuth client from the runner's auth-key one; it needs
-# the policy-file write scope.
+# the policy-file write scope, plus the auth-keys write scope with
+# tag:talos allowed (mints the node join key).
 provider "tailscale" {
   oauth_client_id     = data.onepassword_item.oauth.username
   oauth_client_secret = data.onepassword_item.oauth.password
