@@ -1,0 +1,23 @@
+# Two replicas on different nodes: the workload proxy keeps a ready
+# backend during node drains and rolls. The env var tells the server
+# how many replicas share informer load.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+spec:
+  replicas: 2
+  template:
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: argocd-server
+      containers:
+        - name: argocd-server
+          env:
+            - name: ARGOCD_API_SERVER_REPLICAS
+              value: "2"
