@@ -10,9 +10,14 @@
     # stack; the same value feeds infra/stacks/omni. Default 200.
     ct_id: "{{ lookup('env', 'TF_VAR_omni_ct_id') | default('200', true) }}"
     repo_root: "{{ playbook_dir }}/../../.."
-    omni_domain: "{{ lookup('pipe', 'op read op://homelab/omni/domain') }}"
-    admin_email: "{{ lookup('pipe', 'op read op://homelab/omni/admin-email') }}"
   tasks:
+    # set_fact evaluates each lookup once; a lookup in vars runs again
+    # on every reference (one op API call each time).
+    - name: Read the Omni identity from 1Password
+      ansible.builtin.set_fact:
+        omni_domain: "{{ lookup('pipe', 'op read op://homelab/omni/domain') }}"
+        admin_email: "{{ lookup('pipe', 'op read op://homelab/omni/admin-email') }}"
+      check_mode: false
     - name: Pass /dev/net/tun into the LXC
       ansible.builtin.lineinfile:
         path: "/etc/pve/lxc/{{ ct_id }}.conf"
@@ -42,12 +47,21 @@
       changed_when: false
       check_mode: false
 
+    - name: Check for the required packages in the LXC
+      ansible.builtin.command: >-
+        pct exec {{ ct_id }} -- sh -c
+        'command -v curl && command -v certbot && command -v gpg
+        && test -e /usr/lib/python3/dist-packages/certbot_dns_cloudflare'
+      register: pkgs
+      failed_when: false
+      changed_when: false
+      check_mode: false
+
     - name: Install packages in the LXC
       ansible.builtin.command: >-
         pct exec {{ ct_id }} -- sh -c
         'apt-get update -q && apt-get install -qy curl ca-certificates certbot python3-certbot-dns-cloudflare gpg'
-      register: apt_result
-      changed_when: "'0 newly installed' not in apt_result.stdout"
+      when: pkgs.rc != 0
 
     - name: Check for Docker in the LXC
       ansible.builtin.command: "pct exec {{ ct_id }} -- sh -c 'command -v docker'"
