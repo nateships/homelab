@@ -17,12 +17,10 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | Value | Where | Meaning |
 |---|---|---|
 | `argocd.omni.nate.cx` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI URL via the Omni workload proxy |
-| `tsidp.tail34eda.ts.net` -> `100.84.16.7` | `kubernetes/bootstrap/argocd/argocd-server-hostaliases.yaml` | tsidp OIDC issuer FQDN and its tailnet IP (the FQDN is public through Certificate Transparency logs) |
 
-These two stay in git because ArgoCD renders only committed manifests:
-its secret indirection covers `oidc.config` only, and `hostAliases`
-cannot reference a Secret. Everything terraform-applied moved to
-TF_VAR_* instead (Omni domain, k8s VLAN CIDR).
+This value stays in git because ArgoCD renders only committed
+manifests. Everything terraform-applied arrives as TF_VAR_* instead
+(Omni domain, k8s VLAN CIDR).
 
 ## 2. Values in `.example` files
 
