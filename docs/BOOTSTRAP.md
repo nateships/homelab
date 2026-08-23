@@ -32,6 +32,8 @@ Do the stages in order. Each stage needs the stage before it.
      cluster stack passes it as `TS_AUTHKEY` to the nodes' tailscale
      extension; OAuth secrets never expire. The tag must exist in the
      tailnet policy first (the tailscale stack applies it).
+   - `datadog`: field `api-key` (Organization Settings -> API Keys);
+     ESO feeds it to the Datadog agents
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
    - `cloudflare-r2`: see stage 4 (etcd backups)
    - `github-argocd`: fields `app-id` and `installation-id` of a GitHub App.

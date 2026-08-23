@@ -1,6 +1,7 @@
 # Generates one Application per kubernetes/apps/<name>/config.yaml.
 # A config file carries only what differs per app (name, namespace,
-# sources, optional ignoreDifferences, optional autosync: false);
+# sources, optional ignoreDifferences, optional autosync: false,
+# optional namespaceLabels for e.g. a privileged PSA namespace);
 # this template owns the shared sync policy. Prune stays off: resources
 # removed from git linger until pruned by hand in the UI or CLI.
 # Deleting a config file still deletes the whole Application.
@@ -54,7 +55,15 @@ spec:
       ignoreDifferences:
     {{- .ignoreDifferences | toYaml | nindent 4 }}
     {{- end }}
-    {{- if and (hasKey . "autosync") (not .autosync) }}
+    {{- if or (hasKey . "namespaceLabels") (and (hasKey . "autosync") (not .autosync)) }}
       syncPolicy:
+    {{- if and (hasKey . "autosync") (not .autosync) }}
         automated: null
+    {{- end }}
+    {{- if hasKey . "namespaceLabels" }}
+        # Labels for the namespace CreateNamespace makes (PSA level etc.)
+        managedNamespaceMetadata:
+          labels:
+    {{- .namespaceLabels | toYaml | nindent 10 }}
+    {{- end }}
     {{- end }}
