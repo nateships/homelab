@@ -26,9 +26,9 @@ provider "onepassword" {}
 
 provider "omni" {
   # Same FQDN as op://homelab/omni/domain (the playbooks read that field);
-  # the provider needs a literal at plan time.
-  # site-specific: Omni domain (docs/SITE.md)
-  endpoint            = "https://omni.nate.cx"
+  # the provider needs the value at plan time, so it arrives as a TF_VAR
+  # instead of a 1Password read.
+  endpoint            = "https://${var.omni_domain}"
   service_account_key = data.onepassword_item.omni.password
 }
 

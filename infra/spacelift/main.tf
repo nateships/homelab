@@ -126,6 +126,8 @@ locals {
     omni_ct_ip      = var.omni_ct_ip
     omni_ct_gateway = var.omni_ct_gateway
     omni_ct_vlan    = var.omni_ct_vlan == null ? null : tostring(var.omni_ct_vlan)
+    omni_domain     = var.omni_domain
+    k8s_vlan_cidr   = var.k8s_vlan_cidr
     ssh_public_key  = var.ssh_public_key
   }
 }
