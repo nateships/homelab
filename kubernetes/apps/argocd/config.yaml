@@ -4,11 +4,7 @@
 name: argocd
 namespace: argocd
 sources:
-  - repoURL: https://github.com/nateships/homelab
-    targetRevision: main
-    path: kubernetes/bootstrap/argocd
+  - path: kubernetes/bootstrap/argocd
   # OIDC client secret via ESO (needs the ESO CRDs, so it cannot live in
   # the bootstrap kustomization that k8s-bootstrap applies standalone)
-  - repoURL: https://github.com/nateships/homelab
-    targetRevision: main
-    path: kubernetes/apps/argocd/config
+  - path: kubernetes/apps/argocd/config

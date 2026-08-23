@@ -3,12 +3,14 @@
 # delivers (see config/).
 name: tailscale-operator
 namespace: tailscale
+# Tailscale proxy pods (egress/ingress) run privileged; Talos enforces
+# baseline PSA, so the namespace opts up.
+namespaceLabels:
+  pod-security.kubernetes.io/enforce: privileged
 sources:
   - repoURL: https://pkgs.tailscale.com/helmcharts
     chart: tailscale-operator
     # renovate: datasource=helm registryUrl=https://pkgs.tailscale.com/helmcharts depName=tailscale-operator
     targetRevision: 1.102.3
   # OAuth secret (ESO)
-  - repoURL: https://github.com/nateships/homelab
-    targetRevision: main
-    path: kubernetes/apps/tailscale-operator/config
+  - path: kubernetes/apps/tailscale-operator/config

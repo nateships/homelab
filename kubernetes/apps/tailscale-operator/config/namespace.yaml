@@ -1,8 +1,0 @@
-# Talos enforces the baseline Pod Security level; Tailscale proxy pods
-# (egress/ingress) run privileged, so this namespace opts up.
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: tailscale
-  labels:
-    pod-security.kubernetes.io/enforce: privileged
