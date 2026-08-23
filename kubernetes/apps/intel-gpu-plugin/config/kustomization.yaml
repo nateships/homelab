@@ -1,6 +1,0 @@
-# Upstream GPU plugin DaemonSet, pinned by release tag.
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  # renovate: datasource=github-releases depName=intel/intel-device-plugins-for-kubernetes
-  - https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin?ref=v0.36.0
