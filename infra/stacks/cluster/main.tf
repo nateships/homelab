@@ -17,6 +17,8 @@ data "onepassword_item" "omni" {
 provider "onepassword" {}
 
 provider "omni" {
+  # Same FQDN as op://homelab/omni/domain (the playbooks read that field);
+  # the provider needs a literal at plan time.
   endpoint            = "https://omni.nate.cx"
   service_account_key = data.onepassword_item.omni.password
 }

@@ -6,7 +6,9 @@
   hosts: pve1
   gather_facts: false
   vars:
-    ct_id: 200 # matches the omni_ct_id default in infra/stacks/omni
+    # Single source: the admin stack shares TF_VAR_omni_ct_id with every
+    # stack; the same value feeds infra/stacks/omni. Default 200.
+    ct_id: "{{ lookup('env', 'TF_VAR_omni_ct_id') | default('200', true) }}"
     repo_root: "{{ playbook_dir }}/../../.."
     omni_domain: "{{ lookup('pipe', 'op read op://homelab/omni/domain') }}"
     admin_email: "{{ lookup('pipe', 'op read op://homelab/omni/admin-email') }}"
@@ -97,43 +99,47 @@
         'mkdir -p /etc/omni/sqlite /etc/etcd && chown 1000:1000 /etc/etcd && chmod 700 /etc/etcd'
       changed_when: false
 
-    - name: Stage secrets and config on the PVE host
-      ansible.builtin.copy:
-        dest: "/tmp/omni-stage-{{ item.name }}"
-        content: "{{ item.content }}"
-        mode: "0600"
-      loop:
-        - name: cloudflare.ini
-          content: |
-            dns_cloudflare_api_token = {{ lookup('pipe', 'op read op://homelab/cloudflare/dns-api-token') }}
-        - name: omni.asc
-          content: "{{ lookup('pipe', 'op document get omni-gpg --vault homelab') }}"
-        - name: omni.env
-          content: "{{ lookup('pipe', 'op inject -i ' ~ repo_root ~ '/omni/omni.env.example') }}"
-        - name: docker-compose.yml
-          content: "{{ lookup('file', repo_root ~ '/omni/docker-compose.yml') }}"
-        - name: provider-config.yaml
-          content: "{{ lookup('pipe', 'op inject -i ' ~ repo_root ~ '/omni/provider-config.yaml') }}"
-      loop_control:
-        label: "{{ item.name }}"
-      no_log: true
+    # The `always` block removes the staged plaintext secrets even when a
+    # push fails; they must not persist on the PVE host.
+    - name: Stage and push the secret files
+      block:
+        - name: Stage secrets and config on the PVE host
+          ansible.builtin.copy:
+            dest: "/tmp/omni-stage-{{ item.name }}"
+            content: "{{ item.content }}"
+            mode: "0600"
+          loop:
+            - name: cloudflare.ini
+              content: |
+                dns_cloudflare_api_token = {{ lookup('pipe', 'op read op://homelab/cloudflare/dns-api-token') }}
+            - name: omni.asc
+              content: "{{ lookup('pipe', 'op document get omni-gpg --vault homelab') }}"
+            - name: omni.env
+              content: "{{ lookup('pipe', 'op inject -i ' ~ repo_root ~ '/omni/omni.env.example') }}"
+            - name: docker-compose.yml
+              content: "{{ lookup('file', repo_root ~ '/omni/docker-compose.yml') }}"
+            - name: provider-config.yaml
+              content: "{{ lookup('pipe', 'op inject -i ' ~ repo_root ~ '/omni/provider-config.yaml') }}"
+          loop_control:
+            label: "{{ item.name }}"
+          no_log: true
 
-    - name: Push the files into the LXC
-      ansible.builtin.command: >-
-        pct push {{ ct_id }} /tmp/omni-stage-{{ item.src }} {{ item.dest }}
-        --perms {{ item.perms }}
-      loop:
-        - { src: cloudflare.ini, dest: /root/cloudflare.ini, perms: "600" }
-        - { src: omni.asc, dest: /etc/omni/omni.asc, perms: "600" }
-        - { src: omni.env, dest: /etc/omni/omni.env, perms: "600" }
-        - { src: docker-compose.yml, dest: /etc/omni/docker-compose.yml, perms: "644" }
-        - { src: provider-config.yaml, dest: /etc/omni/provider-config.yaml, perms: "600" }
-
-    - name: Remove the staged files from the PVE host
-      ansible.builtin.file:
-        path: "/tmp/omni-stage-{{ item }}"
-        state: absent
-      loop: [cloudflare.ini, omni.asc, omni.env, docker-compose.yml, provider-config.yaml]
+        - name: Push the files into the LXC
+          ansible.builtin.command: >-
+            pct push {{ ct_id }} /tmp/omni-stage-{{ item.src }} {{ item.dest }}
+            --perms {{ item.perms }}
+          loop:
+            - { src: cloudflare.ini, dest: /root/cloudflare.ini, perms: "600" }
+            - { src: omni.asc, dest: /etc/omni/omni.asc, perms: "600" }
+            - { src: omni.env, dest: /etc/omni/omni.env, perms: "600" }
+            - { src: docker-compose.yml, dest: /etc/omni/docker-compose.yml, perms: "644" }
+            - { src: provider-config.yaml, dest: /etc/omni/provider-config.yaml, perms: "600" }
+      always:
+        - name: Remove the staged files from the PVE host
+          ansible.builtin.file:
+            path: "/tmp/omni-stage-{{ item }}"
+            state: absent
+          loop: [cloudflare.ini, omni.asc, omni.env, docker-compose.yml, provider-config.yaml]
 
     # Wildcard included: the workload service proxy serves apps on
     # <name>.{{ omni_domain }}. --keep-until-expiring makes this a no-op

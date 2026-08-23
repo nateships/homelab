@@ -5,6 +5,7 @@
 proxmox_endpoint = "https://pve.tailnet-name.ts.net:8006"
 
 proxmox_node    = "pve"
+omni_ct_id      = 200 # optional; default 200
 omni_ct_ip      = "192.168.10.15/24"
 omni_ct_gateway = "192.168.10.1"
 omni_ct_vlan    = 10

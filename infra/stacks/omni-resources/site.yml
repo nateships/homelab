@@ -6,12 +6,15 @@
   hosts: localhost
   connection: local
   gather_facts: false
+  # One omnictl auth setup for every task; the endpoint comes from the
+  # same 1Password field that omni-config renders into omni.env.
+  environment:
+    OMNI_ENDPOINT: "https://{{ lookup('pipe', 'op read op://homelab/omni/domain') }}"
+    OMNI_SERVICE_ACCOUNT_KEY: "{{ lookup('pipe', 'op read op://homelab/omni-service-account/password') }}"
   tasks:
     - name: Apply the machine classes
       ansible.builtin.shell: |
         set -eu
-        export OMNI_ENDPOINT=https://omni.nate.cx
-        export OMNI_SERVICE_ACCOUNT_KEY="$(op read op://homelab/omni-service-account/password)"
         omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/control-plane.yaml"
         omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/worker.yaml"
       changed_when: true
@@ -21,8 +24,6 @@
     - name: Apply the etcd backup S3 configuration
       ansible.builtin.shell: |
         set -eu
-        export OMNI_ENDPOINT=https://omni.nate.cx
-        export OMNI_SERVICE_ACCOUNT_KEY="$(op read op://homelab/omni-service-account/password)"
         tmp=$(mktemp)
         trap 'rm -f "$tmp"' EXIT
         op inject -i "{{ playbook_dir }}/../../../omni/etcd-backup-s3.yaml" -o "$tmp" -f

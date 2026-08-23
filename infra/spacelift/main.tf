@@ -8,7 +8,8 @@
 #     -> opt-in per stack via `labels: [op]` in its stack.yaml
 
 # ------------------------------------------------------------------------------
-# Secrets from 1Password (expects an item "proxmox" with an "api-token" field)
+# Secrets from 1Password (expects an item "proxmox" with the API token in
+# its password field)
 # ------------------------------------------------------------------------------
 data "onepassword_vault" "homelab" {
   name = var.op_vault
@@ -53,11 +54,12 @@ resource "spacelift_context" "homelab" {
   # Auto-attaches to every stack labeled "homelab"; no attachment resources.
   labels = ["autoattach:homelab"]
 
-  # Spacelift's hosted workers have no route to the LAN. These hooks join the
-  # run to the tailnet: userspace tailscaled (no root, no TUN device) exposing
-  # a SOCKS5 proxy and an HTTP proxy that the ALL_PROXY/HTTPS_PROXY env vars
-  # (below) point clients at. Proxmox is reached at its ts.net address. The
-  # binaries come from the custom runner image (runner/Dockerfile).
+  # Spacelift's hosted workers have no route to the LAN. These hooks join
+  # the run to the tailnet. Userspace tailscaled runs without root and
+  # without a TUN device. It serves a SOCKS5 proxy and an HTTP proxy; the
+  # ALL_PROXY/HTTPS_PROXY env vars (below) point clients at them. Clients
+  # reach Proxmox at its ts.net address. The binaries come from the custom
+  # runner image (runner/Dockerfile).
   # Each phase can run in a fresh container, so every phase starts the
   # daemon. Spacelift joins hooks with &&, so the backgrounded daemon needs
   # a subshell; a trailing bare & would produce "& &&" and a syntax error.
@@ -71,7 +73,8 @@ resource "spacelift_context" "homelab" {
 locals {
   tailscale_up = [
     "(tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --outbound-http-proxy-listen=localhost:1056 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &)",
-    "sleep 2",
+    # Wait for the daemon socket; a fixed sleep flakes on slow workers.
+    "timeout 15 sh -c 'until [ -S /tmp/tailscaled.sock ]; do sleep 0.2; done'",
     "tailscale --socket=/tmp/tailscaled.sock up --auth-key=\"$${TAILSCALE_AUTH_KEY}?ephemeral=true&preauthorized=true\" --advertise-tags=tag:spacelift --hostname=spacelift-run --accept-routes",
   ]
 }
@@ -119,6 +122,7 @@ resource "spacelift_environment_variable" "proxmox_api_token" {
 locals {
   shared_tfvars = {
     proxmox_node    = var.proxmox_node
+    omni_ct_id      = tostring(var.omni_ct_id)
     omni_ct_ip      = var.omni_ct_ip
     omni_ct_gateway = var.omni_ct_gateway
     omni_ct_vlan    = var.omni_ct_vlan == null ? null : tostring(var.omni_ct_vlan)
@@ -151,8 +155,8 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 #   env: {NAME: value}        # plain env vars set on this stack only
 #   project_globs: [omni/**]  # extra paths whose changes trigger this stack
 # Adding a stack = new directory + stack.yaml + push. Note: the admin stack
-# must have project glob "infra/stacks/**/stack.yaml" set so manifest
-# changes trigger it.
+# must have project globs "infra/stacks/**/stack.yaml" and "mise.toml" set,
+# so manifest changes and opentofu bumps trigger it.
 # ------------------------------------------------------------------------------
 locals {
   stacks_dir      = "${path.module}/../stacks"

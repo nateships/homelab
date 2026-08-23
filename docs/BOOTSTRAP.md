@@ -9,8 +9,12 @@ Do the stages in order. Each stage needs the stage before it.
    read access to the `homelab` vault only. Save the `ops_...` token in your
    Private vault.
 3. Create these items in the `homelab` vault:
-   - `omni`: fields `account-uuid`, `admin-email`
-   - `proxmox`: password field = the API token from stage 1
+   - `omni`: fields `account-uuid`, `admin-email` (stage 3 adds `domain`
+     and `lxc-ip`)
+   - `proxmox`: password field = the API token from stage 1. Three more
+     fields feed the infra provider (stage 4): `lan-url` (the LAN API URL,
+     for example `https://<pve-lan-ip>:8006`), `token-id`
+     (`root@pam!spacelift`), `token-secret` (the token UUID)
    - `tailscale-spacelift`: password field = the Tailscale OAuth client
      secret from stage 1
    - `tailscale-terraform`: username = OAuth client ID, password = secret;
@@ -32,10 +36,10 @@ Do the stages in order. Each stage needs the stage before it.
      private key (PEM) as a document named `github-argocd-key`. ArgoCD
      reads the private repo with it. TODO(public): remove the App, both
      1Password entries, and the bootstrap task that consumes them.
-4. Copy the service account token to three places:
-   - GitHub repo secret `OP_SERVICE_ACCOUNT_TOKEN`
-   - The Spacelift `bootstrap` context (stage 2)
-   - One Kubernetes secret (stage 5)
+4. Copy the service account token to the Spacelift `bootstrap` context
+   (stage 2). That is the only manual copy: the `homelab-k8s-bootstrap`
+   stack creates the in-cluster secret from its run environment (stage 5),
+   and CI needs no token.
 
 > Family-plan service accounts have low API rate limits. Keep ESO
 > `refreshInterval` at `1h` on each ExternalSecret.
@@ -86,12 +90,11 @@ Contexts attach through `autoattach:` labels, not clicks.
    builds it on push; after the first build, set the ghcr package
    visibility to public so Spacelift can pull it.
    Set one `TF_VAR_*` env for each input in
-   `infra/spacelift/terraform.tfvars.example`: `proxmox_endpoint`,
-   `proxmox_node`, `omni_ct_ip`, `omni_ct_gateway`, `omni_ct_vlan`
-   (optional), `ssh_public_key`.
-3. Behavior → project globs: add `infra/stacks/**/stack.yaml`. Manifest
-   changes then trigger the admin stack. Other files in a stack dir trigger
-   only that stack.
+   `infra/spacelift/terraform.tfvars.example` (that file is the full list).
+3. Behavior → project globs: add `infra/stacks/**/stack.yaml` and
+   `mise.toml`. Manifest changes and opentofu bumps (the stacks' tofu
+   version comes from mise.toml) then trigger the admin stack. Other files
+   in a stack dir trigger only that stack.
 4. Trigger a run. The run creates the `homelab` space, the `homelab` context
    (Proxmox and Tailscale credentials, run hooks, label `autoattach:homelab`),
    and the `homelab-omni` stack (label `homelab`).
@@ -108,9 +111,10 @@ outside 1Password. Re-run the stack to deploy config or image changes
 One-time preparation:
 
 1. Enable Tailscale SSH on the PVE host: `tailscale set --ssh`
-2. Fill the `omni` item: `domain` (the Omni FQDN) and `admin-email`.
-   Point two DNS A records at the LXC IP: the domain itself and a
-   wildcard (`*.` prefix) for the workload service proxy. Proxy off.
+2. Fill the `omni` item: `domain` (the Omni FQDN), `admin-email`, and
+   `lxc-ip` (the LXC's static IP, no CIDR suffix; it must match
+   `omni_ct_ip`). Point two DNS A records at the LXC IP: the domain itself
+   and a wildcard (`*.` prefix) for the workload service proxy. Proxy off.
 3. Fill `cloudflare/dns-api-token` (Zone:DNS:Edit) for the certbot
    DNS challenge.
 4. Generate the etcd encryption key locally and store it in 1Password:

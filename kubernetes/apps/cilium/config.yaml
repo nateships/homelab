@@ -1,5 +1,6 @@
 # ArgoCD adopts the Cilium that the one-time Omni bootstrap manifest
-# installed. Keep the values in sync with scripts/render-cilium-bootstrap.sh.
+# installed. The values live once, in values.yaml, shared with
+# scripts/render-cilium-bootstrap.sh.
 name: cilium
 namespace: kube-system
 sources:
@@ -8,36 +9,8 @@ sources:
     # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
     targetRevision: 1.18.1
     helm:
-      valuesObject:
-        ipam:
-          mode: kubernetes
-        kubeProxyReplacement: true
-        # Off until enabled properly (certs via cronJob method, not
-        # render-time generation, which churns secrets every sync)
-        hubble:
-          enabled: false
-        # Talos-specific settings
-        k8sServiceHost: localhost
-        k8sServicePort: 7445
-        securityContext:
-          capabilities:
-            ciliumAgent:
-              - CHOWN
-              - KILL
-              - NET_ADMIN
-              - NET_RAW
-              - IPC_LOCK
-              - SYS_ADMIN
-              - SYS_RESOURCE
-              - DAC_OVERRIDE
-              - FOWNER
-              - SETGID
-              - SETUID
-            cleanCiliumState:
-              - NET_ADMIN
-              - SYS_ADMIN
-              - SYS_RESOURCE
-        cgroup:
-          autoMount:
-            enabled: false
-          hostRoot: /sys/fs/cgroup
+      valueFiles:
+        - $values/kubernetes/apps/cilium/values.yaml
+  - repoURL: https://github.com/nateships/homelab
+    targetRevision: main
+    ref: values

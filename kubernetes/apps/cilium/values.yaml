@@ -1,0 +1,36 @@
+# Single source for the Cilium values. Two consumers:
+# - scripts/render-cilium-bootstrap.sh renders the one-time bootstrap
+#   manifest (infra/stacks/cluster) from it.
+# - The cilium Application reads it via valueFiles (config.yaml).
+ipam:
+  mode: kubernetes
+kubeProxyReplacement: true
+# Off until enabled properly (certs via cronJob method, not
+# render-time generation, which churns secrets every sync)
+hubble:
+  enabled: false
+# Talos-specific settings
+k8sServiceHost: localhost
+k8sServicePort: 7445
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup

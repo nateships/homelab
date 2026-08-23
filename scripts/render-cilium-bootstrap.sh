@@ -1,27 +1,24 @@
 #!/bin/sh
 # Renders the Cilium bootstrap manifest that Omni applies one time at
 # cluster bootstrap (infra/stacks/cluster). ArgoCD adopts Cilium afterward
-# (kubernetes/apps/cilium) and owns upgrades; keep the version and values
-# here in step with that Application.
+# (kubernetes/apps/cilium) and owns upgrades. The values come from the same
+# values.yaml the Application reads; keep the version in step with its
+# targetRevision (Renovate groups the two pins).
 set -eu
 
 # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
 VERSION=1.18.1
 OUT="$(dirname "$0")/../infra/stacks/cluster/manifests/cilium-bootstrap.yaml"
+VALUES="$(dirname "$0")/../kubernetes/apps/cilium/values.yaml"
 
+# The trailing-space trim matches the trailing-whitespace prek hook; the
+# CI diff check compares this output to the hook-cleaned committed file.
 helm template cilium cilium \
   --repo https://helm.cilium.io \
   --version "$VERSION" \
   --namespace kube-system \
-  --set ipam.mode=kubernetes \
-  --set kubeProxyReplacement=true \
-  --set k8sServiceHost=localhost \
-  --set k8sServicePort=7445 \
-  --set 'securityContext.capabilities.ciliumAgent={CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}' \
-  --set 'securityContext.capabilities.cleanCiliumState={NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}' \
-  --set hubble.enabled=false \
-  --set cgroup.autoMount.enabled=false \
-  --set cgroup.hostRoot=/sys/fs/cgroup \
+  -f "$VALUES" \
+  | sed -e 's/[[:space:]]*$//' \
   > "$OUT"
 
 echo "rendered $OUT"

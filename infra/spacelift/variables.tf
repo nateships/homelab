@@ -34,6 +34,12 @@ variable "proxmox_node" {
   type        = string
 }
 
+variable "omni_ct_id" {
+  description = "VMID for the Omni LXC; also read by the omni-config playbook"
+  type        = number
+  default     = 200
+}
+
 variable "omni_ct_ip" {
   description = "Static IP/CIDR for the Omni LXC, e.g. 192.168.10.15/24"
   type        = string
