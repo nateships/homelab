@@ -56,6 +56,16 @@ variable "omni_ct_vlan" {
   default     = null
 }
 
+variable "omni_domain" {
+  description = "Bare Omni domain, e.g. omni.example.com; also the workload-proxy suffix"
+  type        = string
+}
+
+variable "k8s_vlan_cidr" {
+  description = "k8s VLAN CIDR the PVE host advertises to the tailnet, e.g. 10.0.101.0/24"
+  type        = string
+}
+
 variable "ssh_public_key" {
   description = "SSH public key for root inside the Omni LXC"
   type        = string
