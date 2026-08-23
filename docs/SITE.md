@@ -39,3 +39,5 @@ Spacelift TF_VAR environment variables and never committed.
   is the full list (includes `omni_domain` and `k8s_vlan_cidr`).
 - Tailscale admin console: OAuth clients (scopes and tags are fixed at
   creation and cannot be expressed in the policy file).
+- Proxmox console: the "vGPU" PCI resource mapping (iGPU SR-IOV virtual
+  functions) that the worker machine class references.
