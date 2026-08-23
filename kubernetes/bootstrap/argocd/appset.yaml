@@ -1,7 +1,9 @@
 # Generates one Application per kubernetes/apps/<name>/config.yaml.
 # A config file carries only what differs per app (name, namespace,
-# sources); this template owns the shared sync policy. Deleting a
-# config file deletes the Application and its resources.
+# sources, optional ignoreDifferences, optional autosync: false);
+# this template owns the shared sync policy. Prune stays off: resources
+# removed from git linger until pruned by hand in the UI or CLI.
+# Deleting a config file still deletes the whole Application.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -26,7 +28,7 @@ spec:
         namespace: "{{ .namespace }}"
       syncPolicy:
         automated:
-          prune: true
+          prune: false
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
@@ -51,4 +53,8 @@ spec:
     {{- if hasKey . "ignoreDifferences" }}
       ignoreDifferences:
     {{- .ignoreDifferences | toYaml | nindent 4 }}
+    {{- end }}
+    {{- if and (hasKey . "autosync") (not .autosync) }}
+      syncPolicy:
+        automated: null
     {{- end }}
