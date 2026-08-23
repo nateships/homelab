@@ -12,6 +12,7 @@ resources:
 
 patches:
   - path: argocd-server-expose.yaml
+  - path: argocd-server-replicas.yaml
   - path: argocd-cmd-params.yaml
   - path: argocd-cm-oidc.yaml
   - path: argocd-cm-kustomize.yaml
