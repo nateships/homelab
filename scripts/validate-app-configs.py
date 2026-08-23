@@ -7,6 +7,7 @@ misspelled ones. Fail the PR instead.
 """
 
 import glob
+import os
 import sys
 
 import yaml
@@ -52,6 +53,13 @@ for path in files:
         err(path, f"unknown keys {sorted(unknown)} (allowed: {sorted(ALLOWED_KEYS)})")
 
     sources = cfg.get("sources")
+    if sources is None:
+        # Default source: the app's own directory, rendered by its
+        # kustomization.
+        if not os.path.exists(os.path.join(os.path.dirname(path), "kustomization.yaml")):
+            err(path, "no 'sources' and no kustomization.yaml beside it")
+        continue
+
     if not isinstance(sources, list) or not sources:
         err(path, "'sources' must be a non-empty list")
         continue

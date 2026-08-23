@@ -1,14 +1,4 @@
 # ArgoCD adopts the Cilium that the one-time Omni bootstrap manifest
-# installed. The values live once, in values.yaml, shared with the
-# helm_template render in infra/stacks/cluster/main.tf.
+# installed; the kustomization alongside renders the chart.
 name: cilium
 namespace: kube-system
-sources:
-  - repoURL: https://helm.cilium.io
-    chart: cilium
-    # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
-    targetRevision: 1.20.1
-    helm:
-      valueFiles:
-        - $values/kubernetes/apps/cilium/values.yaml
-  - ref: values
