@@ -22,3 +22,6 @@ mise.local.toml
 
 # OS noise
 .DS_Store
+
+# kustomize helm inflator cache (kubectl kustomize --enable-helm)
+kubernetes/apps/*/charts/

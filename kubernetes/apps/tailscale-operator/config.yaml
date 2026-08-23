@@ -1,16 +1,7 @@
-# Joins the cluster to the tailnet. The chart's oauth block stays empty,
-# so the operator mounts the pre-created operator-oauth secret that ESO
-# delivers (see config/).
+# Joins the cluster to the tailnet.
 name: tailscale-operator
 namespace: tailscale
 # Tailscale proxy pods (egress/ingress) run privileged; Talos enforces
 # baseline PSA, so the namespace opts up.
 namespaceLabels:
   pod-security.kubernetes.io/enforce: privileged
-sources:
-  - repoURL: https://pkgs.tailscale.com/helmcharts
-    chart: tailscale-operator
-    # renovate: datasource=helm registryUrl=https://pkgs.tailscale.com/helmcharts depName=tailscale-operator
-    targetRevision: 1.102.3
-  # OAuth secret (ESO)
-  - path: kubernetes/apps/tailscale-operator/config

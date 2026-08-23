@@ -18,4 +18,5 @@ patches:
   - path: argocd-server-hostaliases.yaml
   - path: argocd-cmd-params.yaml
   - path: argocd-cm-oidc.yaml
+  - path: argocd-cm-kustomize.yaml
   - path: argocd-rbac.yaml

@@ -1,0 +1,7 @@
+# Only the OIDC client secret: it needs the ESO CRDs, so it cannot live
+# in the bootstrap kustomization that k8s-bootstrap applies standalone
+# on a bare cluster. The bootstrap dir itself is this app's other source.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - external-secret.yaml

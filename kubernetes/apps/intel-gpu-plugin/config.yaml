@@ -1,12 +1,6 @@
 # Registers the workers' iGPU SR-IOV virtual functions as the
-# gpu.intel.com/i915 resource (Plex and friends request it). The
+# gpu.intel.com/xe resource (pods request it for transcoding). The
 # DaemonSet runs on every amd64 node and registers nothing where
-# /dev/dri is absent, so no node selection is needed. Sourced straight
-# from the upstream repo, pinned by release tag.
+# /dev/dri is absent, so no node selection is needed.
 name: intel-gpu-plugin
 namespace: kube-system
-sources:
-  - repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes
-    path: deployments/gpu_plugin
-    # renovate: datasource=github-releases depName=intel/intel-device-plugins-for-kubernetes
-    targetRevision: v0.36.0

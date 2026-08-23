@@ -1,10 +1,9 @@
-# ArgoCD manages itself: same kustomization the k8s-bootstrap stack applies
-# once, so adoption is a no-op and upgrades flow through GitOps. That
-# kustomization includes the ApplicationSet that generates this Application.
+# ArgoCD manages itself: same kustomization the k8s-bootstrap stack
+# applies once, so adoption is a no-op and upgrades flow through GitOps.
+# Explicit sources (the only app with them): the bootstrap dir plus the
+# ESO secret kustomization alongside this file.
 name: argocd
 namespace: argocd
 sources:
   - path: kubernetes/bootstrap/argocd
-  # OIDC client secret via ESO (needs the ESO CRDs, so it cannot live in
-  # the bootstrap kustomization that k8s-bootstrap applies standalone)
-  - path: kubernetes/apps/argocd/config
+  - path: kubernetes/apps/argocd

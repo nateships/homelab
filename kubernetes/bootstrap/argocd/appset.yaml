@@ -2,8 +2,11 @@
 # A config file carries only what differs per app; this template owns
 # the shared sync policy. Config keys (CI validates the schema):
 #   name, namespace   required
-#   sources           required; local-repo sources may omit repoURL and
-#                     targetRevision (defaulted in templatePatch below)
+#   sources           optional; defaults to the app's own directory
+#                     (kubernetes/apps/<name>, rendered by its
+#                     kustomization.yaml). When given, local-repo
+#                     sources may omit repoURL and targetRevision
+#                     (defaulted in templatePatch below)
 #   ignoreDifferences optional, passed through
 #   autosync: false   optional, turns off automated sync for the app
 #   namespaceLabels   optional, labels for the auto-created namespace
@@ -60,7 +63,8 @@ spec:
   templatePatch: |
     spec:
       sources:
-    {{- range .sources }}
+    {{- /* sprig get, not .sources: missingkey=error fires on absent map keys */}}
+    {{- range (get . "sources" | default (list (dict "path" (printf "kubernetes/apps/%s" .name)))) }}
       - {{- mergeOverwrite (dict "repoURL" "https://github.com/nateships/homelab" "targetRevision" "main") . | toYaml | nindent 8 }}
     {{- end }}
     {{- if hasKey . "ignoreDifferences" }}
