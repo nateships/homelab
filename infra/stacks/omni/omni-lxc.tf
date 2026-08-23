@@ -1,12 +1,7 @@
-# Unprivileged LXC that runs self-hosted Omni (Docker Compose) and the
-# Proxmox infra provider Docker container.
-#
-# Two things OpenTofu cannot fully express for LXCs (see docs/BOOTSTRAP.md):
-#   1. /dev/net/tun passthrough, required by the Omni Docker container (SideroLink
-#      runs userspace WireGuard over a TUN device). Applied post-create on the
-#      Proxmox host:
-#        pct set <vmid> --dev0 path=/dev/net/tun
-#   2. Docker install inside the LXC.
+# Unprivileged LXC that runs self-hosted Omni and the Proxmox infra
+# provider. The omni-config playbook adds what OpenTofu cannot express:
+# /dev/net/tun passthrough (SideroLink needs a TUN device) and the
+# Docker install.
 # The LXC template. Tofu downloads it to the node, so no manual pveam step.
 resource "proxmox_download_file" "debian_template" {
   node_name    = var.proxmox_node
@@ -22,9 +17,8 @@ resource "proxmox_virtual_environment_container" "omni" {
   unprivileged = true
   started      = true
 
-  # Docker-in-LXC needs nesting + keyctl. The API can only set nesting
-  # (other feature flags require a real root@pam login; tokens do not
-  # qualify), so the omni-config playbook sets keyctl and this resource
+  # Docker-in-LXC needs nesting + keyctl. The API token can only set
+  # nesting; the omni-config playbook sets keyctl. This resource
   # ignores feature drift.
   features {
     nesting = true

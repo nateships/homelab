@@ -1,7 +1,5 @@
-# Single source for the Cilium values. Two consumers:
-# - The one-time bootstrap manifest (infra/stacks/cluster) renders from it
-#   at plan time via data.helm_template.
-# - The cilium Application reads it via valueFiles (config.yaml).
+# Two consumers: the bootstrap render (infra/stacks/cluster) and the
+# cilium kustomization.
 ipam:
   mode: kubernetes
 kubeProxyReplacement: true

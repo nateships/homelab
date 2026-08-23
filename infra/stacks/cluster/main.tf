@@ -14,9 +14,9 @@ data "onepassword_item" "omni" {
   title = "omni-service-account"
 }
 
-# Hand-managed: the SECRET of a dedicated OAuth client (scope auth_keys,
-# tag tag:talos) from the admin console. An OAuth secret works as an auth
-# key and never expires; the join parameters are appended below.
+# The secret of a dedicated OAuth client (scope auth_keys, tag
+# tag:talos), hand-filled from the admin console. OAuth secrets do not
+# expire. The config patch below appends the join parameters.
 data "onepassword_item" "talos_tailscale_authkey" {
   vault = data.onepassword_vault.homelab.uuid
   title = "talos-tailscale-authkey"
@@ -25,9 +25,8 @@ data "onepassword_item" "talos_tailscale_authkey" {
 provider "onepassword" {}
 
 provider "omni" {
-  # Same FQDN as op://homelab/omni/domain (the playbooks read that field);
-  # the provider needs the value at plan time, so it arrives as a TF_VAR
-  # instead of a 1Password read.
+  # Must match op://homelab/omni/domain. The provider needs the value
+  # at plan time, so it arrives as a TF_VAR.
   endpoint            = "https://${var.omni_domain}"
   service_account_key = data.onepassword_item.omni.password
 }
@@ -71,9 +70,8 @@ resource "omni_machine_set" "workers" {
   }
 }
 
-# MANDATORY on Talos 1.13+: the LifecycleService install/upgrade flow needs
-# an explicit install disk. Without it, VMs stop at stage=UPGRADING and show
-# no error. Proxmox virtio-scsi presents as /dev/sda.
+# Talos 1.13+ requires an explicit install disk. Without it, VMs stop
+# at stage=UPGRADING with no error. Proxmox virtio-scsi is /dev/sda.
 resource "omni_config_patch" "install_disk" {
   name    = "install-disk"
   cluster = omni_cluster.homelab.name
@@ -119,12 +117,11 @@ resource "omni_config_patch" "worker_labels" {
   })
 }
 
-# Cilium bootstrap: the cluster ships no CNI (patch above), and ArgoCD's own
-# pods cannot start without one. Omni applies this rendered chart ONE TIME at
-# bootstrap; ArgoCD (kubernetes/apps/cilium) adopts it afterward and owns
-# upgrades. Rendered at plan time from the same values.yaml the Application
-# reads; keep the version in step with its targetRevision (Renovate groups
-# the two pins).
+# Cilium bootstrap: the cluster ships no CNI, and ArgoCD pods cannot
+# start without one. Omni applies this render one time; ArgoCD
+# (kubernetes/apps/cilium) then owns upgrades. The render uses the same
+# values.yaml as the Application. Keep this version equal to the app's
+# chart version (Renovate groups the two pins).
 data "helm_template" "cilium_bootstrap" {
   name       = "cilium"
   repository = "https://helm.cilium.io"
@@ -159,18 +156,13 @@ resource "omni_machine_extensions" "all" {
     "siderolabs/qemu-guest-agent",
     "siderolabs/iscsi-tools",
     "siderolabs/util-linux-tools",
-    # Nodes join the tailnet as tag:talos devices. Pods reach tailnet-only
-    # services (tsidp) through the node: public DNS resolves ts.net names
-    # to tailnet IPs, Cilium masquerades pod egress to the node, and the
-    # node routes 100.64.0.0/10 via tailscaled. No CoreDNS rewrite needed,
-    # so the Talos-managed coredns manifest stays in sync in Omni.
+    # Nodes join the tailnet as tag:talos devices. Pods reach tsidp
+    # through the node: Cilium masquerades pod egress, the node routes
+    # 100.64.0.0/10 via tailscaled.
     "siderolabs/tailscale",
-    # xe drives the iGPU SR-IOV virtual functions the workers receive
-    # from Proxmox (machine class pci_devices); verified in VF mode on
-    # 6.18. Mainline i915 cannot drive Raptor Lake VFs, so there is no
-    # i915 extension. Loads nothing on nodes without the hardware.
-    # Guest microcode extensions are pointless in VMs: the PVE host
-    # loads microcode.
+    # xe drives the iGPU SR-IOV virtual functions (machine class
+    # pci_devices). Mainline i915 cannot drive Raptor Lake VFs. Do not
+    # add microcode extensions: the PVE host loads microcode.
     "siderolabs/xe",
   ]
 }
@@ -184,12 +176,9 @@ resource "omni_config_patch" "tailscale_authkey" {
     kind: ExtensionServiceConfig
     name: tailscale
     environment:
-      # Ephemeral: a replaced worker's dead device auto-removes from the
-      # tailnet instead of lingering offline forever (tagged devices
-      # never key-expire). Reboots and upgrades are shorter than the
-      # removal grace period and /var/lib/tailscale persists across
-      # them; a node offline long enough to be removed rejoins on boot
-      # with the never-expiring OAuth secret.
+      # ephemeral=true: Tailscale removes a device that stays offline,
+      # so replaced workers do not accumulate. A removed node rejoins
+      # on boot with the OAuth secret.
       - TS_AUTHKEY=${data.onepassword_item.talos_tailscale_authkey.password}?ephemeral=true&preauthorized=true
       - TS_EXTRA_ARGS=--advertise-tags=tag:talos
   EOT

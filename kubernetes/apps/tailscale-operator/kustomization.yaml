@@ -1,5 +1,5 @@
-# The chart's oauth block stays empty, so the operator mounts the
-# pre-created operator-oauth secret that ESO delivers.
+# The chart's oauth block stays empty; the operator mounts the
+# operator-oauth secret from ESO.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

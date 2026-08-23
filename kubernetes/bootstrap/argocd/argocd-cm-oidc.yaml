@@ -1,9 +1,7 @@
-# OIDC login against tsidp, ArgoCD-native (no Dex). Issuer, client ID,
-# and client secret resolve from the argocd-tsidp secret (delivered by
-# ESO, see kubernetes/apps/argocd/config/). The server resolves the
-# issuer FQDN through a hostAliases patch (argocd-server-hostaliases).
-# Until the secret exists, OIDC login is unavailable and the local
-# admin account still works.
+# OIDC login against tsidp, ArgoCD-native (no Dex). The values resolve
+# from the argocd-tsidp secret (ESO, kubernetes/apps/argocd). The
+# hostAliases patch resolves the issuer FQDN. Without the secret, OIDC
+# login is unavailable; the local admin account works.
 apiVersion: v1
 kind: ConfigMap
 metadata:

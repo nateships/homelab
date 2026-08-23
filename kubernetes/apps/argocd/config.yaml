@@ -1,7 +1,5 @@
-# ArgoCD manages itself: same kustomization the k8s-bootstrap stack
-# applies once, so adoption is a no-op and upgrades flow through GitOps.
-# Explicit sources (the only app with them): the bootstrap dir plus the
-# ESO secret kustomization alongside this file.
+# ArgoCD manages itself through the bootstrap directory. Explicit
+# sources: the bootstrap dir plus the secret kustomization here.
 name: argocd
 namespace: argocd
 sources:

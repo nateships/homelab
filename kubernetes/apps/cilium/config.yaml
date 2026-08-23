@@ -1,4 +1,2 @@
-# ArgoCD adopts the Cilium that the one-time Omni bootstrap manifest
-# installed; the kustomization alongside renders the chart.
 name: cilium
 namespace: kube-system

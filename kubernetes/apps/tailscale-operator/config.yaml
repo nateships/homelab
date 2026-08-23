@@ -1,4 +1,3 @@
-# Joins the cluster to the tailnet.
 name: tailscale-operator
 namespace: tailscale
 # Tailscale proxy pods (egress/ingress) run privileged; Talos enforces

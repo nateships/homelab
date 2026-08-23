@@ -54,15 +54,11 @@ resource "spacelift_context" "homelab" {
   # Auto-attaches to every stack labeled "homelab"; no attachment resources.
   labels = ["autoattach:homelab"]
 
-  # Spacelift's hosted workers have no route to the LAN. These hooks join
-  # the run to the tailnet. Userspace tailscaled runs without root and
-  # without a TUN device. It serves a SOCKS5 proxy and an HTTP proxy; the
-  # ALL_PROXY/HTTPS_PROXY env vars (below) point clients at them. Clients
-  # reach Proxmox at its ts.net address. The binaries come from the custom
-  # runner image (runner/Dockerfile).
-  # Each phase can run in a fresh container, so every phase starts the
-  # daemon. Spacelift joins hooks with &&, so the backgrounded daemon needs
-  # a subshell; a trailing bare & would produce "& &&" and a syntax error.
+  # Spacelift workers have no LAN route; these hooks join each run to
+  # the tailnet. Userspace tailscaled serves SOCKS5 and HTTP proxies;
+  # ALL_PROXY/HTTPS_PROXY point clients at them. Each phase can run in
+  # a fresh container, so every phase starts the daemon. Spacelift
+  # joins hooks with &&, so the backgrounded daemon needs a subshell.
   before_init    = local.tailscale_up
   before_plan    = local.tailscale_up
   before_apply   = local.tailscale_up
@@ -86,10 +82,9 @@ resource "spacelift_environment_variable" "tailscale_auth_key" {
   write_only = true
 }
 
-# tailscaled's netstack dials non-tailnet destinations directly, so routing
-# everything through the proxies is safe (registry downloads included).
-# ALL_PROXY covers curl-style tools; Go HTTP clients (the tofu providers)
-# only honor HTTPS_PROXY, served by tailscaled's outbound HTTP proxy.
+# tailscaled dials non-tailnet destinations directly, so the proxies
+# are safe for all traffic. ALL_PROXY covers curl-style tools; Go HTTP
+# clients only honor HTTPS_PROXY.
 resource "spacelift_environment_variable" "all_proxy" {
   context_id = spacelift_context.homelab.id
   name       = "ALL_PROXY"
@@ -118,7 +113,7 @@ resource "spacelift_environment_variable" "proxmox_api_token" {
   write_only = true
 }
 
-# Fan the individual admin-stack inputs out to stacks as TF_VAR_* env vars.
+# Fan the admin-stack inputs out to stacks as TF_VAR_* env vars.
 locals {
   shared_tfvars = {
     proxmox_node    = var.proxmox_node
@@ -144,9 +139,9 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 # ------------------------------------------------------------------------------
 # Stacks: auto-hydrated from stack.yaml manifests
 #
-# A directory becomes a stack only when it contains infra/stacks/<dir>/stack.yaml
-# (explicit opt-in: shared-module or WIP dirs never hydrate by accident).
-# Stack name = homelab-<dir path, / replaced by ->, shared context attached.
+# A directory becomes a stack only when it contains
+# infra/stacks/<dir>/stack.yaml. Stack name = homelab-<dir>; the shared
+# context attaches by label.
 # Manifest keys (must be a non-empty YAML map):
 #   description: ...
 #   autodeploy: true          # default false: plan on push, apply on confirm
@@ -156,16 +151,14 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 #   playbook: site.yml        # ansible only; path inside the stack dir
 #   env: {NAME: value}        # plain env vars set on this stack only
 #   project_globs: [omni/**]  # extra paths whose changes trigger this stack
-# Adding a stack = new directory + stack.yaml + push. Note: the admin stack
-# must have project globs "infra/stacks/**/stack.yaml" and "mise.toml" set,
-# so manifest changes and opentofu bumps trigger it.
+# New stack = new directory + stack.yaml + push. The admin stack needs
+# project globs "infra/stacks/**/stack.yaml" and "mise.toml".
 # ------------------------------------------------------------------------------
 locals {
   stacks_dir      = "${path.module}/../stacks"
   stack_manifests = fileset(local.stacks_dir, "**/stack.yaml")
 
-  # Single source for the tofu version: the opentofu pin in mise.toml.
-  # Renovate bumps mise.toml; the next admin-stack run rolls it out.
+  # The tofu version comes from the opentofu pin in mise.toml.
   tofu_version = regex("(?m)^opentofu = \"([0-9.]+)\"", file("${path.module}/../../mise.toml"))[0]
 
   stack_defaults = {

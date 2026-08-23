@@ -1,8 +1,7 @@
 ---
-# Bootstraps GitOps onto the cluster: ArgoCD (with the ApplicationSet that
-# generates all apps), its repo credential, and the one secret ESO needs.
-# Runs on the runner against an Omni service-account kubeconfig; re-running
-# on a healthy cluster is a no-op.
+# Bootstraps GitOps: ArgoCD with the ApplicationSet, the repo
+# credential, and the ESO token secret. A re-run on a healthy cluster
+# is a no-op.
 - name: Kubernetes bootstrap
   hosts: localhost
   connection: local
@@ -30,10 +29,9 @@
       until: argocd.rc == 0
       changed_when: "'serverside-applied' in argocd.stdout"
 
-    # The repo is private; the git generator and the app sources need this
-    # credential. GitHub App auth: Contents read-only, this repo only.
-    # TODO(public): remove this task, the GitHub App, the github-argocd
-    # item, and the github-argocd-key document once the repo is public.
+    # The repo is private; ArgoCD needs this credential (GitHub App,
+    # Contents read-only). TODO(public): remove this task, the GitHub
+    # App, and both 1Password entries when the repo is public.
     - name: Create the ArgoCD repo credential
       # Assignments first: `set -e` then aborts when an op read fails, so a
       # 1Password error can not apply a secret with empty values.

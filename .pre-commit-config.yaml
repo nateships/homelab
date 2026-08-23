@@ -26,10 +26,9 @@ repos:
         language: system
         files: \.tf$
         pass_filenames: false
-      # Raw manifests only: config.yaml is ApplicationSet input,
-      # kustomization.yaml and values.yaml are render input. CI renders
-      # the full apps (kustomize + helm) and validates the output; this
-      # hook stays fast and offline.
+      # Raw manifests only; config.yaml, kustomization.yaml, and
+      # values.yaml are inputs, not manifests. CI validates the full
+      # rendered apps.
       - id: kubeconform
         name: kubeconform
         entry: >-

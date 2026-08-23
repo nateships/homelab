@@ -1,11 +1,6 @@
-# Pods cannot resolve the tsidp issuer FQDN: ts.net names are not in
-# public DNS, and MagicDNS never reaches the cluster DNS chain (CoreDNS
-# forwards to Talos hostDNS, which only reads machine-config
-# nameservers). The nodes route 100.64.0.0/10 over the tailnet
-# (tailscale extension), so a static hosts entry on the one OIDC
-# consumer is enough. The FQDN is public knowledge regardless: tsidp's
-# Let's Encrypt certificate put it in the Certificate Transparency logs.
-# If the tsidp tailnet IP ever changes, update it here.
+# ts.net names do not resolve in public DNS. This entry resolves the
+# tsidp issuer FQDN for argocd-server; the nodes route 100.64.0.0/10
+# over the tailnet. Update the IP here if the tsidp device changes.
 # site-specific: tsidp FQDN and tailnet IP (docs/SITE.md)
 apiVersion: apps/v1
 kind: Deployment
