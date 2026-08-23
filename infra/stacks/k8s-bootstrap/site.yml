@@ -59,12 +59,14 @@
       ansible.builtin.shell: |
         set -eu
         tailnet="$(op read op://homelab/tailscale-tsidp/tailnet-dns)"
-        rewrite="rewrite stop { name exact tsidp.${tailnet} tsidp.tailscale.svc.cluster.local answer auto }"
+        target=tsidp.tailscale.svc.cluster.local
         kubectl -n kube-system get configmap coredns -o jsonpath='{.data.Corefile}' > /tmp/Corefile
-        if grep -qF "$rewrite" /tmp/Corefile; then
+        if grep -qE "^ +name exact tsidp\.${tailnet} ${target}\$" /tmp/Corefile; then
           echo unchanged
         else
-          awk -v r="    ${rewrite}" '{print} /^\.:53 \{/ {print r}' /tmp/Corefile > /tmp/Corefile.new
+          sed -e "/rewrite stop { name exact tsidp\..* ${target} answer auto }/d" /tmp/Corefile \
+            | sed -e "/^ *rewrite stop {\$/{N;N;N;/${target}/d;}" > /tmp/Corefile.clean
+          awk -v n="tsidp.${tailnet}" -v t="$target" '{print} /^\.:53 \{/ {print "    rewrite stop {"; print "        name exact " n " " t; print "        answer auto"; print "    }"}' /tmp/Corefile.clean > /tmp/Corefile.new
           kubectl -n kube-system create configmap coredns --from-file=Corefile=/tmp/Corefile.new --dry-run=client -o yaml | kubectl apply --server-side --force-conflicts -f -
           kubectl -n kube-system rollout restart deployment coredns
         fi
