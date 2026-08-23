@@ -1,0 +1,14 @@
+# Joins the cluster to the tailnet. The chart's oauth block stays empty,
+# so the operator mounts the pre-created operator-oauth secret that ESO
+# delivers (see config/).
+name: tailscale-operator
+namespace: tailscale
+sources:
+  - repoURL: https://pkgs.tailscale.com/helmcharts
+    chart: tailscale-operator
+    # renovate: datasource=helm registryUrl=https://pkgs.tailscale.com/helmcharts depName=tailscale-operator
+    targetRevision: 1.102.3
+  # OAuth secret (ESO) and the tsidp egress proxy
+  - repoURL: https://github.com/nateships/homelab
+    targetRevision: main
+    path: kubernetes/apps/tailscale-operator/config
