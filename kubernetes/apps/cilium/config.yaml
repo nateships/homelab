@@ -1,6 +1,6 @@
 # ArgoCD adopts the Cilium that the one-time Omni bootstrap manifest
-# installed. The values live once, in values.yaml, shared with
-# scripts/render-cilium-bootstrap.sh.
+# installed. The values live once, in values.yaml, shared with the
+# helm_template render in infra/stacks/cluster/main.tf.
 name: cilium
 namespace: kube-system
 sources:

@@ -87,7 +87,7 @@
       "groupName": "kubernetes"
     },
     {
-      "description": "Cilium: ArgoCD app + bootstrap render script move together. CI fails the PR until scripts/render-cilium-bootstrap.sh is re-run.",
+      "description": "Cilium: ArgoCD app + the helm_template pin in infra/stacks/cluster move together.",
       "matchDepNames": ["cilium"],
       "groupName": "cilium"
     }

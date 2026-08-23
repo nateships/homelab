@@ -28,10 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4
-      - name: cilium bootstrap manifest is current
-        run: |
-          sh scripts/render-cilium-bootstrap.sh
-          git diff --exit-code infra/stacks/cluster/manifests/
       - name: bootstrap kustomization renders
         run: kubectl kustomize kubernetes/bootstrap/argocd > /dev/null
       - name: kubeconform
