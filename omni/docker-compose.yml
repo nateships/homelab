@@ -45,7 +45,7 @@ services:
   # OIDC identity provider on the tailnet; Omni authenticates against it.
   tsidp:
     container_name: tsidp
-    image: ghcr.io/tailscale/tsidp:latest
+    image: ghcr.io/tailscale/tsidp:latest@sha256:cae91835375efcbf75ecb8f9520e3472cda946e3ca9af1df3bce9540902f289e
     # The image's app user cannot write the root-owned named volume.
     user: "0"
     environment:
