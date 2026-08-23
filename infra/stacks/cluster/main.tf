@@ -14,6 +14,12 @@ data "onepassword_item" "omni" {
   title = "omni-service-account"
 }
 
+# Written by the tailscale stack (tailscale_tailnet_key.talos_nodes).
+data "onepassword_item" "talos_tailscale_authkey" {
+  vault = data.onepassword_vault.homelab.uuid
+  title = "talos-tailscale-authkey"
+}
+
 provider "onepassword" {}
 
 provider "omni" {
@@ -150,5 +156,24 @@ resource "omni_machine_extensions" "all" {
     "siderolabs/qemu-guest-agent",
     "siderolabs/iscsi-tools",
     "siderolabs/util-linux-tools",
+    # Nodes join the tailnet as tag:talos devices. Pods reach tailnet-only
+    # services (tsidp) through the node: public DNS resolves ts.net names
+    # to tailnet IPs, Cilium masquerades pod egress to the node, and the
+    # node routes 100.64.0.0/10 via tailscaled. No CoreDNS rewrite needed,
+    # so the Talos-managed coredns manifest stays in sync in Omni.
+    "siderolabs/tailscale",
   ]
+}
+
+resource "omni_config_patch" "tailscale_authkey" {
+  name    = "tailscale-authkey"
+  cluster = omni_cluster.homelab.name
+
+  data = <<-EOT
+    apiVersion: v1alpha1
+    kind: ExtensionServiceConfig
+    name: tailscale
+    environment:
+      - TS_AUTHKEY=${data.onepassword_item.talos_tailscale_authkey.password}
+  EOT
 }
