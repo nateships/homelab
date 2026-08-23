@@ -27,11 +27,6 @@ Do the stages in order. Each stage needs the stage before it.
      `tag:k8s-operator`). username = client ID, password = secret. The
      tag must exist in the tailnet policy first (the tailscale stack
      applies it).
-   - `talos-tailscale-authkey`: password = the secret of a dedicated
-     OAuth client (scope **Auth Keys: write**, tag `tag:talos`). The
-     cluster stack passes it as `TS_AUTHKEY` to the nodes' tailscale
-     extension; OAuth secrets never expire. The tag must exist in the
-     tailnet policy first (the tailscale stack applies it).
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
    - `cloudflare-r2`: see stage 4 (etcd backups)
    - `github-argocd`: fields `app-id` and `installation-id` of a GitHub App.

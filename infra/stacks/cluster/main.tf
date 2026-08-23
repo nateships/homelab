@@ -14,14 +14,6 @@ data "onepassword_item" "omni" {
   title = "omni-service-account"
 }
 
-# The secret of a dedicated OAuth client (scope auth_keys, tag
-# tag:talos), hand-filled from the admin console. OAuth secrets do not
-# expire. The config patch below appends the join parameters.
-data "onepassword_item" "talos_tailscale_authkey" {
-  vault = data.onepassword_vault.homelab.uuid
-  title = "talos-tailscale-authkey"
-}
-
 provider "onepassword" {}
 
 provider "omni" {
@@ -156,30 +148,9 @@ resource "omni_machine_extensions" "all" {
     "siderolabs/qemu-guest-agent",
     "siderolabs/iscsi-tools",
     "siderolabs/util-linux-tools",
-    # Nodes join the tailnet as tag:talos devices. Pods reach tsidp
-    # through the node: Cilium masquerades pod egress, the node routes
-    # 100.64.0.0/10 via tailscaled.
-    "siderolabs/tailscale",
     # xe drives the iGPU SR-IOV virtual functions (machine class
     # pci_devices). Mainline i915 cannot drive Raptor Lake VFs. Do not
     # add microcode extensions: the PVE host loads microcode.
     "siderolabs/xe",
   ]
-}
-
-resource "omni_config_patch" "tailscale_authkey" {
-  name    = "tailscale-authkey"
-  cluster = omni_cluster.homelab.name
-
-  data = <<-EOT
-    apiVersion: v1alpha1
-    kind: ExtensionServiceConfig
-    name: tailscale
-    environment:
-      # ephemeral=true: Tailscale removes a device that stays offline,
-      # so replaced workers do not accumulate. A removed node rejoins
-      # on boot with the OAuth secret.
-      - TS_AUTHKEY=${data.onepassword_item.talos_tailscale_authkey.password}?ephemeral=true&preauthorized=true
-      - TS_EXTRA_ARGS=--advertise-tags=tag:talos
-  EOT
 }
