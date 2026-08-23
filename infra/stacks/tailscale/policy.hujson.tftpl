@@ -21,6 +21,12 @@
 		},
 	},
 
+	// tsidp serves its application endpoints publicly through Funnel
+	// (TSIDP_USE_FUNNEL in omni/docker-compose.yml).
+	"nodeAttrs": [
+		{"target": ["tag:tsidp"], "attr": ["funnel"]},
+	],
+
 	"acls": [
 		// Spacelift runs reach the Proxmox API and SSH.
 		{"action": "accept", "src": ["tag:spacelift"], "dst": ["tag:pve:8006", "tag:pve:22"]},
