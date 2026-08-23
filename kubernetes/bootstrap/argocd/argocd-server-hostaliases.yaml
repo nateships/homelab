@@ -6,6 +6,7 @@
 # consumer is enough. The FQDN is public knowledge regardless: tsidp's
 # Let's Encrypt certificate put it in the Certificate Transparency logs.
 # If the tsidp tailnet IP ever changes, update it here.
+# site-specific: tsidp FQDN and tailnet IP (docs/SITE.md)
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -9,6 +9,7 @@ kind: ConfigMap
 metadata:
   name: argocd-cm
 data:
+  # site-specific: workload-proxy URL for this cluster (docs/SITE.md)
   url: https://argocd.omni.nate.cx
   oidc.config: |
     name: Tailscale

@@ -16,6 +16,7 @@
 
 	// The PVE host is the subnet router for the k8s VLAN; approve its
 	// advertisement automatically, no console click.
+	// site-specific: k8s VLAN CIDR (docs/SITE.md)
 	"autoApprovers": {
 		"routes": {
 			"10.16.101.0/24": ["tag:pve"],
