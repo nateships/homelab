@@ -7,6 +7,8 @@
   // Automerge non-major once CI passes; majors stay manual via the rule below.
   "automerge": true,
   "platformAutomerge": true,
+  // Off by default in Renovate; tracks `rev:` pins in .pre-commit-config.yaml.
+  "pre-commit": { "enabled": true },
   "customManagers": [
     {
       // Agnostic annotation manager: track any pinned version that carries a
@@ -51,14 +53,15 @@
   ],
   "packageRules": [
     {
-      "description": "Silence the mise manager's doomed lookup for the op CLI (no GitHub releases). The 1password/op regex manager owns this pin.",
-      "matchDepNames": ["1password/cli"],
+      "description": "Silence the mise manager's doomed lookup for the op CLI (no GitHub releases). The 1password/op regex manager owns this pin. The mise manager's depName keeps the 'aqua:' prefix, so match both forms.",
+      "matchDepNames": ["aqua:1password/cli", "1password/cli"],
       "enabled": false
     },
     {
-      "description": "op CLI pins (mise.toml + runner Dockerfile) move together",
+      "description": "op CLI pin in mise.toml. pinDigests off: the Docker datasource is only a version feed here; a sha256 digest cannot be written into a mise version string.",
       "matchDepNames": ["1password/op"],
-      "groupName": "op-cli"
+      "groupName": "op-cli",
+      "pinDigests": false
     },
     {
       "description": "Major updates: manual review, never automerge",
