@@ -12,3 +12,11 @@ sources:
   - repoURL: https://github.com/nateships/homelab
     targetRevision: main
     path: kubernetes/apps/tailscale-operator/config
+# The operator rewrites the egress Service's externalName to its proxy;
+# git keeps the placeholder. Ignore it or selfHeal fights the operator.
+ignoreDifferences:
+  - kind: Service
+    name: tsidp
+    namespace: tailscale
+    jsonPointers:
+      - /spec/externalName
