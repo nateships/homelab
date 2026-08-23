@@ -1,9 +1,17 @@
 # Generates one Application per kubernetes/apps/<name>/config.yaml.
-# A config file carries only what differs per app (name, namespace,
-# sources, optional ignoreDifferences, optional autosync: false);
-# this template owns the shared sync policy. Prune stays off: resources
-# removed from git linger until pruned by hand in the UI or CLI.
-# Deleting a config file still deletes the whole Application.
+# A config file carries only what differs per app; this template owns
+# the shared sync policy. Config keys (CI validates the schema):
+#   name, namespace   required
+#   sources           required; local-repo sources may omit repoURL and
+#                     targetRevision (defaulted in templatePatch below)
+#   ignoreDifferences optional, passed through
+#   autosync: false   optional, turns off automated sync for the app
+#   namespaceLabels   optional, labels for the auto-created namespace
+#                     (e.g. a privileged PSA level)
+# Prune stays off: resources removed from git linger until pruned by
+# hand in the UI or CLI. Deleting a config file still deletes the whole
+# Application; preserveResourcesOnDeletion keeps an accidental deletion
+# of this ApplicationSet from cascading into every app's resources.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -12,6 +20,8 @@ metadata:
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
+  syncPolicy:
+    preserveResourcesOnDeletion: true
   generators:
     - git:
         repoURL: https://github.com/nateships/homelab
@@ -43,18 +53,29 @@ spec:
           backoff:
             duration: 30s
             factor: 2
-  # Sources (and optional ignoreDifferences) are nested YAML; the flat
-  # template fields above cannot carry them, so this patch injects them
-  # verbatim.
+  # Sources and the optional keys are nested YAML; the flat template
+  # fields above cannot carry them, so this patch injects them. The
+  # patch strategic-merges into the template, so the shared syncPolicy
+  # keys survive the conditional additions.
   templatePatch: |
     spec:
       sources:
-    {{- .sources | toYaml | nindent 4 }}
+    {{- range .sources }}
+      - {{- mergeOverwrite (dict "repoURL" "https://github.com/nateships/homelab" "targetRevision" "main") . | toYaml | nindent 8 }}
+    {{- end }}
     {{- if hasKey . "ignoreDifferences" }}
       ignoreDifferences:
     {{- .ignoreDifferences | toYaml | nindent 4 }}
     {{- end }}
-    {{- if and (hasKey . "autosync") (not .autosync) }}
+    {{- if or (hasKey . "namespaceLabels") (and (hasKey . "autosync") (not .autosync)) }}
       syncPolicy:
+    {{- if and (hasKey . "autosync") (not .autosync) }}
         automated: null
+    {{- end }}
+    {{- if hasKey . "namespaceLabels" }}
+        # Labels for the namespace CreateNamespace makes (PSA level etc.)
+        managedNamespaceMetadata:
+          labels:
+    {{- .namespaceLabels | toYaml | nindent 10 }}
+    {{- end }}
     {{- end }}

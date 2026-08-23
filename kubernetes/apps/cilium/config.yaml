@@ -11,6 +11,4 @@ sources:
     helm:
       valueFiles:
         - $values/kubernetes/apps/cilium/values.yaml
-  - repoURL: https://github.com/nateships/homelab
-    targetRevision: main
-    ref: values
+  - ref: values

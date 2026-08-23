@@ -10,6 +10,4 @@ sources:
       valuesObject:
         installCRDs: true
   # ClusterSecretStore pointing at 1Password (git dir alongside this file)
-  - repoURL: https://github.com/nateships/homelab
-    targetRevision: main
-    path: kubernetes/apps/external-secrets/config
+  - path: kubernetes/apps/external-secrets/config
