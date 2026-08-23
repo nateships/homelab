@@ -123,6 +123,8 @@ locals {
     omni_ct_vlan    = var.omni_ct_vlan == null ? null : tostring(var.omni_ct_vlan)
     omni_domain     = var.omni_domain
     k8s_vlan_cidr   = var.k8s_vlan_cidr
+    r2_account_id   = var.r2_account_id
+    r2_bucket       = var.r2_bucket
     ssh_public_key  = var.ssh_public_key
   }
 }

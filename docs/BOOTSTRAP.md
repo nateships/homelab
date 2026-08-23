@@ -28,6 +28,9 @@ Do the stages in order. Each stage needs the stage before it.
      tag must exist in the tailnet policy first (the tailscale stack
      applies it).
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
+   - `cloudflare-terraform`: password = an API token with Zone DNS Edit
+     and Account R2 Write; the cloudflare stack manages the DNS records
+     and the R2 bucket with it
    - `cloudflare-r2`: see stage 4 (etcd backups)
    - `github-argocd`: fields `app-id` and `installation-id` of a GitHub App.
      Create it under Settings → Developer settings → GitHub Apps: permission
@@ -113,8 +116,8 @@ One-time preparation:
 1. Enable Tailscale SSH on the PVE host: `tailscale set --ssh`
 2. Fill the `omni` item: `domain` (the Omni FQDN), `admin-email`, and
    `lxc-ip` (the LXC's static IP, no CIDR suffix; it must match
-   `omni_ct_ip`). Point two DNS A records at the LXC IP: the domain itself
-   and a wildcard (`*.` prefix) for the workload service proxy. Proxy off.
+   `omni_ct_ip`). The cloudflare stack creates the two DNS A records
+   (domain + wildcard, proxy off); apply it before this stage.
 3. Fill `cloudflare/dns-api-token` (Zone:DNS:Edit) for the certbot
    DNS challenge.
 4. Generate the etcd encryption key locally and store it in 1Password:
