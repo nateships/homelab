@@ -1,6 +1,6 @@
-# Datadog operator plus a DatadogAgent instance (config/): node agents
-# and the cluster agent, infra metrics, orchestrator explorer, and log
-# collection. The API key arrives via ESO (config/external-secret.yaml).
+# Datadog agents via the plain chart (no operator, no CRDs): node
+# agents, cluster agent, infra metrics, orchestrator explorer, and log
+# collection. The API key Secret rides alongside (config/, ESO).
 name: datadog
 namespace: datadog
 # Node agents mount host paths (containerd socket, /proc, cgroups) and
@@ -9,10 +9,23 @@ namespaceLabels:
   pod-security.kubernetes.io/enforce: privileged
 sources:
   - repoURL: https://helm.datadoghq.com
-    chart: datadog-operator
-    # renovate: datasource=helm registryUrl=https://helm.datadoghq.com depName=datadog-operator
-    targetRevision: 2.25.1
-  # API-key secret (ESO) and the DatadogAgent CR
+    chart: datadog
+    # renovate: datasource=helm registryUrl=https://helm.datadoghq.com depName=datadog
+    targetRevision: 3.240.0
+    helm:
+      valuesObject:
+        datadog:
+          site: datadoghq.com
+          clusterName: homelab
+          apiKeyExistingSecret: datadog-secret
+          kubelet:
+            # Talos kubelets serve self-signed certs the agent
+            # cannot verify.
+            tlsVerify: false
+          logs:
+            enabled: true
+            containerCollectAll: true
+  # API-key secret (ESO)
   - repoURL: https://github.com/nateships/homelab
     targetRevision: main
     path: kubernetes/apps/datadog/config
