@@ -1,7 +1,6 @@
-# The app content: chart inflated by kustomize (ArgoCD runs it with
-# --enable-helm). values.yaml is shared with the bootstrap render in
-# infra/stacks/cluster/main.tf; keep the version in step with that
-# stack's pin (Renovate groups the two).
+# values.yaml is shared with the bootstrap render in
+# infra/stacks/cluster/main.tf. Keep this version equal to that pin
+# (Renovate groups the two).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 helmCharts:

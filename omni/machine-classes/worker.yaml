@@ -8,9 +8,8 @@ spec:
   matchlabels: []
   autoprovision:
     providerid: proxmox
-    # Probe the iGPU VF (UHD 770, PCI id 8086:a780) with the xe driver;
-    # force_probe is required while xe support for this generation is
-    # experimental. Pods request the GPU as gpu.intel.com/xe.
+    # Probe the iGPU VF with xe; xe support for this generation needs
+    # force_probe. Pods request the GPU as gpu.intel.com/xe.
     # site-specific: the a780 device id belongs to this host's iGPU
     kernelargs:
       - xe.force_probe=a780
@@ -30,10 +29,9 @@ spec:
       disk_iothread: true
       disk_cache: none
       disk_aio: io_uring
-      # iGPU SR-IOV: each worker gets one virtual function from the
-      # "vGPU" Proxmox resource mapping (7 VFs on the UHD 770; the host
-      # keeps the physical function). q35 gives native PCIe; ballooning
-      # is off because passthrough pins guest memory anyway.
+      # Each worker gets one iGPU virtual function from the "vGPU"
+      # Proxmox resource mapping. q35 gives native PCIe. Passthrough
+      # pins guest memory, so ballooning is off.
       # site-specific: the resource mapping name is created by hand in
       # the Proxmox console (docs/SITE.md)
       machine_type: q35

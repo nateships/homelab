@@ -7,13 +7,13 @@ data "onepassword_item" "oauth" {
   title = "tailscale-terraform"
 }
 
-# The WHOLE tailnet policy file. An apply replaces everything in the admin
-# console; console edits become drift that the next apply reverts.
+# The whole tailnet policy. An apply replaces the console policy;
+# console edits drift and the next apply reverts them.
 resource "tailscale_acl" "tailnet" {
   acl = templatefile("${path.module}/policy.hujson.tftpl", {
     k8s_vlan_cidr = var.k8s_vlan_cidr
   })
 
-  # Take ownership on first apply; the repo policy replaces console state.
+  # First apply takes ownership of the console policy.
   overwrite_existing_content = true
 }

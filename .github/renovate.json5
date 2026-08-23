@@ -11,11 +11,9 @@
   "pre-commit": { "enabled": true },
   "customManagers": [
     {
-      // Agnostic annotation manager: track any pinned version that carries a
+      // Tracks any pin that carries a
       //   # renovate: datasource=<ds> depName=<name> [versioning=<v>] [extractVersion=<re>]
-      // comment on the line above it (env templates, cluster template, tf
-      // defaults). Annotate a new pin and Renovate tracks it; no per-dependency
-      // config needed.
+      // comment on the line above it.
       "customType": "regex",
       "managerFilePatterns": [
         "/^omni/.*\\.(ya?ml|example)$/",
@@ -30,10 +28,8 @@
       "versioningTemplate": "semver-coerced"
     },
     {
-      // op CLI pin in mise.toml. The mise manager cannot look this dep up
-      // (no GitHub releases), so a dedicated regex tracks it via the
-      // 1password/op Docker image tags. Anchored to the exact line because
-      // the generic annotation regex would stop at the colon in "aqua:".
+      // op CLI pin in mise.toml, tracked via the 1password/op Docker
+      // image tags (the CLI has no GitHub releases).
       "customType": "regex",
       "managerFilePatterns": ["/^mise\\.toml$/"],
       "matchStrings": ["\"aqua:1password/cli\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
@@ -41,9 +37,8 @@
       "datasourceTemplate": "docker"
     },
     {
-      // ArgoCD install manifest URL in the bootstrap kustomization. Separate
-      // manager because the version sits inside a URL, where the annotation
-      // regex's `(?:=|:)` anchor would stop at "https:".
+      // ArgoCD install manifest URL in the bootstrap kustomization; the
+      // version sits inside a URL.
       "customType": "regex",
       "managerFilePatterns": ["/^kubernetes/bootstrap/argocd/kustomization\\.yaml$/"],
       "matchStrings": ["argoproj/argo-cd/(?<currentValue>v[\\d.]+)/manifests/install\\.yaml"],
@@ -53,12 +48,12 @@
   ],
   "packageRules": [
     {
-      "description": "Silence the mise manager's doomed lookup for the op CLI (no GitHub releases). The 1password/op regex manager owns this pin. The mise manager's depName keeps the 'aqua:' prefix, so match both forms.",
+      "description": "The op CLI has no GitHub releases; the 1password/op regex manager owns this pin.",
       "matchDepNames": ["aqua:1password/cli", "1password/cli"],
       "enabled": false
     },
     {
-      "description": "op CLI pin in mise.toml. pinDigests off: the Docker datasource is only a version feed here; a sha256 digest cannot be written into a mise version string.",
+      "description": "pinDigests off: the Docker datasource is only a version feed for a mise version string.",
       "matchDepNames": ["1password/op"],
       "groupName": "op-cli",
       "pinDigests": false
@@ -69,8 +64,7 @@
       "automerge": false,
       "addLabels": ["major-update"]
     },
-    // Coupled pins move together, one PR each: server/CLI mismatches break
-    // omnictl (gRPC errors) and violate kubectl version skew.
+    // Coupled pins move together, one PR each.
     {
       "description": "Omni server + omnictl",
       "matchDepNames": ["siderolabs/omni", "omnictl"],

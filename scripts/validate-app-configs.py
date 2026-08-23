@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Validate kubernetes/apps/*/config.yaml against the ApplicationSet schema.
 
-One malformed config file wedges the ApplicationSet generator for every
-app, and goTemplate's missingkey=error only catches absent keys, not
-misspelled ones. Fail the PR instead.
+One malformed config file stops Application generation for every app.
 """
 
 import glob

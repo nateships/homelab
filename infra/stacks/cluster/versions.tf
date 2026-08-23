@@ -11,8 +11,8 @@ terraform {
       source  = "1Password/onepassword"
       version = "< 4.0.0"
     }
-    # Renders the Cilium bootstrap manifest at plan time (data.helm_template);
-    # no cluster connection is configured or needed.
+    # Renders the Cilium bootstrap manifest at plan time. No cluster
+    # connection is needed.
     helm = {
       source  = "hashicorp/helm"
       version = "< 4.0.0"

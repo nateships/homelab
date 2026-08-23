@@ -1,6 +1,5 @@
-# The app kustomizations inflate helm charts (helmCharts field); the
-# flag lets ArgoCD's kustomize run helm. CI renders each app the same
-# way (kubectl kustomize --enable-helm).
+# The app kustomizations inflate helm charts; this flag lets ArgoCD's
+# kustomize run helm. CI renders with the same flag.
 apiVersion: v1
 kind: ConfigMap
 metadata:

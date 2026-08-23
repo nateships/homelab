@@ -1,6 +1,4 @@
-# Registers the workers' iGPU SR-IOV virtual functions as the
-# gpu.intel.com/xe resource (pods request it for transcoding). The
-# DaemonSet runs on every amd64 node and registers nothing where
-# /dev/dri is absent, so no node selection is needed.
+# Registers the workers' iGPU virtual functions as gpu.intel.com/xe.
+# The DaemonSet registers nothing on nodes without /dev/dri.
 name: intel-gpu-plugin
 namespace: kube-system
