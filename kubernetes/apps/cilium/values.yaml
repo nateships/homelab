@@ -1,6 +1,6 @@
 # Single source for the Cilium values. Two consumers:
-# - scripts/render-cilium-bootstrap.sh renders the one-time bootstrap
-#   manifest (infra/stacks/cluster) from it.
+# - The one-time bootstrap manifest (infra/stacks/cluster) renders from it
+#   at plan time via data.helm_template.
 # - The cilium Application reads it via valueFiles (config.yaml).
 ipam:
   mode: kubernetes

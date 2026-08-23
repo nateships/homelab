@@ -113,13 +113,34 @@ resource "omni_config_patch" "worker_labels" {
 # Cilium bootstrap: the cluster ships no CNI (patch above), and ArgoCD's own
 # pods cannot start without one. Omni applies this rendered chart ONE TIME at
 # bootstrap; ArgoCD (kubernetes/apps/cilium) adopts it afterward and owns
-# upgrades. Re-render with scripts/render-cilium-bootstrap.sh.
+# upgrades. Rendered at plan time from the same values.yaml the Application
+# reads; keep the version in step with its targetRevision (Renovate groups
+# the two pins).
+data "helm_template" "cilium_bootstrap" {
+  name       = "cilium"
+  repository = "https://helm.cilium.io"
+  chart      = "cilium"
+  # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
+  version      = "1.20.1"
+  namespace    = "kube-system"
+  kube_version = local.kubernetes_version
+  values       = [file("${path.module}/../../../kubernetes/apps/cilium/values.yaml")]
+
+  lifecycle {
+    # Helm-generated TLS material must never reach the Omni manifest.
+    postcondition {
+      condition     = !strcontains(self.manifest, "kind: Secret")
+      error_message = "Rendered Cilium bootstrap manifest contains a Secret."
+    }
+  }
+}
+
 resource "omni_kubernetes_manifest" "cilium_bootstrap" {
   name    = "cilium-bootstrap"
   cluster = omni_cluster.homelab.name
   mode    = "one-time"
 
-  data = file("${path.module}/manifests/cilium-bootstrap.yaml")
+  data = data.helm_template.cilium_bootstrap.manifest
 }
 
 resource "omni_machine_extensions" "all" {
