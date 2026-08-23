@@ -54,6 +54,12 @@ services:
       TS_AUTHKEY: ${TSIDP_AUTHKEY}
       # Required when TS_AUTHKEY is an OAuth client secret
       TS_ADVERTISE_TAGS: tag:tsidp
+      # Funnel serves the application endpoints (discovery, token,
+      # JWKS) publicly and puts the FQDN in public DNS; /authorize
+      # stays tailnet-only. In-cluster OIDC clients (ArgoCD) resolve
+      # and reach the issuer without tailnet plumbing. Needs the
+      # funnel nodeAttr for tag:tsidp in the tailnet policy.
+      TSIDP_USE_FUNNEL: "1"
     volumes:
       - tsidp-data:/var/lib/tsidp
     command: --dir=/var/lib/tsidp
