@@ -8,7 +8,14 @@ spec:
   matchlabels: []
   autoprovision:
     providerid: proxmox
-    kernelargs: []
+    # Steer the iGPU VF (UHD 770, PCI id 8086:a780) to the xe driver:
+    # mainline i915 cannot drive Raptor Lake SR-IOV VFs, xe 6.18+ can
+    # (experimental). force_probe is required while xe support for this
+    # generation is experimental.
+    # site-specific: the a780 device id belongs to this host's iGPU
+    kernelargs:
+      - i915.force_probe=!a780
+      - xe.force_probe=a780
     metavalues: []
     providerdata: |
       cores: 8
