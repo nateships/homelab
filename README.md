@@ -33,6 +33,7 @@ kubernetes/
   apps/             One config.yaml per app; the ApplicationSet generates each Application
 .github/workflows/  CI: tofu fmt/validate, kubeconform
 docs/BOOTSTRAP.md   Bring-up guide, zero to cluster
+docs/SITE.md        Every site-specific value: what a fork must change
 ```
 
 ## Secrets

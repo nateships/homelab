@@ -1,13 +1,15 @@
 # OIDC login against tsidp, ArgoCD-native (no Dex). Issuer, client ID,
 # and client secret resolve from the argocd-tsidp secret (delivered by
-# ESO, see kubernetes/apps/argocd/config/); the issuer URL contains the
-# tailnet name, which stays out of git. Until the secret exists, OIDC
-# login is unavailable and the local admin account still works.
+# ESO, see kubernetes/apps/argocd/config/). The server resolves the
+# issuer FQDN through a hostAliases patch (argocd-server-hostaliases).
+# Until the secret exists, OIDC login is unavailable and the local
+# admin account still works.
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: argocd-cm
 data:
+  # site-specific: workload-proxy URL for this cluster (docs/SITE.md)
   url: https://argocd.omni.nate.cx
   oidc.config: |
     name: Tailscale

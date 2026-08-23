@@ -1,5 +1,6 @@
 # Expose the ArgoCD UI through the Omni workload proxy:
 # https://argocd.omni.nate.cx, authenticated by Omni (tsidp).
+# site-specific: proxy hostname derives from the Omni domain (docs/SITE.md)
 apiVersion: v1
 kind: Service
 metadata:
