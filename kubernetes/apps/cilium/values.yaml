@@ -3,10 +3,24 @@
 ipam:
   mode: kubernetes
 kubeProxyReplacement: true
-# Off until enabled properly (certs via cronJob method, not
-# render-time generation, which churns secrets every sync)
+# cronJob cert method: certs generate in-cluster, so the rendered
+# chart stays free of Secrets (the bootstrap render enforces that).
 hubble:
-  enabled: false
+  enabled: true
+  tls:
+    auto:
+      enabled: true
+      method: cronJob
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+    service:
+      # Omni workload proxy: https://hubble.<omni domain>
+      annotations:
+        omni-kube-service-exposer.sidero.dev/port: "50081:80"
+        omni-kube-service-exposer.sidero.dev/label: Hubble
+        omni-kube-service-exposer.sidero.dev/prefix: hubble
 # Talos-specific settings
 k8sServiceHost: localhost
 k8sServicePort: 7445
