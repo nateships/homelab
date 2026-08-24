@@ -27,6 +27,10 @@ Do the stages in order. Each stage needs the stage before it.
      `tag:k8s-operator`). username = client ID, password = secret. The
      tag must exist in the tailnet policy first (the tailscale stack
      applies it).
+   - `proxmox-csi`: password = the token secret of a dedicated
+     `kubernetes-csi@pve!csi` API token (role CSI; the item's notes
+     carry the pveum commands). The CSI plugin provisions worker
+     volumes on the zpool with it.
    - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
    - `cloudflare-terraform`: password = an API token with Zone DNS Edit
      and Account R2 Write; the cloudflare stack manages the DNS records
