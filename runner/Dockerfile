@@ -11,7 +11,7 @@ RUN apt-get update \
     && useradd --uid 1983 --create-home --shell /bin/bash spacelift
 
 # renovate: datasource=github-releases depName=jdx/mise extractVersion=^v(?<version>.+)$
-ARG MISE_VERSION=2026.8.10
+ARG MISE_VERSION=2026.8.11
 
 ENV MISE_DATA_DIR=/usr/local/share/mise \
     MISE_CONFIG_DIR=/etc/mise \
