@@ -100,10 +100,15 @@ resource "omni_config_patch" "worker_labels" {
     machine_set = omni_machine_set.workers.name
   }
 
+  # Workers can only self-set kubelet-allowlisted labels; the earlier
+  # node-role label never applied. The topology labels are allowlisted;
+  # the CSI plugin requires them (region matches the plugin config,
+  # zone is the PVE node name).
   data = yamlencode({
     machine = {
       nodeLabels = {
-        "node-role.kubernetes.io/worker" = ""
+        "topology.kubernetes.io/region" = "homelab"
+        "topology.kubernetes.io/zone"   = var.proxmox_node
       }
     }
   })

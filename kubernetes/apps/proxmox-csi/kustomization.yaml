@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Plugin config with the API token (ESO)
+  - external-secret.yaml
+helmCharts:
+  - name: proxmox-csi-plugin
+    repo: oci://ghcr.io/sergelogvinov/charts
+    version: 0.5.10
+    releaseName: proxmox-csi
+    namespace: csi-proxmox
+    includeCRDs: true
+    valuesInline:
+      existingConfigSecret: proxmox-csi-plugin
+      storageClass:
+        - name: proxmox-zfs
+          storage: zpool
+          reclaimPolicy: Delete
+          fstype: xfs
+          ssd: "true"
+patches:
+  # The chart has no default-class flag.
+  - patch: |-
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: proxmox-zfs
+        annotations:
+          storageclass.kubernetes.io/is-default-class: "true"
