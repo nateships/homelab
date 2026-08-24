@@ -1,0 +1,35 @@
+# Static NFS volume: pods mount the Synology directly (NFSv4.1 client
+# is in the Talos kernel; no CSI). storageClassName "" on both sides
+# keeps the default StorageClass from capturing the claim. Retain: the
+# library outlives any cluster.
+# site-specific: Synology address and export path (docs/SITE.md)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: syno-media
+spec:
+  capacity:
+    storage: 1Ti # informational for a static NFS volume
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - nfsvers=4.1
+  nfs:
+    server: 10.16.10.100
+    path: /volume1/media
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: syno-media
+  resources:
+    requests:
+      storage: 1Ti

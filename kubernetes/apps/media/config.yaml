@@ -1,0 +1,6 @@
+# Shared foundation for the media stack: the Synology NFS library as
+# one RWX volume. Apps mount the PVC at /data (subPath for partial
+# views). Media files are owned by UID 1024 / GID 100; app containers
+# run with that identity.
+name: media
+namespace: media

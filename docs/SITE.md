@@ -17,6 +17,7 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | Value | Where | Meaning |
 |---|---|---|
 | `argocd.omni.nate.cx` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI URL via the Omni workload proxy |
+| `10.16.10.100:/volume1/media` | `kubernetes/apps/media/media-pv.yaml` | Synology NFS export holding the media library |
 
 This value stays in git because ArgoCD renders only committed
 manifests. Everything terraform-applied arrives as TF_VAR_* instead
