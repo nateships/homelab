@@ -40,6 +40,7 @@ services:
       --workload-proxying-use-omni-subdomain
       --workload-proxying-subdomain=
       --etcd-backup-s3
+      --enable-break-glass-configs
       ${AUTH}
 
   # OIDC identity provider on the tailnet; Omni authenticates against it.
