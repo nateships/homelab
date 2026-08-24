@@ -25,24 +25,22 @@
 		{"target": ["tag:tsidp"], "attr": ["funnel"]},
 	],
 
-	"acls": [
-		// Spacelift runs reach the Proxmox API and SSH.
-		{"action": "accept", "src": ["tag:spacelift"], "dst": ["tag:pve:8006", "tag:pve:22"]},
-
-		// Default allow for everything else (Tailscale's default posture).
-		// Tighten by replacing this rule with explicit ones.
-		{"action": "accept", "src": ["*"], "dst": ["*:*"]},
-	],
-
 	// Tailscale SSH: the Ansible stack and tailnet members log into
 	// the PVE host as root. No SSH keys.
 	"ssh": [
 		{"action": "accept", "src": ["tag:spacelift", "autogroup:member"], "dst": ["tag:pve"], "users": ["root"]},
 	],
 
-	// Grant the tsidp admin UI and client registration to tailnet
-	// members.
 	"grants": [
+		// Spacelift runs reach the Proxmox API and SSH.
+		{"src": ["tag:spacelift"], "dst": ["tag:pve"], "ip": ["tcp:8006", "tcp:22"]},
+
+		// Default allow for everything else (Tailscale's default posture).
+		// Tighten by replacing this rule with explicit ones.
+		{"src": ["*"], "dst": ["*"], "ip": ["*"]},
+
+		// Grant the tsidp admin UI and client registration to tailnet
+		// members.
 		{
 			"src": ["autogroup:member"],
 			"dst": ["tag:tsidp"],
