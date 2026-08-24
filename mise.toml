@@ -15,7 +15,7 @@ kubeconform = "0.8.0"
 # Renovate tracks it through the 1password/op Docker image tags.
 "aqua:1password/cli" = "2.39.0"
 prek = "0.4.14"
-trufflehog = "3.97.0"
+trufflehog = "3.97.1"
 
 # Runner-image tools (runner/Dockerfile installs this whole file via mise)
 "aqua:tailscale/tailscale" = "1.102.3"
