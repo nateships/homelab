@@ -56,6 +56,12 @@ resource "proxmox_virtual_environment_container" "omni" {
   initialization {
     hostname = "omni"
 
+    # Without this the LXC inherits the host resolv.conf, which
+    # tailscale points at 100.100.100.100 (dead in a fresh container).
+    dns {
+      servers = [var.omni_ct_gateway]
+    }
+
     ip_config {
       ipv4 {
         address = var.omni_ct_ip
