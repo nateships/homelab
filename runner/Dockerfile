@@ -25,6 +25,9 @@ RUN curl -fsSL https://mise.run | MISE_VERSION="v${MISE_VERSION}" sh \
     && mise trust /etc/mise/config.toml \
     && mise install \
     && chmod -R a+rX "${MISE_DATA_DIR}" \
+    # The build ran as root; drop its cache so the runtime user can
+    # recreate a writable one.
+    && rm -rf "${MISE_CACHE_DIR}" \
     # smoke-test the tools the stacks depend on
     && op --version && tailscale --version \
     && ansible-playbook --version && omnictl --version
