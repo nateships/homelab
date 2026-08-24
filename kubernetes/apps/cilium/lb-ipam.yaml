@@ -1,0 +1,23 @@
+# LoadBalancer VIPs come from a static carve-out of the node VLAN,
+# above the DHCP scope. Reachable from the LAN through the router and
+# over the tailnet through the advertised subnet route.
+# site-specific: the VIP range (docs/SITE.md)
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: vlan-vips
+spec:
+  blocks:
+    - cidr: 10.16.101.224/27
+---
+# Workers answer ARP for the VIPs (they carry the topology labels;
+# control planes do not announce).
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: vlan-vips
+spec:
+  nodeSelector:
+    matchLabels:
+      topology.kubernetes.io/region: homelab
+  loadBalancerIPs: true
