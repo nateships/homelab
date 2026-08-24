@@ -44,6 +44,15 @@
       "matchStrings": ["argoproj/argo-cd/(?<currentValue>v[\\d.]+)/manifests/install\\.yaml"],
       "depNameTemplate": "argoproj/argo-cd",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      // Gateway API CRD manifest URL in the cilium kustomization; the
+      // version sits inside a URL.
+      "customType": "regex",
+      "managerFilePatterns": ["/^kubernetes/apps/cilium/kustomization\\.yaml$/"],
+      "matchStrings": ["gateway-api/releases/download/(?<currentValue>v[\\d.]+)/standard-install\\.yaml"],
+      "depNameTemplate": "kubernetes-sigs/gateway-api",
+      "datasourceTemplate": "github-releases"
     }
   ],
   "packageRules": [
