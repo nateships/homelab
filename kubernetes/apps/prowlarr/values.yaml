@@ -40,13 +40,13 @@ ingress:
     annotations:
       # Served as a Tailscale Service by the shared ProxyGroup.
       tailscale.com/proxy-group: ingress
-    hosts:
-      - host: prowlarr
-        paths:
-          - path: /
-            service:
-              identifier: app
-              port: http
+    # The tailscale controller ignores host-bearing rules; the tailnet
+    # name comes from tls.hosts and the backend is the default.
+    defaultBackend:
+      service:
+        name: prowlarr
+        port:
+          number: 9696
     tls:
       - hosts: [prowlarr]
 persistence:
