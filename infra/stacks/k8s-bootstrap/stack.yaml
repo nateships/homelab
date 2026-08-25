@@ -1,5 +1,7 @@
 # Stack manifest: hydrated by the admin stack (infra/spacelift).
 description: Kubernetes bootstrap (ArgoCD, ApplicationSet, ESO secret)
+# Ansible check mode adds no information here; apply on push.
+autodeploy: true
 type: ansible
 playbook: site.yml
 labels: [op]
