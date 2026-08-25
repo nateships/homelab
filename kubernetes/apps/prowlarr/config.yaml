@@ -1,0 +1,4 @@
+# Indexer manager. Config only (no media mount); reachable at
+# https://prowlarr.<tailnet>.ts.net through the tailscale operator.
+name: prowlarr
+namespace: prowlarr

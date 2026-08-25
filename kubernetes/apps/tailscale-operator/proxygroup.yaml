@@ -1,0 +1,9 @@
+# Shared ingress proxies: every Ingress with the proxy-group
+# annotation becomes a Tailscale Service served by both replicas.
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyGroup
+metadata:
+  name: ingress
+spec:
+  type: ingress
+  replicas: 2

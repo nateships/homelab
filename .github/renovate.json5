@@ -23,7 +23,7 @@
         "/(^|/)Dockerfile(\\..+)?$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[^\\s]+)(?: registryUrl=(?<registryUrl>[^\\s]+))? depName=(?<depName>[^\\s]+)(?: versioning=(?<versioning>[^\\s]+))?(?: extractVersion=(?<extractVersion>[^\\s]+))?\\s+.*?(?:=|:)\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+        "# renovate: datasource=(?<datasource>[^\\s]+)(?: registryUrl=(?<registryUrl>[^\\s]+))? depName=(?<depName>[^\\s]+)(?: versioning=(?<versioning>[^\\s]+))?(?: extractVersion=(?<extractVersion>[^\\s]+))?\\s+.*?(?:=|:)\\s*\"?(?<currentValue>[^\"\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?\"?"
       ],
       "versioningTemplate": "semver-coerced"
     },
