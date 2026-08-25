@@ -3,10 +3,12 @@
 # their secrets land in the 1Password items the consumers already read.
 # Scope or tag changes are plan/apply; rotation is tofu taint.
 
+# depends_on: tag ownership must apply before minting.
 resource "tailscale_oauth_client" "spacelift" {
   description = "spacelift-runs"
   scopes      = ["auth_keys"]
   tags        = ["tag:spacelift"]
+  depends_on  = [tailscale_acl.tailnet]
 }
 
 resource "onepassword_item" "tailscale_spacelift" {
@@ -25,6 +27,7 @@ resource "tailscale_oauth_client" "omni" {
   description = "omni-lxc"
   scopes      = ["auth_keys"]
   tags        = ["tag:omni"]
+  depends_on  = [tailscale_acl.tailnet]
 }
 
 resource "onepassword_item" "tailscale_omni" {
@@ -43,6 +46,7 @@ resource "tailscale_oauth_client" "tsidp" {
   description = "tsidp"
   scopes      = ["auth_keys"]
   tags        = ["tag:tsidp"]
+  depends_on  = [tailscale_acl.tailnet]
 }
 
 resource "onepassword_item" "tailscale_tsidp" {
@@ -61,6 +65,7 @@ resource "tailscale_oauth_client" "k8s_operator" {
   description = "kubernetes-operator"
   scopes      = ["auth_keys", "devices:core", "services"]
   tags        = ["tag:k8s-operator"]
+  depends_on  = [tailscale_acl.tailnet]
 }
 
 resource "onepassword_item" "tailscale_operator" {

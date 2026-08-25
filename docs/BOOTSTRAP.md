@@ -20,9 +20,10 @@ Do the stages in order. Each stage needs the stage before it.
      secret. The ROOT client: the tailscale stack mints every other
      tailnet credential with it. Write scopes: **Policy File**,
      **OAuth Keys**, **Auth Keys**, **Devices Core**, **Services**;
-     tags: `tag:spacelift`, `tag:omni`, `tag:tsidp`,
-     `tag:k8s-operator` (a client can only grant scopes and tags it
-     holds)
+     tags: `tag:terraform`, `tag:spacelift`, `tag:omni`, `tag:tsidp`,
+     `tag:k8s-operator` (tag:terraform makes the client an OWNER of
+     the minted tags via tagOwners; API callers must own a tag to
+     assign it)
    - `tailscale-omni`, `tailscale-tsidp`: created empty; the tailscale
      stack fills them
    - `tsidp-omni`: see stage 3

@@ -2,12 +2,16 @@
 {
 	// Who may apply each tag to devices.
 	"tagOwners": {
-		"tag:spacelift": ["autogroup:admin"],
+		// The root OAuth client holds tag:terraform; ownership below
+		// lets it mint the tagged clients (API callers must OWN a tag
+		// to assign it).
+		"tag:terraform": ["autogroup:admin"],
+		"tag:spacelift": ["autogroup:admin", "tag:terraform"],
 		"tag:pve": ["autogroup:admin"],
-		"tag:omni": ["autogroup:admin"],
-		"tag:tsidp": ["autogroup:admin"],
+		"tag:omni": ["autogroup:admin", "tag:terraform"],
+		"tag:tsidp": ["autogroup:admin", "tag:terraform"],
 		// The Kubernetes operator; it provisions proxy devices as tag:k8s.
-		"tag:k8s-operator": ["autogroup:admin"],
+		"tag:k8s-operator": ["autogroup:admin", "tag:terraform"],
 		"tag:k8s": ["tag:k8s-operator"],
 	},
 
