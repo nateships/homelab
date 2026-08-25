@@ -2,6 +2,8 @@
 # Sits between omni-config (Omni must run) and cluster (machine sets
 # reference the classes this stack applies).
 description: Omni machine classes and etcd backup config (omnictl)
+# Ansible check mode adds no information here; apply on push.
+autodeploy: true
 type: ansible
 playbook: site.yml
 labels: [op]
