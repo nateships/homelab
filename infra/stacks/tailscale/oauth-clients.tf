@@ -18,10 +18,6 @@ resource "onepassword_item" "tailscale_spacelift" {
   password = tailscale_oauth_client.spacelift.key
 }
 
-import {
-  to = onepassword_item.tailscale_spacelift
-  id = "vaults/nepmh5li3casah74lu46ip74ym/items/pabhby2ddtolapziaurulpoze4"
-}
 
 resource "tailscale_oauth_client" "omni" {
   description = "omni-lxc"
@@ -37,10 +33,6 @@ resource "onepassword_item" "tailscale_omni" {
   password = tailscale_oauth_client.omni.key
 }
 
-import {
-  to = onepassword_item.tailscale_omni
-  id = "vaults/nepmh5li3casah74lu46ip74ym/items/ufkc53z73p7cbvn52egxl6xf54"
-}
 
 resource "tailscale_oauth_client" "tsidp" {
   description = "tsidp"
@@ -56,10 +48,6 @@ resource "onepassword_item" "tailscale_tsidp" {
   password = tailscale_oauth_client.tsidp.key
 }
 
-import {
-  to = onepassword_item.tailscale_tsidp
-  id = "vaults/nepmh5li3casah74lu46ip74ym/items/m2zbeafqxddrskjkpnkzjo3uue"
-}
 
 resource "tailscale_oauth_client" "k8s_operator" {
   description = "kubernetes-operator"
@@ -74,9 +62,4 @@ resource "onepassword_item" "tailscale_operator" {
   category = "login"
   username = tailscale_oauth_client.k8s_operator.id
   password = tailscale_oauth_client.k8s_operator.key
-}
-
-import {
-  to = onepassword_item.tailscale_operator
-  id = "vaults/nepmh5li3casah74lu46ip74ym/items/ah7ehoka5etibodjcyxwnsnlgi"
 }
