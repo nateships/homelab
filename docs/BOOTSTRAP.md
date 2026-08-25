@@ -15,12 +15,17 @@ Do the stages in order. Each stage needs the stage before it.
      fields feed the infra provider (stage 4): `lan-url` (the LAN API URL,
      for example `https://<pve-lan-ip>:8006`), `token-id`
      (`root@pam!spacelift`), `token-secret` (the token UUID)
-   - `tailscale-spacelift`: password field = the Tailscale OAuth client
-     secret from stage 1
-   - `tailscale-terraform`: username = OAuth client ID, password = secret;
-     a second OAuth client with the policy-file write scope, used by the
-     tailscale stack
-   - `tailscale-omni`, `tailscale-tsidp`, `tsidp-omni`: see stage 3
+   - `tailscale-spacelift`: created empty; the tailscale stack fills it
+   - `tailscale-terraform`: username = OAuth client ID, password =
+     secret. The ROOT client: the tailscale stack mints every other
+     tailnet credential with it. Write scopes: **Policy File**,
+     **OAuth Keys**, **Auth Keys**, **Devices Core**, **Services**;
+     tags: `tag:spacelift`, `tag:omni`, `tag:tsidp`,
+     `tag:k8s-operator` (a client can only grant scopes and tags it
+     holds)
+   - `tailscale-omni`, `tailscale-tsidp`: created empty; the tailscale
+     stack fills them
+   - `tsidp-omni`: see stage 3
    - `tsidp-argocd`: see stage 5 (ArgoCD OIDC login)
    - `tailscale-operator`: OAuth client for the Kubernetes operator
      (scopes **Auth Keys: write** and **Devices Core: write**, tag
@@ -61,16 +66,11 @@ connects to Proxmox at its ts.net address.
    curl -fsSL https://tailscale.com/install.sh | sh
    tailscale up   # note the MagicDNS name, e.g. pve.tailnet-name.ts.net
    ```
-2. Create a Tailscale OAuth client for Spacelift runs. First add the tag to
-   your ACLs and let it reach only the PVE host on port 8006:
-   ```jsonc
-   "tagOwners": { "tag:spacelift": ["autogroup:admin"] },
-   "acls": [{ "action": "accept", "src": ["tag:spacelift"], "dst": ["pve1:8006"] }],
-   ```
-   Then: admin console → Settings → **OAuth clients** → Generate. Scope:
-   **Keys → Auth Keys (write)**. Tag: `tag:spacelift`. Store the
-   `tskey-client-...` secret in the `tailscale-spacelift` item. The secret
-   does not expire; the run hook adds `?ephemeral=true&preauthorized=true`.
+2. Create the root OAuth client (`tailscale-terraform` item; scopes and
+   tags in stage 0). The tailscale stack mints the Spacelift run
+   credential from it into the `tailscale-spacelift` item; the run hook
+   adds `?ephemeral=true&preauthorized=true`. On a bare tailnet, add
+   the tags to the policy before the console accepts the client.
 3. Create the Proxmox API token:
    ```bash
    pveum user token add root@pam spacelift --privsep=0
@@ -141,11 +141,9 @@ Login uses Tailscale identity through tsidp (an OIDC provider that runs
 next to Omni and joins the tailnet). Two-phase, because the OIDC client can
 only be registered once tsidp runs:
 
-1. Create two more Tailscale OAuth clients (Trust credentials, scope
-   **Auth keys: write**): one with tag `tag:omni` (the LXC joins the
-   tailnet), one with `tag:tsidp`. Store the secrets in the
-   `tailscale-omni` and `tailscale-tsidp` items. Set the tailnet DNS name
-   in the `tailscale-tsidp` item's `tailnet-dns` field.
+1. The tailscale stack fills the `tailscale-omni` and `tailscale-tsidp`
+   items (the LXC and tsidp join the tailnet with them). Set the
+   tailnet DNS name in the `omni` item's `tailnet-dns` field.
 2. Run `homelab-omni-config`. The LXC joins the tailnet and tsidp starts.
 3. Open `https://tsidp.<tailnet>.ts.net` and register a client with
    redirect URI `https://omni.nate.cx/oidc/consume`. Store the client ID
