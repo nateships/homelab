@@ -5,6 +5,8 @@
 # detach first.
 name: proxmox-csi
 namespace: csi-proxmox
+labels:
+  category: storage
 # The node plugin mounts host paths and runs privileged; Talos
 # enforces baseline PSA, so the namespace opts up.
 namespaceLabels:

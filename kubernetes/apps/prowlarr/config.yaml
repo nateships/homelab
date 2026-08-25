@@ -2,3 +2,5 @@
 # https://prowlarr.<tailnet>.ts.net through the tailscale operator.
 name: prowlarr
 namespace: prowlarr
+labels:
+  category: media
