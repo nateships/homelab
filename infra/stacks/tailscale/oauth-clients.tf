@@ -12,10 +12,11 @@ resource "tailscale_oauth_client" "spacelift" {
 }
 
 resource "onepassword_item" "tailscale_spacelift" {
-  vault    = data.onepassword_vault.homelab.uuid
-  title    = "tailscale-spacelift"
-  category = "password"
-  password = tailscale_oauth_client.spacelift.key
+  vault      = data.onepassword_vault.homelab.uuid
+  note_value = "tailscale OAuth client id: ${tailscale_oauth_client.spacelift.id}"
+  title      = "tailscale-spacelift"
+  category   = "password"
+  password   = tailscale_oauth_client.spacelift.key
 }
 
 
@@ -27,10 +28,11 @@ resource "tailscale_oauth_client" "omni" {
 }
 
 resource "onepassword_item" "tailscale_omni" {
-  vault    = data.onepassword_vault.homelab.uuid
-  title    = "tailscale-omni"
-  category = "password"
-  password = tailscale_oauth_client.omni.key
+  vault      = data.onepassword_vault.homelab.uuid
+  note_value = "tailscale OAuth client id: ${tailscale_oauth_client.omni.id}"
+  title      = "tailscale-omni"
+  category   = "password"
+  password   = tailscale_oauth_client.omni.key
 }
 
 
@@ -42,10 +44,11 @@ resource "tailscale_oauth_client" "tsidp" {
 }
 
 resource "onepassword_item" "tailscale_tsidp" {
-  vault    = data.onepassword_vault.homelab.uuid
-  title    = "tailscale-tsidp"
-  category = "password"
-  password = tailscale_oauth_client.tsidp.key
+  vault      = data.onepassword_vault.homelab.uuid
+  note_value = "tailscale OAuth client id: ${tailscale_oauth_client.tsidp.id}"
+  title      = "tailscale-tsidp"
+  category   = "password"
+  password   = tailscale_oauth_client.tsidp.key
 }
 
 
