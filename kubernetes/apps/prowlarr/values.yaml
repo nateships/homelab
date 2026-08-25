@@ -8,6 +8,10 @@ controllers:
           tag: 2.6.2@sha256:13c576d2ad93764ab78d4e75c80447bc5489a06a15fd39e89c0be0be01e2ba3a
         env:
           TZ: America/New_York
+          # Auth is the tailnet ingress; the UI trusts it (the API
+          # stays key-protected).
+          PROWLARR__AUTH__METHOD: External
+          PROWLARR__AUTH__REQUIRED: DisabledForLocalAddresses
         probes:
           liveness:
             enabled: true
