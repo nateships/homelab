@@ -25,3 +25,6 @@ mise.local.toml
 
 # kustomize helm inflator cache (kubectl kustomize --enable-helm)
 kubernetes/apps/*/charts/
+
+# Claude Code session artifacts
+.claude/

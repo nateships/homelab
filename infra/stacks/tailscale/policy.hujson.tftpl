@@ -17,6 +17,11 @@
 		"routes": {
 			"${k8s_vlan_cidr}": ["tag:pve"],
 		},
+		// The operator's ProxyGroup devices advertise Tailscale
+		// Services (one per exposed Ingress) without console clicks.
+		"services": {
+			"tag:k8s": ["tag:k8s"],
+		},
 	},
 
 	// tsidp serves its application endpoints publicly through Funnel
