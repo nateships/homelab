@@ -23,10 +23,10 @@ Do the stages in order. Each stage needs the stage before it.
    - `tailscale-omni`, `tailscale-tsidp`, `tsidp-omni`: see stage 3
    - `tsidp-argocd`: see stage 5 (ArgoCD OIDC login)
    - `tailscale-operator`: OAuth client for the Kubernetes operator
-     (scopes **Auth Keys: write** and **Devices Core: write**, tag
-     `tag:k8s-operator`). username = client ID, password = secret. The
-     tag must exist in the tailnet policy first (the tailscale stack
-     applies it).
+     (write scopes **Services**, **Devices Core**, and **Auth Keys**,
+     each with tag `tag:k8s-operator`). username = client ID,
+     password = secret. The tag must exist in the tailnet policy first
+     (the tailscale stack applies it).
    - `proxmox-csi`: password = the token secret of a dedicated
      `kubernetes-csi@pve!csi` API token (role CSI; the item's notes
      carry the pveum commands). The CSI plugin provisions worker
