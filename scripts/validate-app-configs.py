@@ -17,6 +17,7 @@ ALLOWED_KEYS = {
     "ignoreDifferences",
     "autosync",
     "namespaceLabels",
+    "labels",
 }
 
 errors = []
@@ -78,12 +79,14 @@ for path in files:
     if "autosync" in cfg and not isinstance(cfg["autosync"], bool):
         err(path, "'autosync' must be a boolean")
 
-    labels = cfg.get("namespaceLabels")
-    if labels is not None and (
-        not isinstance(labels, dict)
-        or not all(isinstance(v, str) for v in labels.values())
-    ):
-        err(path, "'namespaceLabels' must be a mapping of string values")
+    for key in ("labels", "namespaceLabels"):
+        val = cfg.get(key)
+        if val is not None and (
+            not isinstance(val, dict)
+            or not all(isinstance(v, str) for v in val.values())
+        ):
+            err(path, f"'{key}' must be a mapping of string values")
+
 
 if errors:
     print("\n".join(errors), file=sys.stderr)

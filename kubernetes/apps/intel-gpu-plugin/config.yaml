@@ -2,3 +2,5 @@
 # The DaemonSet registers nothing on nodes without /dev/dri.
 name: intel-gpu-plugin
 namespace: kube-system
+labels:
+  category: infra

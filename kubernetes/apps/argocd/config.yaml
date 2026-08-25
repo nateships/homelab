@@ -2,6 +2,8 @@
 # sources: the bootstrap dir plus the secret kustomization here.
 name: argocd
 namespace: argocd
+labels:
+  category: infra
 sources:
   - path: kubernetes/bootstrap/argocd
   - path: kubernetes/apps/argocd

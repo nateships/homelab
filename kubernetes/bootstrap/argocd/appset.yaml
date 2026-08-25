@@ -7,6 +7,9 @@
 #   ignoreDifferences optional, passed through
 #   autosync: false   optional; disables automated sync
 #   namespaceLabels   optional; labels for the created namespace
+#   labels            optional; labels on the generated Application
+#                     (category: infra|network|storage|media by
+#                     convention, for UI filtering)
 # Prune is off: resources removed from git stay until manual pruning.
 # Deletion of a config file deletes the Application.
 # preserveResourcesOnDeletion keeps app resources if someone deletes
@@ -55,6 +58,11 @@ spec:
   # The flat template fields cannot carry nested YAML; this patch
   # injects it. The patch strategic-merges into the template.
   templatePatch: |
+    {{- if hasKey . "labels" }}
+    metadata:
+      labels:
+    {{- get . "labels" | toYaml | nindent 8 }}
+    {{- end }}
     spec:
       sources:
     {{- /* sprig get, not .sources: missingkey=error rejects absent keys */}}

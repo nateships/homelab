@@ -1,2 +1,4 @@
 name: external-secrets
 namespace: external-secrets
+labels:
+  category: infra
