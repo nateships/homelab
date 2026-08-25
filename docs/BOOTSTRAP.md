@@ -5,9 +5,10 @@ Do the stages in order. Each stage needs the stage before it.
 ## 0. 1Password
 
 1. Create a vault named `homelab`. Service accounts cannot read Private vaults.
-2. Create a service account: 1Password → Developer → Service Account. Give it
-   read access to the `homelab` vault only. Save the `ops_...` token in your
-   Private vault.
+2. Create a service account (`homelab-rw`): 1Password → Developer →
+   Service Account. Give it read and write access to the `homelab`
+   vault only (the tailscale stack writes minted secrets into items).
+   Save the `ops_...` token in your Private vault.
 3. Create these items in the `homelab` vault:
    - `omni`: fields `account-uuid`, `admin-email` (stage 3 adds `domain`
      and `lxc-ip`)
