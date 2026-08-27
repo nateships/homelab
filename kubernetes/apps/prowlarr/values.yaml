@@ -12,6 +12,17 @@ controllers:
           # stays key-protected).
           PROWLARR__AUTH__METHOD: External
           PROWLARR__AUTH__REQUIRED: DisabledForLocalAddresses
+          # Pinned config-plane settings; env beats the restored
+          # config.xml. URLBASE stays empty behind the tailnet
+          # ingress; the port matches the service and probes.
+          PROWLARR__SERVER__PORT: "9696"
+          PROWLARR__SERVER__URLBASE: ""
+          PROWLARR__LOG__ANALYTICSENABLED: "False"
+          PROWLARR__AUTH__APIKEY:
+            valueFrom:
+              secretKeyRef:
+                name: prowlarr
+                key: api_key
         probes:
           liveness:
             enabled: true
