@@ -1,0 +1,13 @@
+# UDP GSO in kernel TUN mode throttles proxy throughput to ~20KB/s
+# (tailscale/tailscale#20858). Disable it until upstream auto-detects.
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: no-udp-gso
+spec:
+  statefulSet:
+    pod:
+      tailscaleContainer:
+        env:
+          - name: TS_DEBUG_DISABLE_UDP_GSO
+            value: "true"
