@@ -14,7 +14,7 @@ kubeconform = "0.8.0"
 # Exact version required: this aqua package cannot enumerate releases.
 # Renovate tracks it through the 1password/op Docker image tags.
 "aqua:1password/cli" = "2.39.0"
-prek = "0.4.14"
+prek = "0.5.0"
 trufflehog = "3.97.1"
 
 # Runner-image tools (runner/Dockerfile installs this whole file via mise)
