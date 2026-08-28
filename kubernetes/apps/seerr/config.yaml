@@ -1,0 +1,6 @@
+# Media request portal for plex users.
+# Reachable at https://seerr.<tailnet>.ts.net.
+name: seerr
+namespace: seerr
+labels:
+  category: media
