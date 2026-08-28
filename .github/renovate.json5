@@ -5,8 +5,11 @@
   "labels": ["renovate"],
   "assignees": ["nateships"],
   // Automerge non-major once CI passes; majors stay manual via the rule below.
+  // Renovate merges during the overnight window itself: GitHub-native
+  // automerge would merge the moment checks pass and ignore the window.
   "automerge": true,
-  "platformAutomerge": true,
+  "platformAutomerge": false,
+  "automergeSchedule": ["after 3am and before 6am"],
   // Off by default in Renovate; tracks `rev:` pins in .pre-commit-config.yaml.
   "pre-commit": { "enabled": true },
   "customManagers": [
