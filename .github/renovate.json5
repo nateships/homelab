@@ -31,6 +31,18 @@
       "versioningTemplate": "semver-coerced"
     },
     {
+      // Inline full image refs (raw container specs where the image is
+      // one string, e.g. velero's plugin initContainer). The annotation
+      // manager only handles bare version values.
+      "customType": "regex",
+      "managerFilePatterns": ["/^kubernetes/apps/.*\\.ya?ml$/"],
+      "matchStrings": [
+        "image: \"?(?<depName>[a-z0-9][a-z0-9./-]*/[a-z0-9./-]+):(?<currentValue>v?[0-9][^\"\\s@]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?\"?\\n"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "semver-coerced"
+    },
+    {
       // op CLI pin in mise.toml, tracked via the 1password/op Docker
       // image tags (the CLI has no GitHub releases).
       "customType": "regex",
