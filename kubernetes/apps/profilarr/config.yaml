@@ -1,0 +1,6 @@
+# Quality profile manager: syncs TRaSH-guides profiles into the arrs.
+# Reachable at https://profilarr.<tailnet>.ts.net.
+name: profilarr
+namespace: profilarr
+labels:
+  category: media
