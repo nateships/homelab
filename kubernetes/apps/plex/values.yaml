@@ -40,9 +40,6 @@ service:
   app:
     controller: plex
     type: LoadBalancer
-    # Preserve client source IPs: SNAT would show every client as a
-    # pod-network address and plex would rate-limit them as remote.
-    externalTrafficPolicy: Local
     annotations:
       # site-specific: the pinned service VIP (docs/SITE.md)
       lbipam.cilium.io/ips: 10.16.101.225
