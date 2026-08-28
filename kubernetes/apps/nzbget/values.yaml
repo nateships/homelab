@@ -8,6 +8,36 @@ controllers:
           tag: 26.3.0@sha256:7b8c77ede65ad37b55e318a38e09249e196736c319bd3c24034f7d53a2f1ba5a
         env:
           TZ: America/New_York
+        # -o overrides beat the config file, so a settings restore
+        # cannot change these. ${AppDir} is expanded by nzbget.
+        args:
+          - -o
+          - MainDir=/config
+          - -o
+          - DestDir=/data/usenet/complete
+          - -o
+          - InterDir=/data/usenet/incomplete
+          - -o
+          - WebDir=${AppDir}/webui
+          - -o
+          - ConfigTemplate=${AppDir}/webui/nzbget.conf.template
+          - -o
+          - CertStore=${AppDir}/cacert.pem
+          - -o
+          - ScriptDir=/config/scripts
+          - -o
+          - TempDir=/tmp
+          - -o
+          - LockFile=/config/nzbget.lock
+          - -o
+          - WriteLog=none
+          - -o
+          - UpdateCheck=none
+          # Auth is delegated to the tailnet ingress.
+          - -o
+          - ControlUsername=
+          - -o
+          - ControlPassword=
         probes:
           liveness:
             enabled: true
@@ -19,7 +49,7 @@ controllers:
           capabilities:
             drop: ["ALL"]
 defaultPodOptions:
-  # Media-stack identity: files on the NAS are UID 1024 / GID 100.
+  # Media-stack identity: files on the media export are UID 1024 / GID 100.
   securityContext:
     runAsNonRoot: true
     runAsUser: 1024
@@ -63,7 +93,5 @@ persistence:
   media:
     existingClaim: media
     globalMounts:
-      # Same path the download tree uses on the NAS; nzbget.conf's
-      # MainDir ports over unchanged.
       - path: /data/usenet
         subPath: usenet

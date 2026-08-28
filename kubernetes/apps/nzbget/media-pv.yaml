@@ -1,9 +1,9 @@
-# Static NFS volume: pods mount the Synology directly (NFSv4.1 client
+# Static NFS volume: pods mount the export directly (NFSv4.1 client
 # is in the Talos kernel; no CSI). One PV binds one PVC, so each
 # consuming namespace carries its own pair against the same export.
 # storageClassName "" keeps the default StorageClass from capturing
 # the claim; Retain because the library outlives any cluster.
-# site-specific: Synology address and export path (docs/SITE.md)
+# site-specific: NFS server address and export path (docs/SITE.md)
 apiVersion: v1
 kind: PersistentVolume
 metadata:
