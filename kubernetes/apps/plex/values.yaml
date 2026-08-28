@@ -51,6 +51,11 @@ persistence:
   # transcoder settings.
   transcode:
     type: emptyDir
+  # Staged offline downloads must survive pod restarts until clients
+  # fetch them; select /downloads in the transcoder settings.
+  downloads:
+    accessMode: ReadWriteOnce
+    size: 25Gi
   # readOnlyRootFilesystem needs a writable /tmp.
   tmp:
     type: emptyDir
