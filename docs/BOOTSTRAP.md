@@ -31,7 +31,7 @@ Do the stages in order. Each stage needs the stage before it.
    - `tsidp-argocd`: see stage 5 (ArgoCD OIDC login)
    - `tsidp-velero-ui`: same shape as `tsidp-argocd` (username = client
      id, password = secret, `issuer` field); register the client in tsidp
-     with redirect URI `https://velero.<tailnet>.ts.net/api/auth/oauth`
+     with redirect URI `https://velero.<tailnet>.ts.net/login`
    - `tailscale-operator`: OAuth client for the Kubernetes operator
      (scopes **Auth Keys: write** and **Devices Core: write**, tag
      `tag:k8s-operator`). username = client ID, password = secret. The
