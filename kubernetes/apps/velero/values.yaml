@@ -1,0 +1,42 @@
+image:
+  repository: velero/velero
+  # renovate: datasource=docker depName=velero/velero
+  tag: v1.18.1
+initContainers:
+  - name: velero-plugin-for-aws
+    # renovate: datasource=docker depName=velero/velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.14.2@sha256:0751144c1c8e52d52c48717fbd13ad5a3061e612ae4d7ad744a946cd5b139d1a
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+credentials:
+  useSecret: true
+  existingSecret: velero-r2
+configuration:
+  # Kopia file-system backup; no CSI snapshots.
+  defaultVolumesToFsBackup: true
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: velero-backups
+      config:
+        region: auto
+        s3ForcePathStyle: "true"
+        # site-specific: R2 endpoint carries the account id (docs/SITE.md)
+        s3Url: https://6583c8e51ebe94090949e37a7c403844.r2.cloudflarestorage.com
+        # R2 rejects the SDK's streaming checksums.
+        checksumAlgorithm: ""
+  volumeSnapshotLocation: []
+snapshotsEnabled: false
+deployNodeAgent: true
+schedules:
+  daily-config:
+    disabled: false
+    schedule: "0 4 * * *"
+    template:
+      ttl: 720h
+      includedNamespaces:
+        - "*"
+metrics:
+  enabled: false
+upgradeCRDs: true

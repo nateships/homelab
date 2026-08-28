@@ -20,6 +20,7 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | `10.16.10.100:/volume1/media` | `kubernetes/apps/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
 | `10.16.101.224/27` | `kubernetes/apps/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
 | `10.16.101.225` | `kubernetes/apps/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |
+| R2 endpoint | `kubernetes/apps/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |
 
 This value stays in git because ArgoCD renders only committed
 manifests. Everything terraform-applied arrives as TF_VAR_* instead

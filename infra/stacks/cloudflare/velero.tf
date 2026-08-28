@@ -1,0 +1,40 @@
+# Velero writes file-system backups of the config PVCs here. Retention
+# is velero's job (backup TTL), so no lifecycle rule.
+resource "cloudflare_r2_bucket" "velero" {
+  account_id = var.r2_account_id
+  name       = "velero-backups"
+}
+
+data "cloudflare_api_token_permission_groups_list" "all" {}
+
+locals {
+  r2_item_write_id = one([
+    for g in data.cloudflare_api_token_permission_groups_list.all.result :
+    g.id if g.name == "Workers R2 Storage Bucket Item Write"
+  ])
+}
+
+# R2's S3 credentials derive from an API token: the access key id is
+# the token id and the secret is the sha256 of the token value.
+resource "cloudflare_api_token" "velero_r2" {
+  name = "velero-r2"
+  policies = [{
+    effect = "allow"
+    permission_groups = [{
+      id = local.r2_item_write_id
+    }]
+    resources = {
+      "com.cloudflare.edge.r2.bucket.${var.r2_account_id}_default_${cloudflare_r2_bucket.velero.name}" = "*"
+    }
+  }]
+}
+
+# ESO renders these into velero's aws credentials file.
+resource "onepassword_item" "velero" {
+  vault      = data.onepassword_vault.homelab.uuid
+  title      = "velero"
+  category   = "password"
+  username   = cloudflare_api_token.velero_r2.id
+  password   = sha256(cloudflare_api_token.velero_r2.value)
+  note_value = "R2 S3 credentials for velero; minted by the cloudflare stack (username = access key id, password = secret key)."
+}

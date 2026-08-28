@@ -23,6 +23,9 @@ controllers:
             # iGPU SR-IOV virtual function (xe device plugin).
             gpu.intel.com/xe: 1
 defaultPodOptions:
+  annotations:
+    # Library and scratch volumes stay out of velero's file backups.
+    backup.velero.io/backup-volumes-excludes: media,transcode,downloads,tmp
   securityContext:
     runAsNonRoot: true
     runAsUser: 1024

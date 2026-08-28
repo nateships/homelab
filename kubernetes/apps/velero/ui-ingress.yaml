@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: velero-ui
+  namespace: velero
+  annotations:
+    # Served as a Tailscale Service by the shared ProxyGroup.
+    tailscale.com/proxy-group: ingress
+    # Advertise before the cert exists: HTTPS-only services deadlock
+    # on first deploy (no advertise without cert, no cert without
+    # advertise). The tailnet transport is encrypted regardless.
+    tailscale.com/http-endpoint: enabled
+spec:
+  ingressClassName: tailscale
+  # The tailscale controller ignores host-bearing rules; the tailnet
+  # name comes from tls.hosts and the backend is the default.
+  defaultBackend:
+    service:
+      name: velero-ui
+      port:
+        number: 3000
+  tls:
+    - hosts: [velero]
