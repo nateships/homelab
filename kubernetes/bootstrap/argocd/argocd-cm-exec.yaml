@@ -1,0 +1,9 @@
+# Web terminal into pods from the ArgoCD UI. The builtin role:admin
+# (rbac policy.default) already allows exec; the server ClusterRole
+# gets pods/exec through the kustomization patch.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+data:
+  exec.enabled: "true"
