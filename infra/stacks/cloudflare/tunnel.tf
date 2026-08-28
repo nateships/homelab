@@ -34,6 +34,25 @@ data "cloudflare_zero_trust_tunnel_cloudflared_token" "k8s" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.k8s.id
 }
 
+# The cutover switch: publishing this name sends public traffic
+# through the tunnel to the in-cluster seerr.
+locals {
+  seerr_zone_name = join(".", slice(split(".", var.seerr_public_hostname), 1, length(split(".", var.seerr_public_hostname))))
+}
+
+data "cloudflare_zones" "seerr" {
+  name = local.seerr_zone_name
+}
+
+resource "cloudflare_dns_record" "seerr" {
+  zone_id = data.cloudflare_zones.seerr.result[0].id
+  name    = var.seerr_public_hostname
+  type    = "CNAME"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
+  ttl     = 1 # proxied records use automatic TTL
+  proxied = true
+}
+
 # ESO reads the token at cloudflared/password.
 resource "onepassword_item" "cloudflared" {
   vault      = data.onepassword_vault.homelab.uuid
