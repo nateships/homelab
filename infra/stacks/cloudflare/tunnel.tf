@@ -37,7 +37,8 @@ data "cloudflare_zero_trust_tunnel_cloudflared_token" "k8s" {
 # The cutover switch: publishing this name sends public traffic
 # through the tunnel to the in-cluster seerr.
 locals {
-  seerr_zone_name = join(".", slice(split(".", var.seerr_public_hostname), 1, length(split(".", var.seerr_public_hostname))))
+  # Last two labels: works for a subdomain and for the zone apex.
+  seerr_zone_name = join(".", slice(split(".", var.seerr_public_hostname), length(split(".", var.seerr_public_hostname)) - 2, length(split(".", var.seerr_public_hostname))))
 }
 
 data "cloudflare_zones" "seerr" {
