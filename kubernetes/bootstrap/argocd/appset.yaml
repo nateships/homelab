@@ -24,6 +24,12 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   syncPolicy:
     preserveResourcesOnDeletion: true
+  # Manual syncPolicy edits on generated Applications survive (e.g.
+  # pausing autosync for maintenance); config.yaml autosync stays the
+  # initial state, and a manual toggle wins until reverted.
+  ignoreApplicationDifferences:
+    - jsonPointers:
+        - /spec/syncPolicy
   generators:
     - git:
         repoURL: https://github.com/nateships/homelab
