@@ -18,3 +18,8 @@ variable "r2_bucket" {
   description = "R2 bucket for Omni etcd backups"
   type        = string
 }
+
+variable "seerr_public_hostname" {
+  description = "Public hostname the tunnel routes to seerr, e.g. seerr.example.com"
+  type        = string
+}
