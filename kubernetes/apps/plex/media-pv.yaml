@@ -1,0 +1,36 @@
+# Static NFS volume: pods mount the export directly (NFSv4.1 client
+# is in the Talos kernel; no CSI). One PV binds one PVC, so each
+# consuming namespace carries its own pair against the same export.
+# storageClassName "" keeps the default StorageClass from capturing
+# the claim; Retain because the library outlives any cluster.
+# site-specific: NFS server address and export path (docs/SITE.md)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: plex-media
+spec:
+  capacity:
+    storage: 1Ti # informational for a static NFS volume
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - nfsvers=4.1
+  nfs:
+    server: 10.16.10.100
+    path: /volume1/media
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+  namespace: plex
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: plex-media
+  resources:
+    requests:
+      storage: 1Ti
