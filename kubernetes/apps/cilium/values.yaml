@@ -3,6 +3,10 @@
 ipam:
   mode: kubernetes
 kubeProxyReplacement: true
+# Auto-detection picks the lowest host link MTU, which is the 1280
+# siderolink management tunnel; pods then drop larger UDP (QUIC
+# handshakes time out; cilium/cilium#37529). Pin to the datapath NIC.
+MTU: 1500
 # cronJob cert method: certs generate in-cluster, so the rendered
 # chart stays free of Secrets (the bootstrap render enforces that).
 hubble:
