@@ -8,8 +8,6 @@ controllers:
           tag: 1.43.3.10896@sha256:4f1d88882a9883cc525e7c84b22c67c57416b7d3b35c3412329eeb07786433a7
         env:
           TZ: America/New_York
-          # site-specific: the pinned service VIP (docs/SITE.md)
-          PLEX_ADVERTISE_URL: http://10.16.101.225:32400
         probes:
           liveness:
             enabled: true
