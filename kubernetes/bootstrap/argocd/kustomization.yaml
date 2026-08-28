@@ -16,4 +16,16 @@ patches:
   - path: argocd-cmd-params.yaml
   - path: argocd-cm-oidc.yaml
   - path: argocd-cm-kustomize.yaml
+  - path: argocd-cm-exec.yaml
   - path: argocd-rbac.yaml
+  # Upstream ships the server ClusterRole without pods/exec.
+  - target:
+      kind: ClusterRole
+      name: argocd-server
+    patch: |-
+      - op: add
+        path: /rules/-
+        value:
+          apiGroups: [""]
+          resources: [pods/exec]
+          verbs: [create]
