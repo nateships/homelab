@@ -27,12 +27,6 @@ hubble:
     enabled: true
   ui:
     enabled: true
-    service:
-      # Omni workload proxy: https://hubble.<omni domain>
-      annotations:
-        omni-kube-service-exposer.sidero.dev/port: "50081:80"
-        omni-kube-service-exposer.sidero.dev/label: Hubble
-        omni-kube-service-exposer.sidero.dev/prefix: hubble
 # Service VIPs on the node VLAN (pool + L2 policy in lb-ipam.yaml)
 # and the Gateway API dataplane (CRDs installed by the kustomization).
 gatewayAPI:

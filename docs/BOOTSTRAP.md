@@ -208,7 +208,7 @@ bootstrapped Cilium and manages itself, ApplicationSet included.
 
 ArgoCD UI login uses tsidp directly (no Dex). One-time: open
 `https://tsidp.<tailnet>.ts.net` and register a client with redirect URI
-`https://argocd.omni.nate.cx/auth/callback`. Fill the `tsidp-argocd`
+`https://argocd.<tailnet>.ts.net/auth/callback`. Fill the `tsidp-argocd`
 item: username = client ID, password = client secret, and an `issuer`
 field = `https://tsidp.<tailnet>.ts.net`. ESO delivers these to ArgoCD;
 until then the local admin account works
