@@ -5,19 +5,22 @@ resource "cloudflare_r2_bucket" "velero" {
   name       = "velero-backups"
 }
 
-data "cloudflare_api_token_permission_groups_list" "all" {}
+data "cloudflare_account_api_token_permission_groups_list" "all" {
+  account_id = var.r2_account_id
+}
 
 locals {
   r2_item_write_id = one([
-    for g in data.cloudflare_api_token_permission_groups_list.all.result :
+    for g in data.cloudflare_account_api_token_permission_groups_list.all.result :
     g.id if g.name == "Workers R2 Storage Bucket Item Write"
   ])
 }
 
-# R2's S3 credentials derive from an API token: the access key id is
-# the token id and the secret is the sha256 of the token value.
-resource "cloudflare_api_token" "velero_r2" {
-  name = "velero-r2"
+# R2's S3 credentials derive from an account token: the access key id
+# is the token id and the secret is the sha256 of the token value.
+resource "cloudflare_account_token" "velero_r2" {
+  account_id = var.r2_account_id
+  name       = "velero-r2"
   policies = [{
     effect = "allow"
     permission_groups = [{
@@ -34,7 +37,7 @@ resource "onepassword_item" "velero" {
   vault      = data.onepassword_vault.homelab.uuid
   title      = "velero"
   category   = "password"
-  username   = cloudflare_api_token.velero_r2.id
-  password   = sha256(cloudflare_api_token.velero_r2.value)
+  username   = cloudflare_account_token.velero_r2.id
+  password   = sha256(cloudflare_account_token.velero_r2.value)
   note_value = "R2 S3 credentials for velero; minted by the cloudflare stack (username = access key id, password = secret key)."
 }
