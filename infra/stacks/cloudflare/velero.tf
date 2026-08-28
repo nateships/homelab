@@ -26,9 +26,9 @@ resource "cloudflare_account_token" "velero_r2" {
     permission_groups = [{
       id = local.r2_item_write_id
     }]
-    resources = {
+    resources = jsonencode({
       "com.cloudflare.edge.r2.bucket.${var.r2_account_id}_default_${cloudflare_r2_bucket.velero.name}" = "*"
-    }
+    })
   }]
 }
 
