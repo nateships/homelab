@@ -1,0 +1,64 @@
+controllers:
+  profilarr:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/dictionarry-hub/profilarr
+          # renovate: datasource=docker depName=ghcr.io/dictionarry-hub/profilarr
+          tag: 2.2.0@sha256:ddcdd0f340043c2ec0a85ca74b9a6be9be42b1c0288c75fc36a26a43f695860b
+        env:
+          TZ: America/New_York
+          # The profile database is a git checkout under /config; git
+          # needs a writable HOME.
+          HOME: /config
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+defaultPodOptions:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1024
+    runAsGroup: 100
+    fsGroup: 100
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: profilarr
+    ports:
+      http:
+        port: 6868
+ingress:
+  app:
+    className: tailscale
+    annotations:
+      # Served as a Tailscale Service by the shared ProxyGroup.
+      tailscale.com/proxy-group: ingress
+      # Advertise before the cert exists: HTTPS-only services deadlock
+      # on first deploy (no advertise without cert, no cert without
+      # advertise). The tailnet transport is encrypted regardless.
+      tailscale.com/http-endpoint: enabled
+    # The tailscale controller ignores host-bearing rules; the tailnet
+    # name comes from tls.hosts and the backend is the default.
+    defaultBackend:
+      service:
+        name: profilarr
+        port:
+          number: 6868
+    tls:
+      - hosts: [profilarr]
+persistence:
+  config:
+    accessMode: ReadWriteOnce
+    size: 2Gi
+  # readOnlyRootFilesystem needs a writable /tmp.
+  tmp:
+    type: emptyDir
