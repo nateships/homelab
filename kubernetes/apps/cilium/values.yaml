@@ -3,6 +3,14 @@
 ipam:
   mode: kubernetes
 kubeProxyReplacement: true
+# DSR keeps the original client IP on LoadBalancer traffic: the
+# announcing node forwards to the backend node in a geneve header and
+# replies leave the backend node directly. DSR dispatch cannot ride
+# vxlan, hence the geneve tunnel.
+tunnelProtocol: geneve
+loadBalancer:
+  mode: dsr
+  dsrDispatch: geneve
 # Auto-detection picks the lowest host link MTU, which is the 1280
 # siderolink management tunnel; pods then drop larger UDP (QUIC
 # handshakes time out; cilium/cilium#37529). Pin to the datapath NIC.
