@@ -16,7 +16,7 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 
 | Value | Where | Meaning |
 |---|---|---|
-| `argocd.omni.nate.cx` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI URL via the Omni workload proxy |
+| `argocd.tail34eda.ts.net` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI tailnet name (tailscale ingress) |
 | `10.16.10.100:/volume1/media` | `kubernetes/apps/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
 | `10.16.101.224/27` | `kubernetes/apps/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
 | `10.16.101.225` | `kubernetes/apps/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |

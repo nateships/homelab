@@ -9,6 +9,7 @@ resources:
   - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
   # VIP pool and L2 announcement policy
   - lb-ipam.yaml
+  - hubble-ingress.yaml
 helmCharts:
   - name: cilium
     repo: https://helm.cilium.io

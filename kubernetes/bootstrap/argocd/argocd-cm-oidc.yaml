@@ -7,8 +7,8 @@ kind: ConfigMap
 metadata:
   name: argocd-cm
 data:
-  # site-specific: workload-proxy URL for this cluster (docs/SITE.md)
-  url: https://argocd.omni.nate.cx
+  # site-specific: the tailnet name of the argocd ingress (docs/SITE.md)
+  url: https://argocd.tail34eda.ts.net
   oidc.config: |
     name: Tailscale
     issuer: $argocd-tsidp:issuer

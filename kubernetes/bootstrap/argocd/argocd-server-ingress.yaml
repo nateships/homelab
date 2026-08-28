@@ -1,0 +1,19 @@
+# The tailscale ingress terminates TLS; argocd-server stays plain
+# HTTP (argocd-cmd-params: server.insecure).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server
+  namespace: argocd
+  annotations:
+    tailscale.com/proxy-group: ingress
+    tailscale.com/http-endpoint: enabled
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: argocd-server
+      port:
+        number: 80
+  tls:
+    - hosts: [argocd]
