@@ -1,0 +1,83 @@
+controllers:
+  sonarr:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/home-operations/sonarr
+          # renovate: datasource=docker depName=ghcr.io/home-operations/sonarr
+          tag: 4.0.19.3007@sha256:57ddf9972fa347a025504135bf73f5c84e4b67d33285b43f170a501145d8c43b
+        env:
+          TZ: America/New_York
+          # Auth is the tailnet ingress; the UI trusts it (the API
+          # stays key-protected).
+          SONARR__AUTH__METHOD: External
+          SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
+          # Pinned config-plane settings; env beats the restored
+          # config.xml. URLBASE stays empty behind the tailnet
+          # ingress; the port matches the service and probes.
+          SONARR__SERVER__PORT: "8989"
+          SONARR__SERVER__URLBASE: ""
+          SONARR__LOG__ANALYTICSENABLED: "False"
+          SONARR__AUTH__APIKEY:
+            valueFrom:
+              secretKeyRef:
+                name: sonarr
+                key: api_key
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+defaultPodOptions:
+  # Media-stack identity: files on the media export are UID 1024 / GID 100.
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1024
+    runAsGroup: 100
+    fsGroup: 100
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: sonarr
+    ports:
+      http:
+        port: 8989
+ingress:
+  app:
+    className: tailscale
+    annotations:
+      # Served as a Tailscale Service by the shared ProxyGroup.
+      tailscale.com/proxy-group: ingress
+      # Advertise before the cert exists: HTTPS-only services deadlock
+      # on first deploy (no advertise without cert, no cert without
+      # advertise). The tailnet transport is encrypted regardless.
+      tailscale.com/http-endpoint: enabled
+    # The tailscale controller ignores host-bearing rules; the tailnet
+    # name comes from tls.hosts and the backend is the default.
+    defaultBackend:
+      service:
+        name: sonarr
+        port:
+          number: 8989
+    tls:
+      - hosts: [sonarr]
+persistence:
+  config:
+    accessMode: ReadWriteOnce
+    size: 5Gi
+  # readOnlyRootFilesystem needs a writable /tmp.
+  tmp:
+    type: emptyDir
+  media:
+    existingClaim: media
+    globalMounts:
+      # Whole export: imports hardlink from the usenet tree into the
+      # library, which only works within one mount.
+      - path: /data
