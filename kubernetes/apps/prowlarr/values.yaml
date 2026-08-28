@@ -34,7 +34,7 @@ controllers:
           capabilities:
             drop: ["ALL"]
 defaultPodOptions:
-  # Media-stack identity: files on the NAS are UID 1024 / GID 100.
+  # Media-stack identity: files on the media export are UID 1024 / GID 100.
   securityContext:
     runAsNonRoot: true
     runAsUser: 1024

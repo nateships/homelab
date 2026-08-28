@@ -49,7 +49,7 @@ controllers:
           capabilities:
             drop: ["ALL"]
 defaultPodOptions:
-  # Media-stack identity: files on the NAS are UID 1024 / GID 100.
+  # Media-stack identity: files on the media export are UID 1024 / GID 100.
   securityContext:
     runAsNonRoot: true
     runAsUser: 1024
@@ -93,6 +93,5 @@ persistence:
   media:
     existingClaim: media
     globalMounts:
-      # Same path the download tree uses on the NAS.
       - path: /data/usenet
         subPath: usenet
