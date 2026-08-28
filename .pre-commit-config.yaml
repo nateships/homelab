@@ -34,7 +34,7 @@ repos:
         entry: >-
           sh -c 'find kubernetes/apps -name "*.yaml"
           ! -name config.yaml ! -name kustomization.yaml
-          ! -name values.yaml ! -path "*/charts/*" -print0
+          ! -name "values*.yaml" ! -path "*/charts/*" -print0
           | xargs -0 kubeconform -strict -ignore-missing-schemas
           kubernetes/bootstrap/argocd/namespace.yaml
           kubernetes/bootstrap/argocd/appset.yaml'

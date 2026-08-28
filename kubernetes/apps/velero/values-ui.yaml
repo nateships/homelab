@@ -1,0 +1,4 @@
+image:
+  repository: otwld/velero-ui
+  # renovate: datasource=docker depName=otwld/velero-ui
+  tag: 0.10.2
