@@ -10,6 +10,10 @@ controllers:
         args:
           - tunnel
           - --no-autoupdate
+          # The k8s VLAN blocks outbound UDP 7844; QUIC cannot
+          # complete and the probes recycle the pod.
+          - --protocol
+          - http2
           - --metrics
           - 0.0.0.0:2000
           - run
