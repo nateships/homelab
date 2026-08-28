@@ -1,7 +1,7 @@
 image:
   repository: velero/velero
   # renovate: datasource=docker depName=velero/velero
-  tag: v1.18.1
+  tag: v1.18.2
 initContainers:
   - name: velero-plugin-for-aws
     # renovate: datasource=docker depName=velero/velero-plugin-for-aws
