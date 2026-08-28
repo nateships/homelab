@@ -1,0 +1,6 @@
+# Movie library manager; imports from the media share's usenet tree into the
+# library. Reachable at https://radarr.<tailnet>.ts.net.
+name: radarr
+namespace: radarr
+labels:
+  category: media
