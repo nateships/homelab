@@ -1,0 +1,63 @@
+controllers:
+  seerr:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/seerr-team/seerr
+          # renovate: datasource=docker depName=ghcr.io/seerr-team/seerr
+          tag: v3.4.1@sha256:f4768de5f616248d723e05891f3345a1402123775d03bf0890dbfedc0831bda1
+        env:
+          TZ: America/New_York
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+defaultPodOptions:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1024
+    runAsGroup: 100
+    fsGroup: 100
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: seerr
+    ports:
+      http:
+        port: 5055
+ingress:
+  app:
+    className: tailscale
+    annotations:
+      # Served as a Tailscale Service by the shared ProxyGroup.
+      tailscale.com/proxy-group: ingress
+      # Advertise before the cert exists: HTTPS-only services deadlock
+      # on first deploy (no advertise without cert, no cert without
+      # advertise). The tailnet transport is encrypted regardless.
+      tailscale.com/http-endpoint: enabled
+    # The tailscale controller ignores host-bearing rules; the tailnet
+    # name comes from tls.hosts and the backend is the default.
+    defaultBackend:
+      service:
+        name: seerr
+        port:
+          number: 5055
+    tls:
+      - hosts: [seerr]
+persistence:
+  config:
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    globalMounts:
+      - path: /app/config
+  # readOnlyRootFilesystem needs a writable /tmp.
+  tmp:
+    type: emptyDir
