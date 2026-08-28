@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   # R2 credentials file (ESO)
   - external-secret.yaml
+  # OIDC client env for velero-ui (ESO)
+  - external-secret-ui.yaml
   # The chart's ingress is host-based; tailscale needs host-less.
   - ui-ingress.yaml
 helmCharts:

@@ -2,3 +2,8 @@ image:
   repository: otwld/velero-ui
   # renovate: datasource=docker depName=otwld/velero-ui
   tag: 0.10.2
+# Login is tailscale identity through tsidp; the OAUTH_* envs come
+# from the velero-ui-oidc secret.
+envFrom:
+  - secretRef:
+      name: velero-ui-oidc
