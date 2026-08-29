@@ -26,13 +26,19 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k8s" {
         hostname = var.birdnet_public_hostname
         service  = "http://birdnet-go.birdnet-go:8080"
       },
-      # GitHub push webhook. Only the webhook path routes to
-      # argocd-server; every other path on the hostname hits the 404
-      # rule below.
+      # GitHub push webhooks. Only the webhook path routes to each
+      # controller; every other path on these hostnames hits the 404
+      # rule below. Two hostnames because both controllers serve the
+      # same path and cloudflared cannot rewrite paths.
       {
         hostname = var.argocd_webhook_public_hostname
         path     = "/api/webhook"
         service  = "http://argocd-server.argocd:80"
+      },
+      {
+        hostname = var.argocd_appset_webhook_public_hostname
+        path     = "/api/webhook"
+        service  = "http://argocd-applicationset-controller.argocd:7000"
       },
       {
         service = "http_status:404"

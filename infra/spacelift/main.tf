@@ -127,7 +127,11 @@ locals {
     r2_bucket               = var.r2_bucket
     seerr_public_hostname   = var.seerr_public_hostname
     birdnet_public_hostname = var.birdnet_public_hostname
-    ssh_public_key          = var.ssh_public_key
+
+    argocd_webhook_public_hostname        = var.argocd_webhook_public_hostname
+    argocd_appset_webhook_public_hostname = var.argocd_appset_webhook_public_hostname
+
+    ssh_public_key = var.ssh_public_key
   }
 }
 
