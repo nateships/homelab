@@ -29,6 +29,14 @@ clusterMetrics:
   enabled: true
   collector: alloy-metrics
 
+# Node hardware metrics: the exporter deploys via telemetryServices;
+# this feature is what scrapes it.
+hostMetrics:
+  enabled: true
+  collector: alloy-metrics
+  linuxHosts:
+    enabled: true
+
 clusterEvents:
   enabled: true
   collector: alloy-singleton
