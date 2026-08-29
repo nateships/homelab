@@ -86,6 +86,9 @@ telemetryServices:
   k8s-manifest-tail:
     deploy: true
     config:
+      # The chart excludes kube-system by default. This repo deploys
+      # cilium and intel-gpu-plugin there, so watch all namespaces.
+      excludeNamespaces: []
       objects:
         - {apiVersion: v1, kind: Pod}
         - {apiVersion: apps/v1, kind: Deployment}
