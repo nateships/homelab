@@ -24,12 +24,15 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   syncPolicy:
     preserveResourcesOnDeletion: true
-  # Manual syncPolicy edits on generated Applications survive (e.g.
-  # pausing autosync for maintenance); config.yaml autosync stays the
-  # initial state, and a manual toggle wins until reverted.
+  # Manual autosync toggles on generated Applications survive (e.g.
+  # pausing for maintenance); config.yaml autosync stays the initial
+  # state, and a manual toggle wins until reverted. Only the automated
+  # field is ignored: a wider pointer also freezes
+  # managedNamespaceMetadata, so namespaceLabels edits never reach
+  # existing Applications.
   ignoreApplicationDifferences:
     - jsonPointers:
-        - /spec/syncPolicy
+        - /spec/syncPolicy/automated
   generators:
     - git:
         repoURL: https://github.com/nateships/homelab
