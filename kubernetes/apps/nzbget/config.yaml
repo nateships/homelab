@@ -4,3 +4,5 @@ name: nzbget
 namespace: nzbget
 labels:
   category: media
+namespaceLabels:
+  homelab/tier: media

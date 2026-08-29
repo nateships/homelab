@@ -4,3 +4,5 @@ name: tautulli
 namespace: tautulli
 labels:
   category: media
+namespaceLabels:
+  homelab/tier: media

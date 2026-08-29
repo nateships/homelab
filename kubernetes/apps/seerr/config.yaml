@@ -4,3 +4,5 @@ name: seerr
 namespace: seerr
 labels:
   category: media
+namespaceLabels:
+  homelab/tier: public

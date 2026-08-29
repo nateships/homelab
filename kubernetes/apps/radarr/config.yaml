@@ -4,3 +4,5 @@ name: radarr
 namespace: radarr
 labels:
   category: media
+namespaceLabels:
+  homelab/tier: media
