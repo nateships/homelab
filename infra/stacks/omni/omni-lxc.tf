@@ -31,7 +31,9 @@ resource "proxmox_virtual_environment_container" "omni" {
   }
 
   lifecycle {
-    ignore_changes = [features, device_passthrough]
+    # operating_system: a template bump must not recreate the container.
+    # The template only matters at creation; rebuild with -replace.
+    ignore_changes = [features, device_passthrough, operating_system]
   }
 
   cpu {
