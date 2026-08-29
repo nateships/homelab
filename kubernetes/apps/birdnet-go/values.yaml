@@ -8,6 +8,11 @@ controllers:
           tag: v0.6.3@sha256:a705ff35fa01187a05e42f0e14d7f41dc9dd2c713dde9cd2dcd568178eae5d4c
         env:
           TZ: America/New_York
+          # The pod user has no home; viper resolves the config dir
+          # from XDG paths.
+          HOME: /config
+          XDG_CONFIG_HOME: /config
+          XDG_DATA_HOME: /data
         probes:
           liveness:
             enabled: true
@@ -51,7 +56,7 @@ ingress:
         port:
           number: 8080
     tls:
-      - hosts: [birdnet-go]
+      - hosts: [birdnet]
 persistence:
   config:
     accessMode: ReadWriteOnce
