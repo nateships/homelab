@@ -22,6 +22,10 @@ controllers:
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
+        resources:
+          limits:
+            # iGPU SR-IOV virtual function (xe device plugin).
+            gpu.intel.com/xe: 1
 
 defaultPodOptions:
   securityContext:
@@ -30,6 +34,8 @@ defaultPodOptions:
     runAsGroup: 100
     fsGroup: 100
     fsGroupChangePolicy: OnRootMismatch
+    # video and render groups own the /dev/dri nodes.
+    supplementalGroups: [44, 104]
     seccompProfile:
       type: RuntimeDefault
 service:
