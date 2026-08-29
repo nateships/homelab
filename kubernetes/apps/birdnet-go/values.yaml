@@ -4,8 +4,8 @@ controllers:
       app:
         image:
           repository: ghcr.io/tphakala/birdnet-go
-          # renovate: datasource=docker depName=ghcr.io/tphakala/birdnet-go
-          tag: v0.6.3@sha256:a705ff35fa01187a05e42f0e14d7f41dc9dd2c713dde9cd2dcd568178eae5d4c
+          # renovate: datasource=docker depName=ghcr.io/tphakala/birdnet-go versioning=loose
+          tag: 20260823@sha256:233b94f1d3b27b261ec8d997364db0cb953f3e3b3362a89e9e22ad4a589143d6
         env:
           TZ: America/New_York
           # The pod user has no home; viper resolves the config dir
