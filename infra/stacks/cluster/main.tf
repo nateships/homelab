@@ -104,6 +104,25 @@ resource "omni_config_patch" "worker_labels" {
       nodeLabels = {
         "topology.kubernetes.io/region" = "homelab"
         "topology.kubernetes.io/zone"   = var.proxmox_node
+        # Monitoring dashboards expect a machine size on every node.
+        "node.kubernetes.io/instance-type" = "proxmox-vm"
+      }
+    }
+  })
+}
+
+resource "omni_config_patch" "control_plane_labels" {
+  name    = "control-plane-labels"
+  cluster = omni_cluster.homelab.name
+
+  selector = {
+    machine_set = omni_machine_set.control_planes.name
+  }
+
+  data = yamlencode({
+    machine = {
+      nodeLabels = {
+        "node.kubernetes.io/instance-type" = "proxmox-vm"
       }
     }
   })
