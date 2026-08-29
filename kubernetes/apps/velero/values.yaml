@@ -38,7 +38,7 @@ schedules:
     disabled: false
     schedule: "0 4 * * *"
     template:
-      ttl: 720h
+      ttl: 168h
       includedNamespaces:
         - "*"
 metrics:
