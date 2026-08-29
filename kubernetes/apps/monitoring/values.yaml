@@ -45,6 +45,12 @@ podLogsViaLoki:
   enabled: true
   collector: alloy-logs
 
+# Manifest snapshots on change: records what actually changed live
+# (operators, kubectl surgery) alongside what git intended.
+kubernetesManifests:
+  enabled: true
+  collector: alloy-singleton
+
 # The collectors' own health metrics (the "Grafana Alloy" status
 # card feeds on alloy_build_info).
 integrations:
@@ -71,3 +77,11 @@ telemetryServices:
     deploy: true
   node-exporter:
     deploy: true
+  k8s-manifest-tail:
+    deploy: true
+    config:
+      objects:
+        - {apiVersion: v1, kind: Pod}
+        - {apiVersion: apps/v1, kind: Deployment}
+        - {apiVersion: apps/v1, kind: StatefulSet}
+        - {apiVersion: apps/v1, kind: DaemonSet}
