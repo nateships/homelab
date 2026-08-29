@@ -1,0 +1,6 @@
+# Rolls annotated workloads when their Secrets or ConfigMaps change,
+# closing the loop from a 1Password edit through ESO to the pod.
+name: reloader
+namespace: reloader
+labels:
+  category: infra
