@@ -47,9 +47,27 @@ for path in files:
         if not isinstance(cfg.get(key), str) or not cfg.get(key):
             err(path, f"'{key}' must be a non-empty string")
 
+    # The appset builds the default source path and the Application name
+    # from 'name', not from the file location. A mismatch deploys the
+    # wrong directory or collides with another Application.
+    dirname = os.path.basename(os.path.dirname(path))
+    if isinstance(cfg.get("name"), str) and cfg["name"] and cfg["name"] != dirname:
+        err(path, f"'name' is '{cfg['name']}' but the directory is '{dirname}'")
+
     unknown = set(cfg) - ALLOWED_KEYS
     if unknown:
         err(path, f"unknown keys {sorted(unknown)} (allowed: {sorted(ALLOWED_KEYS)})")
+
+    if "autosync" in cfg and not isinstance(cfg["autosync"], bool):
+        err(path, "'autosync' must be a boolean")
+
+    for key in ("labels", "namespaceLabels"):
+        val = cfg.get(key)
+        if val is not None and (
+            not isinstance(val, dict)
+            or not all(isinstance(v, str) for v in val.values())
+        ):
+            err(path, f"'{key}' must be a mapping of string values")
 
     sources = cfg.get("sources")
     if sources is None:
@@ -73,19 +91,12 @@ for path in files:
         if "chart" in src:
             if "repoURL" not in src:
                 err(path, f"sources[{i}] has 'chart' but no 'repoURL'")
+            # The templatePatch default targetRevision is the branch
+            # 'main', which is not a valid chart version.
+            if "targetRevision" not in src:
+                err(path, f"sources[{i}] has 'chart' but no 'targetRevision'")
         elif "path" not in src and "ref" not in src:
             err(path, f"sources[{i}] needs 'chart', 'path', or 'ref'")
-
-    if "autosync" in cfg and not isinstance(cfg["autosync"], bool):
-        err(path, "'autosync' must be a boolean")
-
-    for key in ("labels", "namespaceLabels"):
-        val = cfg.get(key)
-        if val is not None and (
-            not isinstance(val, dict)
-            or not all(isinstance(v, str) for v in val.values())
-        ):
-            err(path, f"'{key}' must be a mapping of string values")
 
 
 if errors:

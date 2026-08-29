@@ -36,7 +36,10 @@ jobs:
         run: |
           # Render each app exactly as ArgoCD does (kustomize with helm
           # inflation) and validate the final manifests. CRDs have no
-          # upstream schemas; skip unknown kinds.
+          # upstream schemas; skip unknown kinds. pipefail makes a
+          # kustomize failure fail the step (kubeconform accepts empty
+          # input and exits 0).
+          set -o pipefail
           for d in kubernetes/apps/*/; do
             echo "--- $d"
             kubectl kustomize --enable-helm "$d" \
