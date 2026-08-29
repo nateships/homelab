@@ -26,6 +26,14 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k8s" {
         hostname = var.birdnet_public_hostname
         service  = "http://birdnet-go.birdnet-go:8080"
       },
+      # GitHub push webhook. Only the webhook path routes to
+      # argocd-server; every other path on the hostname hits the 404
+      # rule below.
+      {
+        hostname = var.argocd_webhook_public_hostname
+        path     = "/api/webhook"
+        service  = "http://argocd-server.argocd:80"
+      },
       {
         service = "http_status:404"
       },
@@ -57,6 +65,22 @@ resource "cloudflare_dns_record" "seerr" {
   content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
   ttl     = 1 # proxied records use automatic TTL
   proxied = true
+}
+
+# Shared secret for the GitHub push webhook. ESO merges it into
+# argocd-secret (webhook.github.secret); the GitHub repo webhook must
+# carry the same value.
+resource "random_password" "argocd_webhook" {
+  length  = 32
+  special = false
+}
+
+resource "onepassword_item" "argocd_webhook" {
+  vault      = data.onepassword_vault.homelab.uuid
+  title      = "argocd-webhook"
+  category   = "password"
+  password   = random_password.argocd_webhook.result
+  note_value = "Shared secret for the GitHub -> ArgoCD push webhook; minted by the cloudflare stack. The GitHub repo webhook uses the same value."
 }
 
 # ESO reads the token at cloudflared/password.
