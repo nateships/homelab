@@ -7,6 +7,8 @@ resources:
   # VIP pool and L2 announcement policy
   - lb-ipam.yaml
   - hubble-ingress.yaml
+  # Tier-based ingress policies (tiers = namespaceLabels in app configs)
+  - netpol.yaml
 helmCharts:
   - name: cilium
     repo: https://helm.cilium.io

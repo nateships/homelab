@@ -5,3 +5,5 @@ name: birdnet-go
 namespace: birdnet-go
 labels:
   category: media
+namespaceLabels:
+  homelab/tier: public

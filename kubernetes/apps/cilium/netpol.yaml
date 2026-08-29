@@ -1,0 +1,50 @@
+# Tier-based ingress control. Tiers come from namespaceLabels in each
+# app's config.yaml (homelab/tier: edge|media|public):
+#   edge    tailscale proxies and cloudflared, the only entry points
+#   media   the media stack (unauthenticated east-west APIs)
+#   public  internet-facing apps, contained to edge ingress only
+# plex is untiered: its single port serves the world through the VIP.
+# Selected pods deny all other ingress. Kubelet probes stay allowed
+# (cilium allow-localhost). Egress is not restricted.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: media-tier-ingress
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.cilium.k8s.namespace.labels.homelab/tier: media
+  ingress:
+    # Entry path, the stack's own east-west traffic, and metric scrapes.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.cilium.k8s.namespace.labels.homelab/tier: edge
+        - matchLabels:
+            k8s:io.cilium.k8s.namespace.labels.homelab/tier: media
+        - matchLabels:
+            k8s:io.cilium.k8s.namespace.labels.kubernetes.io/metadata.name: monitoring
+    # seerr reaches sonarr and radarr on their API ports only.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.cilium.k8s.namespace.labels.kubernetes.io/metadata.name: seerr
+      toPorts:
+        - ports:
+            - port: "8989"
+              protocol: TCP
+            - port: "7878"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: public-tier-ingress
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.cilium.k8s.namespace.labels.homelab/tier: public
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.cilium.k8s.namespace.labels.homelab/tier: edge
+        - matchLabels:
+            k8s:io.cilium.k8s.namespace.labels.kubernetes.io/metadata.name: monitoring

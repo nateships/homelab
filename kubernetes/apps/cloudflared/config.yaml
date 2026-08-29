@@ -4,3 +4,5 @@ name: cloudflared
 namespace: cloudflared
 labels:
   category: network
+namespaceLabels:
+  homelab/tier: edge
