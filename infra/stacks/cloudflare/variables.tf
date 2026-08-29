@@ -28,3 +28,13 @@ variable "birdnet_public_hostname" {
   description = "Public hostname the tunnel routes to birdnet-go, e.g. birds.example.com"
   type        = string
 }
+
+variable "argocd_webhook_public_hostname" {
+  description = "Public hostname the tunnel routes to the ArgoCD webhook path, e.g. argocd-webhook.example.com"
+  type        = string
+}
+
+variable "argocd_appset_webhook_public_hostname" {
+  description = "Public hostname the tunnel routes to the ApplicationSet webhook path, e.g. argocd-appset-webhook.example.com"
+  type        = string
+}
