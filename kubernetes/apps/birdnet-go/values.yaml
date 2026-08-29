@@ -56,7 +56,7 @@ ingress:
         port:
           number: 8080
     tls:
-      - hosts: [birdnet-go]
+      - hosts: [birdnet]
 persistence:
   config:
     accessMode: ReadWriteOnce

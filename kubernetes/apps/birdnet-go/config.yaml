@@ -1,6 +1,6 @@
 # Bird sound detection from an RTSP stream (SQLite on the data
 # volume). Public via the cloudflared tunnel; admin at
-# https://birdnet-go.<tailnet>.ts.net.
+# https://birdnet.<tailnet>.ts.net.
 name: birdnet-go
 namespace: birdnet-go
 labels:
