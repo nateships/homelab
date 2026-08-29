@@ -44,6 +44,32 @@ clusterEvents:
 podLogsViaLoki:
   enabled: true
   collector: alloy-logs
+  # Loki's keyword detection misreads lines that contain err=null or
+  # "error":null as errors. Extract the real level from the two
+  # formats that produce those lines (klog severity prefix,
+  # pipe-delimited level token) and ship it as structured metadata;
+  # unmatched lines keep Loki's detection. The chart runs this value
+  # through Helm tpl, so the Alloy template hides in backticks. The
+  # last regex re-captures only a non-empty level: structured
+  # metadata with an empty value makes Loki reject the line.
+  extraLogProcessingStages: |
+    stage.regex {
+      expression = "^(?P<klog_severity>[IWEF])[0-9]{4} "
+    }
+    stage.regex {
+      expression = " \\| (?P<pipe_severity>TRACE|DEBUG|INFO|WARNING|WARN|ERROR|FATAL) \\| "
+    }
+    stage.template {
+      source   = "level"
+      template = "{{ `{{if eq .klog_severity \"I\"}}info{{else if eq .klog_severity \"W\"}}warn{{else if eq .klog_severity \"E\"}}error{{else if eq .klog_severity \"F\"}}fatal{{else if .pipe_severity}}{{.pipe_severity}}{{end}}` }}"
+    }
+    stage.regex {
+      source     = "level"
+      expression = "(?P<log_level>.+)"
+    }
+    stage.structured_metadata {
+      values = { level = "log_level" }
+    }
 
 # Manifest snapshots on change: records what actually changed live
 # (operators, kubectl surgery) alongside what git intended.
