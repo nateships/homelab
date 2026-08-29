@@ -22,21 +22,10 @@ locals {
   zone_id = data.cloudflare_zones.zone.result[0].id
 }
 
-# Both records point at the Omni LXC: the domain itself and a wildcard
-# for the workload service proxy. Proxying stays off: Omni terminates
-# TLS with its own certificate.
+# Omni terminates TLS with its own certificate; proxying stays off.
 resource "cloudflare_dns_record" "omni" {
   zone_id = local.zone_id
   name    = var.omni_domain
-  type    = "A"
-  content = local.lxc_ip
-  ttl     = 300
-  proxied = false
-}
-
-resource "cloudflare_dns_record" "omni_wildcard" {
-  zone_id = local.zone_id
-  name    = "*.${var.omni_domain}"
   type    = "A"
   content = local.lxc_ip
   ttl     = 300
