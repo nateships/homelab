@@ -24,8 +24,10 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | R2 endpoint | `kubernetes/apps/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |
 | `network_bridge: vmbr0`, `vlan: 101` | `omni/machine-classes/*.yaml` | PVE bridge and VLAN id the cluster VMs attach to |
 | `storage_selector: name == "zpool"` | `omni/machine-classes/*.yaml` | CEL selector naming the PVE datastore for VM disks |
+| `xe.force_probe=a780` | `omni/machine-classes/worker.yaml` | PCI device id of the host iGPU (xe driver probe) |
+| `mapping: vGPU` | `omni/machine-classes/worker.yaml` | Name of the hand-made Proxmox PCI resource mapping |
 
-This value stays in git because ArgoCD renders only committed
+These values stay in git because ArgoCD and Omni render only committed
 manifests. Everything terraform-applied arrives as TF_VAR_* instead
 (Omni domain, k8s VLAN CIDR).
 

@@ -11,6 +11,7 @@ spec:
     # Probe the iGPU VF with xe; xe support for this generation needs
     # force_probe. Pods request the GPU as gpu.intel.com/xe.
     # site-specific: the a780 device id belongs to this host's iGPU
+    # (docs/SITE.md)
     kernelargs:
       - xe.force_probe=a780
     metavalues: []

@@ -29,31 +29,6 @@
       until: argocd.rc == 0
       changed_when: "'serverside-applied' in argocd.stdout"
 
-    # The repo is private; ArgoCD needs this credential (GitHub App,
-    # Contents read-only). TODO(public): remove this task, the GitHub
-    # App, and both 1Password entries when the repo is public.
-    - name: Create the ArgoCD repo credential
-      # Assignments first: `set -e` then aborts when an op read fails, so a
-      # 1Password error can not apply a secret with empty values.
-      ansible.builtin.shell: |
-        set -eu
-        app_id="$(op read 'op://homelab/github-argocd/app-id')"
-        install_id="$(op read 'op://homelab/github-argocd/installation-id')"
-        private_key="$(op document get github-argocd-key --vault homelab)"
-        kubectl create secret generic repo-homelab \
-          --namespace argocd \
-          --from-literal=type=git \
-          --from-literal=url=https://github.com/nateships/homelab \
-          --from-literal=githubAppID="$app_id" \
-          --from-literal=githubAppInstallationID="$install_id" \
-          --from-literal=githubAppPrivateKey="$private_key" \
-          --dry-run=client -o yaml \
-          | kubectl label --local -f - argocd.argoproj.io/secret-type=repository -o yaml \
-          | kubectl apply -f -
-      register: repo_cred
-      changed_when: "'created' in repo_cred.stdout or 'configured' in repo_cred.stdout"
-      no_log: true
-
     - name: Create the external-secrets namespace
       ansible.builtin.shell: >-
         kubectl create namespace external-secrets --dry-run=client -o yaml
