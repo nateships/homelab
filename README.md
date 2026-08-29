@@ -3,10 +3,10 @@
 GitOps-driven homelab: Proxmox → Omni + Talos → ArgoCD. Spacelift runs the
 OpenTofu. GitHub Actions runs the CI checks.
 
-This repo is written to go **public**. It contains no secrets, encrypted or
-otherwise. All secrets live in 1Password and reach each system at runtime
-(see [Secrets](#secrets)). Private-repo plumbing carries a `TODO(public)`
-marker and dies when the repo opens.
+This repo is public. It contains no secrets, encrypted or otherwise. All
+secrets live in 1Password and reach each system at runtime (see
+[Secrets](#secrets)). Committed site values carry a `site-specific:`
+marker; [docs/SITE.md](docs/SITE.md) indexes what a fork must change.
 
 ## Architecture
 

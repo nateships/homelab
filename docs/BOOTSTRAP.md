@@ -46,13 +46,6 @@ Do the stages in order. Each stage needs the stage before it.
      and Account R2 Write; the cloudflare stack manages the DNS records
      and the R2 bucket with it
    - `cloudflare-r2`: see stage 4 (etcd backups)
-   - `github-argocd`: fields `app-id` and `installation-id` of a GitHub App.
-     Create it under Settings → Developer settings → GitHub Apps: permission
-     Contents: Read-only, webhook off, install on `nateships/homelab` only
-     (the installation id is in the installation page URL). Store the App
-     private key (PEM) as a document named `github-argocd-key`. ArgoCD
-     reads the private repo with it. TODO(public): remove the App, both
-     1Password entries, and the bootstrap task that consumes them.
 4. Copy the service account token to the Spacelift `bootstrap` context
    (stage 2). That is the only manual copy: the `homelab-k8s-bootstrap`
    stack creates the in-cluster secret from its run environment (stage 5),
@@ -151,11 +144,11 @@ only be registered once tsidp runs:
    tailnet DNS name in the `omni` item's `tailnet-dns` field.
 2. Run `homelab-omni-config`. The LXC joins the tailnet and tsidp starts.
 3. Open `https://tsidp.<tailnet>.ts.net` and register a client with
-   redirect URI `https://omni.nate.cx/oidc/consume`. Store the client ID
+   redirect URI `https://<omni-domain>/oidc/consume`. Store the client ID
    (username) and secret (password) in the `tsidp-omni` item.
 4. Re-run `homelab-omni-config`. Omni restarts with OIDC enabled.
 
-Check the result: open `https://omni.nate.cx` from a tailnet device. Log in
+Check the result: open the Omni domain from a tailnet device. Log in
 with your Tailscale identity. `admin-email` in the `omni` item must match
 the email tsidp presents; if login fails, compare with the login screen and
 update the field, then re-run the stack.
@@ -194,9 +187,9 @@ update the field, then re-run the stack.
 
 Confirm the `homelab-k8s-bootstrap` run. It fetches a service-account
 kubeconfig from Omni, installs ArgoCD together with the ApplicationSet,
-creates the repo credential (`github-argocd`), and creates the one secret
-ESO needs (the 1Password token, taken from the run environment). Nothing
-here is manual.
+and creates the one secret ESO needs (the 1Password token, taken from
+the run environment). Nothing here is manual. The repo is public, so
+ArgoCD needs no repo credential.
 
 The ApplicationSet generates one Application per
 `kubernetes/apps/<name>/config.yaml`. A config file holds the app name,
