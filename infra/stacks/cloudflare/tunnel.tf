@@ -23,6 +23,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k8s" {
         service  = "http://seerr.seerr:5055"
       },
       {
+        hostname = var.birdnet_public_hostname
+        service  = "http://birdnet-go.birdnet-go:8080"
+      },
+      {
         service = "http_status:404"
       },
     ]
@@ -38,7 +42,8 @@ data "cloudflare_zero_trust_tunnel_cloudflared_token" "k8s" {
 # through the tunnel to the in-cluster seerr.
 locals {
   # Last two labels: works for a subdomain and for the zone apex.
-  seerr_zone_name = join(".", slice(split(".", var.seerr_public_hostname), length(split(".", var.seerr_public_hostname)) - 2, length(split(".", var.seerr_public_hostname))))
+  seerr_zone_name   = join(".", slice(split(".", var.seerr_public_hostname), length(split(".", var.seerr_public_hostname)) - 2, length(split(".", var.seerr_public_hostname))))
+  birdnet_zone_name = join(".", slice(split(".", var.birdnet_public_hostname), length(split(".", var.birdnet_public_hostname)) - 2, length(split(".", var.birdnet_public_hostname))))
 }
 
 data "cloudflare_zones" "seerr" {
@@ -61,4 +66,17 @@ resource "onepassword_item" "cloudflared" {
   category   = "password"
   password   = data.cloudflare_zero_trust_tunnel_cloudflared_token.k8s.token
   note_value = "Tunnel token for the in-cluster cloudflared; minted by the cloudflare stack."
+}
+
+data "cloudflare_zones" "birdnet" {
+  name = local.birdnet_zone_name
+}
+
+resource "cloudflare_dns_record" "birdnet" {
+  zone_id = data.cloudflare_zones.birdnet.result[0].id
+  name    = var.birdnet_public_hostname
+  type    = "CNAME"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
+  ttl     = 1 # proxied records use automatic TTL
+  proxied = true
 }

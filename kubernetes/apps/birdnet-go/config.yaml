@@ -1,0 +1,7 @@
+# Bird sound detection from an RTSP stream; MariaDB rides in the same
+# release. Public via the cloudflared tunnel; admin at
+# https://birdnet-go.<tailnet>.ts.net.
+name: birdnet-go
+namespace: birdnet-go
+labels:
+  category: media

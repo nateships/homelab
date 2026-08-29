@@ -76,6 +76,11 @@ variable "seerr_public_hostname" {
   type        = string
 }
 
+variable "birdnet_public_hostname" {
+  description = "Public hostname the tunnel routes to birdnet-go, e.g. birds.example.com"
+  type        = string
+}
+
 variable "r2_bucket" {
   description = "R2 bucket for Omni etcd backups"
   type        = string

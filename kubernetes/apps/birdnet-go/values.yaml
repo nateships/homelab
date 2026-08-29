@@ -1,0 +1,127 @@
+controllers:
+  birdnet-go:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/tphakala/birdnet-go
+          # renovate: datasource=docker depName=ghcr.io/tphakala/birdnet-go
+          tag: v0.6.3@sha256:a705ff35fa01187a05e42f0e14d7f41dc9dd2c713dde9cd2dcd568178eae5d4c
+        env:
+          TZ: America/New_York
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+  mariadb:
+    containers:
+      app:
+        image:
+          repository: docker.io/library/mariadb
+          # renovate: datasource=docker depName=docker.io/library/mariadb
+          tag: 12.3.3@sha256:dd9b303aed4f4890ed09f766d8ca9ddfd176c0c6f6267feff53b3192ec65a979
+        env:
+          MARIADB_USER:
+            valueFrom:
+              secretKeyRef:
+                name: birdnet-go
+                key: db_user
+          MARIADB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: birdnet-go
+                key: db_password
+          MARIADB_ROOT_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: birdnet-go
+                key: db_root_password
+          MARIADB_DATABASE:
+            valueFrom:
+              secretKeyRef:
+                name: birdnet-go
+                key: db_name
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: [healthcheck.sh, --connect]
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: [healthcheck.sh, --connect]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+defaultPodOptions:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1024
+    runAsGroup: 100
+    fsGroup: 100
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: birdnet-go
+    ports:
+      http:
+        port: 8080
+ingress:
+  app:
+    className: tailscale
+    annotations:
+      # Served as a Tailscale Service by the shared ProxyGroup.
+      tailscale.com/proxy-group: ingress
+      # Advertise before the cert exists: HTTPS-only services deadlock
+      # on first deploy (no advertise without cert, no cert without
+      # advertise). The tailnet transport is encrypted regardless.
+      tailscale.com/http-endpoint: enabled
+    # The tailscale controller ignores host-bearing rules; the tailnet
+    # name comes from tls.hosts and the backend is the default.
+    defaultBackend:
+      service:
+        name: birdnet-go
+        port:
+          number: 8080
+    tls:
+      - hosts: [birdnet-go]
+persistence:
+  config:
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    advancedMounts:
+      birdnet-go:
+        app:
+          - path: /config
+  data:
+    accessMode: ReadWriteOnce
+    size: 20Gi
+    advancedMounts:
+      birdnet-go:
+        app:
+          - path: /data
+  db:
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    advancedMounts:
+      mariadb:
+        app:
+          - path: /var/lib/mysql
+  # birdnet writes temp audio while analyzing.
+  tmp:
+    type: emptyDir
+    advancedMounts:
+      birdnet-go:
+        app:
+          - path: /tmp
