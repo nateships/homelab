@@ -25,6 +25,8 @@ configuration:
         s3Url: https://6583c8e51ebe94090949e37a7c403844.r2.cloudflarestorage.com
         # R2 rejects the SDK's streaming checksums.
         checksumAlgorithm: ""
+        # R2 also rejects the (empty) object-tagging header.
+        tagging: ""
   volumeSnapshotLocation: []
 snapshotsEnabled: false
 deployNodeAgent: true
