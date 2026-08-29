@@ -212,6 +212,24 @@ For your own kubectl access:
 omnictl kubeconfig --cluster homelab
 ```
 
+GitHub push webhooks (optional; without them ArgoCD polls every 3
+minutes): the cloudflare stack routes the two webhook hostnames
+(`TF_VAR_argocd_webhook_public_hostname`,
+`TF_VAR_argocd_appset_webhook_public_hostname`) and mints the shared
+secret into the `argocd-webhook` item; ESO merges it into
+`argocd-secret`. One-time, after the stack applies and the CNAMEs
+publish, create one repo webhook per hostname:
+
+```bash
+for h in argocd-webhook.example.com argocd-appset-webhook.example.com; do
+  gh api repos/<owner>/<repo>/hooks -f name=web \
+    -f "config[url]=https://$h/api/webhook" \
+    -f "config[content_type]=json" \
+    -f "config[secret]=$(op read op://homelab/argocd-webhook/password)" \
+    -f "events[]=push"
+done
+```
+
 To add a secret from here on: put an item in the `homelab` vault, then
 commit an `ExternalSecret`:
 

@@ -102,6 +102,38 @@ data "cloudflare_zones" "birdnet" {
   name = local.birdnet_zone_name
 }
 
+# GitHub reaches the webhook paths through these names.
+locals {
+  argocd_webhook_zone_name        = join(".", slice(split(".", var.argocd_webhook_public_hostname), length(split(".", var.argocd_webhook_public_hostname)) - 2, length(split(".", var.argocd_webhook_public_hostname))))
+  argocd_appset_webhook_zone_name = join(".", slice(split(".", var.argocd_appset_webhook_public_hostname), length(split(".", var.argocd_appset_webhook_public_hostname)) - 2, length(split(".", var.argocd_appset_webhook_public_hostname))))
+}
+
+data "cloudflare_zones" "argocd_webhook" {
+  name = local.argocd_webhook_zone_name
+}
+
+resource "cloudflare_dns_record" "argocd_webhook" {
+  zone_id = data.cloudflare_zones.argocd_webhook.result[0].id
+  name    = var.argocd_webhook_public_hostname
+  type    = "CNAME"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
+  ttl     = 1 # proxied records use automatic TTL
+  proxied = true
+}
+
+data "cloudflare_zones" "argocd_appset_webhook" {
+  name = local.argocd_appset_webhook_zone_name
+}
+
+resource "cloudflare_dns_record" "argocd_appset_webhook" {
+  zone_id = data.cloudflare_zones.argocd_appset_webhook.result[0].id
+  name    = var.argocd_appset_webhook_public_hostname
+  type    = "CNAME"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
+  ttl     = 1 # proxied records use automatic TTL
+  proxied = true
+}
+
 resource "cloudflare_dns_record" "birdnet" {
   zone_id = data.cloudflare_zones.birdnet.result[0].id
   name    = var.birdnet_public_hostname
