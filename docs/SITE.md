@@ -22,6 +22,8 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | `10.16.101.224/27` | `kubernetes/apps/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
 | `10.16.101.225` | `kubernetes/apps/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |
 | R2 endpoint | `kubernetes/apps/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |
+| `network_bridge: vmbr0`, `vlan: 101` | `omni/machine-classes/*.yaml` | PVE bridge and VLAN id the cluster VMs attach to |
+| `storage_selector: name == "zpool"` | `omni/machine-classes/*.yaml` | CEL selector naming the PVE datastore for VM disks |
 
 This value stays in git because ArgoCD renders only committed
 manifests. Everything terraform-applied arrives as TF_VAR_* instead
