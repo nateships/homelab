@@ -31,7 +31,7 @@ omni/               Self-hosted Omni: compose file, env template, machine classe
 kubernetes/
   bootstrap/        One-time ArgoCD install + the ApplicationSet
   apps/             One config.yaml per app; the ApplicationSet generates each Application
-.github/workflows/  CI: tofu fmt/validate, kubeconform
+.github/workflows/  CI: tofu fmt/validate, appset schema, kubeconform; Spacelift runner image build
 docs/BOOTSTRAP.md   Bring-up guide, zero to cluster
 docs/SITE.md        Every site-specific value: what a fork must change
 ```

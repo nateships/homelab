@@ -10,8 +10,8 @@ Do the stages in order. Each stage needs the stage before it.
    vault only (the tailscale stack writes minted secrets into items).
    Save the `ops_...` token in your Private vault.
 3. Create these items in the `homelab` vault:
-   - `omni`: fields `account-uuid`, `admin-email` (stage 3 adds `domain`
-     and `lxc-ip`)
+   - `omni`: fields `account-uuid`, `admin-email` (stage 3 adds `domain`,
+     `lxc-ip`, and `tailnet-dns`; `omni.env.example` reads `tailnet-dns`)
    - `proxmox`: password field = the API token from stage 1. Three more
      fields feed the infra provider (stage 4): `lan-url` (the LAN API URL,
      for example `https://<pve-lan-ip>:8006`), `token-id`

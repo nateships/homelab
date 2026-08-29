@@ -16,6 +16,8 @@ spec:
       memory: 8192
       disk_size: 60
       cpu_type: host
+      # site-specific: bridge, VLAN id, and datastore selector name this
+      # PVE host's network and storage (docs/SITE.md)
       network_bridge: vmbr0
       # Same VLAN as the Omni LXC; SideroLink stays on one L2 segment
       vlan: 101
