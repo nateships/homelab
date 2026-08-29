@@ -41,6 +41,8 @@ schedules:
       ttl: 168h
       includedNamespaces:
         - "*"
+# Scraped via the monitoring chart's annotation autodiscovery; the
+# backup-failure alerts feed on these.
 metrics:
-  enabled: false
+  enabled: true
 upgradeCRDs: true

@@ -51,6 +51,12 @@ kubernetesManifests:
   enabled: true
   collector: alloy-singleton
 
+# Scrape anything carrying prometheus.io/scrape annotations
+# (velero today).
+annotationAutodiscovery:
+  enabled: true
+  collector: alloy-metrics
+
 # The collectors' own health metrics (the "Grafana Alloy" status
 # card feeds on alloy_build_info).
 integrations:
