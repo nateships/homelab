@@ -34,6 +34,10 @@ controllers:
           capabilities:
             drop: ["ALL"]
 defaultPodOptions:
+  annotations:
+    # Scratch (and shared-library) volumes stay out of velero's file
+    # backups.
+    backup.velero.io/backup-volumes-excludes: tmp
   # Media-stack identity: files on the media export are UID 1024 / GID 100.
   securityContext:
     runAsNonRoot: true

@@ -28,6 +28,10 @@ controllers:
             gpu.intel.com/xe: 1
 
 defaultPodOptions:
+  annotations:
+    # Scratch (and shared-library) volumes stay out of velero's file
+    # backups.
+    backup.velero.io/backup-volumes-excludes: clips,tmp
   securityContext:
     runAsNonRoot: true
     runAsUser: 1024
