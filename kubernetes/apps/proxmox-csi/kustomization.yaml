@@ -12,6 +12,9 @@ helmCharts:
     includeCRDs: true
     valuesInline:
       existingConfigSecret: proxmox-csi-plugin
+      # The default (5) makes the sidecars dump every gRPC exchange;
+      # Loki misreads the err=null lines as errors.
+      logVerbosityLevel: 2
       storageClass:
         - name: proxmox-zfs
           storage: zpool
