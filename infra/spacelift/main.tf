@@ -116,17 +116,18 @@ resource "spacelift_environment_variable" "proxmox_api_token" {
 # Fan the admin-stack inputs out to stacks as TF_VAR_* env vars.
 locals {
   shared_tfvars = {
-    proxmox_node          = var.proxmox_node
-    omni_ct_id            = tostring(var.omni_ct_id)
-    omni_ct_ip            = var.omni_ct_ip
-    omni_ct_gateway       = var.omni_ct_gateway
-    omni_ct_vlan          = var.omni_ct_vlan == null ? null : tostring(var.omni_ct_vlan)
-    omni_domain           = var.omni_domain
-    k8s_vlan_cidr         = var.k8s_vlan_cidr
-    r2_account_id         = var.r2_account_id
-    r2_bucket             = var.r2_bucket
-    seerr_public_hostname = var.seerr_public_hostname
-    ssh_public_key        = var.ssh_public_key
+    proxmox_node            = var.proxmox_node
+    omni_ct_id              = tostring(var.omni_ct_id)
+    omni_ct_ip              = var.omni_ct_ip
+    omni_ct_gateway         = var.omni_ct_gateway
+    omni_ct_vlan            = var.omni_ct_vlan == null ? null : tostring(var.omni_ct_vlan)
+    omni_domain             = var.omni_domain
+    k8s_vlan_cidr           = var.k8s_vlan_cidr
+    r2_account_id           = var.r2_account_id
+    r2_bucket               = var.r2_bucket
+    seerr_public_hostname   = var.seerr_public_hostname
+    birdnet_public_hostname = var.birdnet_public_hostname
+    ssh_public_key          = var.ssh_public_key
   }
 }
 

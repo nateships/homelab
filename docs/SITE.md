@@ -18,6 +18,7 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 |---|---|---|
 | `argocd.tail34eda.ts.net` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI tailnet name (tailscale ingress) |
 | `10.16.10.100:/volume1/media` | `kubernetes/apps/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
+| `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
 | `10.16.101.224/27` | `kubernetes/apps/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
 | `10.16.101.225` | `kubernetes/apps/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |
 | R2 endpoint | `kubernetes/apps/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |
