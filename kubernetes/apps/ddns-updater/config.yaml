@@ -1,6 +1,6 @@
 # Keeps public DNS records pointed at the WAN address. Records and
 # credentials live in the ddns-updater 1Password item, off the repo.
-# Reachable at https://ddns-updater.<tailnet>.ts.net.
+# Reachable at https://ddns.<tailnet>.ts.net.
 name: ddns-updater
 namespace: ddns-updater
 labels:

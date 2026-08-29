@@ -69,7 +69,7 @@ ingress:
         port:
           number: 8000
     tls:
-      - hosts: [ddns-updater]
+      - hosts: [ddns]
 persistence:
   # Update history.
   data:
