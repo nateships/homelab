@@ -106,11 +106,20 @@ persistence:
           - path: /config
   data:
     accessMode: ReadWriteOnce
-    size: 20Gi
+    size: 5Gi
     advancedMounts:
       birdnet-go:
         app:
           - path: /data
+  # Existing clip library on the NFS export; the clips path in the
+  # app settings is /data/clips.
+  clips:
+    existingClaim: clips
+    advancedMounts:
+      birdnet-go:
+        app:
+          - path: /data/clips
+            subPath: clips
   db:
     accessMode: ReadWriteOnce
     size: 10Gi
