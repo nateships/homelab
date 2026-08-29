@@ -6,7 +6,7 @@ resources:
 helmCharts:
   - name: proxmox-csi-plugin
     repo: oci://ghcr.io/sergelogvinov/charts
-    version: 0.5.10
+    version: 0.5.11
     releaseName: proxmox-csi
     namespace: csi-proxmox
     includeCRDs: true
