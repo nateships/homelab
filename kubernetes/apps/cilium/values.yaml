@@ -60,3 +60,11 @@ cgroup:
   autoMount:
     enabled: false
   hostRoot: /sys/fs/cgroup
+# No TLS-aware CiliumNetworkPolicies: skip the secret-sync RBAC and
+# the cilium-secrets namespace it lives in.
+tls:
+  readSecretsOnlyFromSecretsNamespace: false
+  secretSync:
+    enabled: false
+  secretsNamespace:
+    create: false
