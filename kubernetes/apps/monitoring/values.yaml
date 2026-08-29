@@ -1,0 +1,52 @@
+cluster:
+  name: homelab
+
+destinations:
+  grafana-cloud-metrics:
+    type: prometheus
+    urlFrom: convert.nonsensitive(remote.kubernetes.secret.grafana_cloud_metrics.data["prom_host"]) + "/api/prom/push"
+    auth:
+      type: basic
+      usernameKey: username
+      passwordKey: password
+    secret:
+      create: false
+      name: grafana-cloud
+      namespace: monitoring
+  grafana-cloud-logs:
+    type: loki
+    urlFrom: convert.nonsensitive(remote.kubernetes.secret.grafana_cloud_logs.data["loki_host"]) + "/loki/api/v1/push"
+    auth:
+      type: basic
+      usernameKey: loki_username
+      passwordKey: password
+    secret:
+      create: false
+      name: grafana-cloud
+      namespace: monitoring
+
+clusterMetrics:
+  enabled: true
+  collector: alloy-metrics
+
+clusterEvents:
+  enabled: true
+  collector: alloy-singleton
+
+podLogsViaLoki:
+  enabled: true
+  collector: alloy-logs
+
+collectors:
+  alloy-metrics:
+    presets: [small, clustered, statefulset]
+  alloy-singleton:
+    presets: [singleton]
+  alloy-logs:
+    presets: [filesystem-log-reader, daemonset]
+
+telemetryServices:
+  kube-state-metrics:
+    deploy: true
+  node-exporter:
+    deploy: true
