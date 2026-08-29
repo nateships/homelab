@@ -1,0 +1,19 @@
+reloader:
+  watchGlobally: true
+  # Every workload rolls when a secret or configmap it references
+  # changes; ESO rewrites secrets only on real value changes.
+  autoReloadAll: true
+  # A cilium roll blips the whole network; datapath changes stay a
+  # deliberate act.
+  ignoreNamespaces: kube-system
+  deployment:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 65534
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: ["ALL"]
