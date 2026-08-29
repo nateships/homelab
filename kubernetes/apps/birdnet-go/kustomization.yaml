@@ -3,11 +3,6 @@ kind: Kustomization
 resources:
   # Clip library PV pair (same NFS export the previous install used)
   - birdnet-pv.yaml
-  # MariaDB credentials (ESO)
-  - external-secret.yaml
-  # A second chart service would suffix every service name; this keeps
-  # the app service on the bare release name.
-  - mariadb-service.yaml
 helmCharts:
   - name: app-template
     repo: oci://ghcr.io/bjw-s-labs/helm

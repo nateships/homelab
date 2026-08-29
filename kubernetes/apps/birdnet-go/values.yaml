@@ -17,51 +17,7 @@ controllers:
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
-  mariadb:
-    containers:
-      app:
-        image:
-          repository: docker.io/library/mariadb
-          # renovate: datasource=docker depName=docker.io/library/mariadb
-          tag: 12.3.3@sha256:dd9b303aed4f4890ed09f766d8ca9ddfd176c0c6f6267feff53b3192ec65a979
-        env:
-          MARIADB_USER:
-            valueFrom:
-              secretKeyRef:
-                name: birdnet-go
-                key: db_user
-          MARIADB_PASSWORD:
-            valueFrom:
-              secretKeyRef:
-                name: birdnet-go
-                key: db_password
-          MARIADB_ROOT_PASSWORD:
-            valueFrom:
-              secretKeyRef:
-                name: birdnet-go
-                key: db_root_password
-          MARIADB_DATABASE:
-            valueFrom:
-              secretKeyRef:
-                name: birdnet-go
-                key: db_name
-        probes:
-          liveness:
-            enabled: true
-            custom: true
-            spec:
-              exec:
-                command: [healthcheck.sh, --connect]
-          readiness:
-            enabled: true
-            custom: true
-            spec:
-              exec:
-                command: [healthcheck.sh, --connect]
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop: ["ALL"]
+
 defaultPodOptions:
   securityContext:
     runAsNonRoot: true
@@ -120,13 +76,6 @@ persistence:
         app:
           - path: /data/clips
             subPath: clips
-  db:
-    accessMode: ReadWriteOnce
-    size: 10Gi
-    advancedMounts:
-      mariadb:
-        app:
-          - path: /var/lib/mysql
   # birdnet writes temp audio while analyzing.
   tmp:
     type: emptyDir
