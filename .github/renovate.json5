@@ -93,6 +93,15 @@
       "automerge": false,
       "addLabels": ["major-update"]
     },
+    {
+      // Dated releases parse as single integers, so every bump reads
+      // as "major"; the date-only filter also keeps nightly-* and sha
+      // tags out of loose versioning's reach.
+      "description": "birdnet-go: dated release tags, automerged",
+      "matchDepNames": ["ghcr.io/tphakala/birdnet-go"],
+      "allowedVersions": "/^20[0-9]{6}$/",
+      "automerge": true
+    },
     // Coupled pins move together, one PR each.
     {
       "description": "Omni server + omnictl",
