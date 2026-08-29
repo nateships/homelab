@@ -7,11 +7,14 @@
 # https://download.proxmox.com/images/aplinfo-pve-9.dat. No renovate
 # datasource covers these images; bump the version and checksum together
 # by hand.
+# http on purpose: the PVE metadata fetcher fails TLS hostname
+# verification against the download CDN. The sha512 (verified on the
+# node) is the integrity anchor, the same model pveam uses.
 resource "proxmox_download_file" "debian_template" {
   node_name          = var.proxmox_node
   datastore_id       = "local" # must have "Container templates" content enabled
   content_type       = "vztmpl"
-  url                = "https://download.proxmox.com/images/system/debian-13-standard_13.6-1_amd64.tar.zst"
+  url                = "http://download.proxmox.com/images/system/debian-13-standard_13.6-1_amd64.tar.zst"
   checksum           = "4c0c27ca6ceab5ef0b84db57825a00f26157ef1854bafe97297813e1cbe8ecb8cc9c453cab6b3b0efe1ba193a50c47ece1e41d950e411b8730b835b71e9e754b"
   checksum_algorithm = "sha512"
 }
