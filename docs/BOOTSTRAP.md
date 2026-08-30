@@ -51,8 +51,11 @@ Do the stages in order. Each stage needs the stage before it.
    stack creates the in-cluster secret from its run environment (stage 5),
    and CI needs no token.
 
-> Family-plan service accounts have low API rate limits. Keep ESO
-> `refreshInterval` at `1h` on each ExternalSecret.
+> Family-plan service accounts have low API rate limits, and every
+> `data` entry on an ExternalSecret is one API call per refresh. Keep
+> ESO `refreshInterval` at `24h`; after rotating an item, force a
+> refresh with
+> `kubectl annotate externalsecret <name> force-sync=$(date +%s)`.
 
 ## 1. Proxmox and Tailscale
 
@@ -239,7 +242,7 @@ kind: ExternalSecret
 metadata:
   name: my-app
 spec:
-  refreshInterval: 1h            # keep >= 1h: Family-plan rate limits
+  refreshInterval: 24h           # items rotate only on tofu applies; Family-plan API quota is small
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword
