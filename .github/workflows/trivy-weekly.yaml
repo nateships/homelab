@@ -38,6 +38,10 @@ jobs:
         uses: ./.github/actions/trivy-scan
         with:
           images: ${{ steps.imgs.outputs.list }}
+          # CRITICAL only across all images. Fixable HIGH is a base-image
+          # flood (900+ duplicated alerts) that drowns the dashboard; the
+          # PR gate still blocks new HIGH in a changed app, where it acts.
+          severity: CRITICAL
           format: sarif
           soft-fail: "true"
       - name: merge per-image SARIFs into one run
