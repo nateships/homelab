@@ -1,0 +1,9 @@
+cloudflare:
+  # Credentials come from the ESO-managed secret, not plaintext values.
+  secretRef:
+    name: cloudflare-tunnel
+    accountIDKey: account_id
+    tunnelNameKey: tunnel_name
+    apiTokenKey: api_token
+ingressClass:
+  name: cloudflare-tunnel
