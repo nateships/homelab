@@ -1,0 +1,10 @@
+# Only the checks that catch data-losing mistakes a YAML parser hides.
+# key-duplicates is the important one: a repeated mapping key is
+# silently collapsed to the last value at parse time, so no schema or
+# kubeconform check downstream ever sees it (this dropped the
+# tailscale namespace's privileged PSA label once).
+ignore: |
+  kubernetes/apps/*/charts/
+  .terraform/
+rules:
+  key-duplicates: enable

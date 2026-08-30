@@ -11,6 +11,14 @@ repos:
       - id: check-added-large-files
       - id: detect-private-key
 
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      # Catches duplicate mapping keys, which every YAML parser
+      # downstream silently collapses (config in .yamllint).
+      - id: yamllint
+        args: [-c, .yamllint]
+
   - repo: local
     hooks:
       # Public repo: block committed secrets before they ever reach GitHub.
