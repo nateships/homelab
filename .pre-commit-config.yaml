@@ -25,9 +25,11 @@ repos:
       # Binary comes from mise.toml, like the other local hooks.
       - id: trufflehog
         name: trufflehog
-        entry: trufflehog git file://. --since-commit HEAD --results=verified,unknown --fail
+        # Filesystem scan of the files being changed. On commit that is
+        # the staged files; under `prek run --all-files` (CI) it is the
+        # whole tracked tree. detect-private-key covers unverifiable keys.
+        entry: mise exec -- trufflehog filesystem --no-update --log-level=-1 --results=verified --fail
         language: system
-        pass_filenames: false
       - id: tofu-fmt
         name: tofu fmt
         entry: tofu fmt -recursive infra/
