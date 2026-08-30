@@ -1,0 +1,52 @@
+controllers:
+  ladder:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/everywall/ladder
+          # renovate: datasource=docker depName=ghcr.io/everywall/ladder
+          tag: v0.0.23@sha256:cf30c32ac046a5554a4e829f46546d68ed6056986ba5ba83c65a5a705828d5fe
+        env:
+          PORT: "8080"
+          # Per-site bypass rules, refreshed from the project's list.
+          RULESET: https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+defaultPodOptions:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: ladder
+    ports:
+      http:
+        port: 8080
+ingress:
+  app:
+    className: tailscale
+    annotations:
+      # Served as a Tailscale Service by the shared ProxyGroup.
+      tailscale.com/proxy-group: ingress
+      # Advertise before the cert exists: HTTPS-only services deadlock
+      # on first deploy (no advertise without cert, no cert without
+      # advertise). The tailnet transport is encrypted regardless.
+      tailscale.com/http-endpoint: enabled
+    defaultBackend:
+      service:
+        name: ladder
+        port:
+          number: 8080
+    tls:
+      - hosts: [ladder]

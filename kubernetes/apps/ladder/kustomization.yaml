@@ -1,12 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources:
-  # App key, admin password, and the public URL (ESO)
-  - external-secret.yaml
 helmCharts:
   - name: app-template
     repo: oci://ghcr.io/bjw-s-labs/helm
     version: 5.1.0
-    releaseName: marreta
-    namespace: marreta
+    releaseName: ladder
+    namespace: ladder
     valuesFile: values.yaml
