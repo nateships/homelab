@@ -1,7 +1,8 @@
 # Scan a list of container images with Trivy. Reused by the PR gate
-# (changed apps, fails on findings) and the weekly sweep (all apps,
-# report only). Trivy comes from mise, so the caller must run
-# mise-action first. Accepted-but-unfixable CVEs live in .trivyignore.
+# (changed apps, table output, fails on findings) and the weekly sweep
+# (all apps, SARIF output for Code Scanning, report only). Trivy comes
+# from mise, so the caller must run mise-action first. Accepted-but-
+# unfixable CVEs live in .trivyignore.
 name: trivy-scan
 description: Scan container images with Trivy at a severity threshold.
 inputs:
@@ -14,6 +15,12 @@ inputs:
   soft-fail:
     description: "true = report only (exit 0); false = fail on findings."
     default: "false"
+  format:
+    description: "table (default) or sarif."
+    default: "table"
+  sarif-dir:
+    description: "Directory for per-image SARIF files when format is sarif."
+    default: "sarif"
 runs:
   using: composite
   steps:
@@ -30,11 +37,20 @@ runs:
         code=1
         [ "${{ inputs.soft-fail }}" = "true" ] && code=0
         printf '%s\n' "${{ inputs.images }}" | sort -u | grep -v '^$' > /tmp/trivy-images.txt
+        [ "${{ inputs.format }}" = "sarif" ] && mkdir -p "${{ inputs.sarif-dir }}"
         rc=0
+        n=0
         while read -r img; do
+          n=$((n + 1))
           echo "::group::trivy $img"
-          trivy image --severity "${{ inputs.severity }}" --ignore-unfixed \
-            --no-progress --exit-code "$code" "$img" || rc=1
+          if [ "${{ inputs.format }}" = "sarif" ]; then
+            trivy image --format sarif -o "${{ inputs.sarif-dir }}/$n.sarif" \
+              --severity "${{ inputs.severity }}" --ignore-unfixed \
+              --no-progress --exit-code "$code" "$img" || rc=1
+          else
+            trivy image --severity "${{ inputs.severity }}" --ignore-unfixed \
+              --no-progress --exit-code "$code" "$img" || rc=1
+          fi
           echo "::endgroup::"
         done < /tmp/trivy-images.txt
         exit $rc
