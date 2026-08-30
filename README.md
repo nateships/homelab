@@ -1,63 +1,36 @@
-# homelab
+<h1 align="center">homelab</h1>
 
-[![ci](https://github.com/nateships/homelab/actions/workflows/ci.yaml/badge.svg)](https://github.com/nateships/homelab/actions/workflows/ci.yaml)
-[![runner-image](https://github.com/nateships/homelab/actions/workflows/runner-image.yaml/badge.svg)](https://github.com/nateships/homelab/actions/workflows/runner-image.yaml)
-[![Renovate](https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate)](.github/renovate.json5)
+<p align="center"><code>git push</code> is the only admin interface.</p>
 
-**Everything is a pull request.** Proxmox → [Omni](https://omni.siderolabs.com/) +
-[Talos](https://www.talos.dev/) → [ArgoCD](https://argo-cd.readthedocs.io/),
-with [Spacelift](https://spacelift.io/) running the OpenTofu and GitHub
-Actions running the CI checks. No SSH into nodes, no kubectl apply, no
-snowflakes: git is the interface to the whole rack.
+<p align="center">
+  <a href="https://github.com/nateships/homelab/actions/workflows/ci.yaml"><img src="https://github.com/nateships/homelab/actions/workflows/ci.yaml/badge.svg" alt="ci"></a>
+  <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
+</p>
 
-![Talos](https://img.shields.io/badge/Talos-FF7300?logo=talos&logoColor=white)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)
-![OpenTofu](https://img.shields.io/badge/OpenTofu-FFDA18?logo=opentofu&logoColor=black)
-![ArgoCD](https://img.shields.io/badge/ArgoCD-EF7B4D?logo=argo&logoColor=white)
-![Cilium](https://img.shields.io/badge/Cilium-F8C517?logo=cilium&logoColor=black)
-![Tailscale](https://img.shields.io/badge/Tailscale-242424?logo=tailscale&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana_Cloud-F46800?logo=grafana&logoColor=white)
-![1Password](https://img.shields.io/badge/1Password-3B66BC?logo=1password&logoColor=white)
+```
+                              ┌────────────── this repo ──────────────┐
+                              │                                       │
+  merge ──► GitHub Actions ── gates: tofu validate · kubeconform · trufflehog
+    │
+    ├──► Spacelift ──► OpenTofu ──► Proxmox ── LXC: Omni (self-hosted)
+    │                                          VMs: Talos nodes ◄── provisioned by Omni
+    │
+    └──► webhook ──► ArgoCD ──► kubernetes/apps: one directory = one Application
+```
 
-This repo is public. It contains no secrets, encrypted or otherwise. All
-secrets live in 1Password and reach each system at runtime (see
-[Secrets](#secrets)). Committed site values carry a `site-specific:`
-marker; [docs/SITE.md](docs/SITE.md) indexes what a fork must change.
+> This repo is public and contains no secrets, encrypted or otherwise.
+> Secrets live in 1Password and reach each system at runtime (see
+> [Secrets](#secrets)). Committed site values carry a `site-specific:`
+> marker; [docs/SITE.md](docs/SITE.md) indexes what a fork must change.
 
 ## Highlights
 
-- **Immutable nodes**: Talos VMs provisioned declaratively by a self-hosted
-  Omni through its Proxmox infrastructure provider; machine classes and
-  config patches in git, rolling updates on merge.
-- **One app = one directory**: an ApplicationSet turns every
-  `kubernetes/apps/<name>/config.yaml` into an ArgoCD Application. Adding an
-  app is one PR with a handful of lines.
-- **Push-triggered GitOps**: GitHub webhooks reach ArgoCD through a
-  path-scoped Cloudflare tunnel route; merges deploy in seconds, not polls.
-- **Cilium end to end**: kube-proxy replacement, Gateway-free tailnet
-  ingress, LB-IPAM VIPs with L2 announcements, DSR for real client IPs, and
-  tier-based network policy.
-- **Secretless repo**: a single 1Password service account feeds Spacelift,
-  bootstrap, and External Secrets Operator; rotation is a tofu apply.
-- **Batteries-included observability**: Grafana Cloud via the k8s-monitoring
-  chart, plus SNMP, PVE, UniFi, and ArgoCD exporters, log-level hygiene in
-  Alloy, and alerts that page a phone through Grafana IRM.
-- **Tested like software**: kubeconform, appset schema validation, tofu
-  fmt/validate, and trufflehog run on every PR; Renovate keeps ~everything
-  pinned and fresh.
-
-## Architecture
-
-```
-GitHub (this repo)
-  ├── Spacelift ──► OpenTofu ──► Proxmox (Omni LXC, networks)
-  ├── GitHub Actions ──► lint / validate / kubeconform
-  └── ArgoCD (in-cluster) ──► kubernetes/apps (ApplicationSet)
-
-Proxmox host
-  ├── LXC: Omni (self-hosted, Docker Compose) + Proxmox infra provider
-  └── VMs: Talos nodes (provisioned by Omni via the Proxmox provider)
-```
+- Immutable [Talos](https://www.talos.dev/) nodes, provisioned by a self-hosted [Omni](https://omni.siderolabs.com/): machine classes and patches in git.
+- One app = one directory: an ApplicationSet turns each `config.yaml` into an ArgoCD Application.
+- Merges deploy in seconds: GitHub webhooks reach ArgoCD through a path-scoped tunnel route.
+- Cilium everywhere: kube-proxy replacement, LB-IPAM VIPs, DSR client IPs, tier-based network policy.
+- One 1Password service account is the only bootstrap secret; everything else derives from it.
+- Observability that pages a phone: Grafana Cloud, host and network exporters, IRM push.
 
 ## Repo layout
 
