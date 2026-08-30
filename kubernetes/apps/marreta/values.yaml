@@ -1,0 +1,62 @@
+controllers:
+  marreta:
+    containers:
+      app:
+        image:
+          repository: ghcr.io/manualdousuario/marreta
+          # renovate: datasource=docker depName=ghcr.io/manualdousuario/marreta
+          tag: 3.0.4@sha256:9bb6484bb8d84ad091f94472d26550e31cdcf6a8d57bd6a3ee77e51e8d65d0ea
+        env:
+          APP_NAME: Marreta
+          APP_LOCALE: en
+          APP_DEBUG: "false"
+          # The browser runs as a sidecar in this pod.
+          BROWSER_WS_ENDPOINT: ws://localhost:9222
+          ADMIN_EMAIL: admin@marreta.local
+        envFrom:
+          - secretRef:
+              name: marreta
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+      # Lightpanda headless browser: Marreta renders pages through it.
+      browser:
+        image:
+          repository: lightpanda/browser
+          # renovate: datasource=docker depName=lightpanda/browser
+          tag: nightly@sha256:d22c9cc1df1e6f081d90deb0fee96938014262f49406c547cda772982229103a
+defaultPodOptions:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: marreta
+    ports:
+      http:
+        port: 8080
+ingress:
+  app:
+    className: tailscale
+    annotations:
+      # Served as a Tailscale Service by the shared ProxyGroup.
+      tailscale.com/proxy-group: ingress
+      # Advertise before the cert exists: HTTPS-only services deadlock
+      # on first deploy (no advertise without cert, no cert without
+      # advertise). The tailnet transport is encrypted regardless.
+      tailscale.com/http-endpoint: enabled
+    defaultBackend:
+      service:
+        name: marreta
+        port:
+          number: 8080
+    tls:
+      - hosts: [marreta]
+persistence:
+  storage:
+    accessMode: ReadWriteOnce
+    size: 2Gi
+    globalMounts:
+      - path: /var/www/html/storage/app
