@@ -14,7 +14,7 @@ the CI checks.
 
 > This repo is public and contains no secrets, encrypted or otherwise.
 > Secrets live in 1Password and reach each system at runtime (see
-> [Secrets](#secrets)). Committed site values carry a `site-specific:`
+> [So you want to run this](#so-you-want-to-run-this)). Committed site values carry a `site-specific:`
 > marker; [docs/SITE.md](docs/SITE.md) indexes what a fork must change.
 
 ## Highlights
@@ -58,37 +58,21 @@ docs/BOOTSTRAP.md   Bring-up guide, zero to cluster
 docs/SITE.md        Every site-specific value: what a fork must change
 ```
 
-## Secrets
+## So you want to run this
 
-One source of truth: a 1Password **service account** scoped to a dedicated
-`homelab` vault. It needs no Connect server.
-
-| Consumer | How the token gets there |
-|---|---|
-| Spacelift | Hand-made `bootstrap` context with label `autoattach:op`; a stack opts in with `labels: [op]` in its stack.yaml |
-| GitHub Actions | Not needed: CI only lints and validates |
-| Kubernetes | The `homelab-k8s-bootstrap` stack creates one secret from its run environment; External Secrets Operator (`onepasswordSDK` provider) syncs the rest |
-
-The service account token is the only bootstrap secret. Everything else
-derives from it. Family-plan API quotas are small (1000 calls per day),
-so ExternalSecrets refresh every 24h and force-sync on rotation.
-
-## Tooling
-
-[mise.toml](mise.toml) pins every tool: opentofu, omnictl, talosctl, kubectl,
-kubeconform, helm, prek, and the 1Password CLI. Run `mise install` to get them. CI
-installs from the same file.
-
-Run `prek install` once to enable the git hooks
-([.pre-commit-config.yaml](.pre-commit-config.yaml)): secret detection
-(trufflehog), tofu fmt, kubeconform, YAML checks.
-
-Renovate ([.github/renovate.json5](.github/renovate.json5)) updates all
-version pins. Coupled pins update as one grouped PR each: Omni server +
-omnictl, Talos + talosctl, Kubernetes + kubectl. To track a new pin, add a
-`# renovate: datasource=... depName=...` comment above it.
-
-## Bring-up
-
-Follow [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md) top to bottom. Order matters:
-1Password → Spacelift → Proxmox LXC → Omni → Talos cluster → ArgoCD → apps.
+1. **Tools**: `mise install` gets everything pinned in [mise.toml](mise.toml);
+   `prek install` enables the git hooks
+   ([.pre-commit-config.yaml](.pre-commit-config.yaml): trufflehog, tofu fmt,
+   kubeconform). CI installs from the same file, and Renovate keeps every pin
+   fresh (add a `# renovate:` comment above a new pin to track it).
+2. **One secret**: create a 1Password service account scoped to a dedicated
+   `homelab` vault; it needs no Connect server. It is the only bootstrap
+   secret. Spacelift holds it in a hand-made context, the
+   `homelab-k8s-bootstrap` stack seeds it into the cluster, and External
+   Secrets Operator syncs everything else from it at runtime.
+3. **Your values**: [docs/SITE.md](docs/SITE.md) indexes every committed
+   site-specific value a fork must change. Everything else arrives as
+   Spacelift TF_VARs or 1Password items, never as commits.
+4. **Bring-up**: follow [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md) top to bottom.
+   Order matters: 1Password → Spacelift → Proxmox LXC → Omni → Talos
+   cluster → ArgoCD → apps.
