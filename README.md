@@ -1,7 +1,5 @@
 <h1 align="center">homelab</h1>
 
-<p align="center"><code>git push</code> is the only admin interface.</p>
-
 <p align="center">
   <a href="https://github.com/nateships/homelab/actions/workflows/ci.yaml"><img src="https://github.com/nateships/homelab/actions/workflows/ci.yaml/badge.svg" alt="ci"></a>
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
