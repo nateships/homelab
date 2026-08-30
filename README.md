@@ -7,18 +7,10 @@
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
 </p>
 
-```mermaid
-flowchart LR
-  repo([this repo])
-  repo -- PR gates --> ci["GitHub Actions<br>tofu validate · kubeconform · trufflehog"]
-  repo -- merge --> sl[Spacelift] -- OpenTofu --> pve[Proxmox]
-  pve --> omni["Omni (LXC)"]
-  omni -- provisions --> cluster
-  repo -- webhook --> argo
-  subgraph cluster ["Talos Kubernetes"]
-    argo[ArgoCD] -- "one directory = one app" --> apps[(kubernetes/apps)]
-  end
-```
+GitOps-driven homelab: Proxmox → [Omni](https://omni.siderolabs.com/) +
+[Talos](https://www.talos.dev/) → [ArgoCD](https://argo-cd.readthedocs.io/).
+[Spacelift](https://spacelift.io/) runs the OpenTofu; GitHub Actions runs
+the CI checks.
 
 > This repo is public and contains no secrets, encrypted or otherwise.
 > Secrets live in 1Password and reach each system at runtime (see
