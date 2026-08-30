@@ -26,6 +26,23 @@ the CI checks.
 - One 1Password service account is the only bootstrap secret; everything else derives from it.
 - Observability that pages a phone: Grafana Cloud, host and network exporters, IRM push.
 
+## Stack
+
+| Layer | Tech |
+|---|---|
+| Hypervisor | [Proxmox VE](https://www.proxmox.com/) (Talos VMs + the Omni LXC) |
+| Cluster lifecycle | [Omni](https://omni.siderolabs.com/) (self-hosted) + its [Proxmox infra provider](https://github.com/siderolabs/omni-infra-provider-proxmox) |
+| Node OS | [Talos Linux](https://www.talos.dev/): immutable, API-only, no SSH |
+| Networking | [Cilium](https://cilium.io/): kube-proxy replacement, LB-IPAM + L2, DSR, network policy |
+| Ingress | [Tailscale operator](https://tailscale.com/kb/1236/kubernetes-operator) (tailnet UIs) + [cloudflared](https://github.com/cloudflare/cloudflared) (public, tunnel-only) |
+| GitOps | [ArgoCD](https://argo-cd.readthedocs.io/) + one ApplicationSet |
+| IaC | [OpenTofu](https://opentofu.org/) on [Spacelift](https://spacelift.io/) |
+| Secrets | [1Password](https://1password.com/) service account + [External Secrets Operator](https://external-secrets.io/) |
+| Storage | [proxmox-csi](https://github.com/sergelogvinov/proxmox-csi-plugin) (ZFS-backed PVCs) + NFS media exports |
+| Backups | [Velero](https://velero.io/) → Cloudflare R2; hourly Omni etcd snapshots → R2 |
+| Observability | [Grafana Cloud](https://grafana.com/products/cloud/) via Alloy; SNMP, PVE, UniFi, ArgoCD exporters; IRM paging |
+| CI / updates | GitHub Actions ([mise](https://mise.jdx.dev/)-pinned tools) + [Renovate](https://docs.renovatebot.com/) |
+
 ## Repo layout
 
 ```
