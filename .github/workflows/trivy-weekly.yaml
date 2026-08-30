@@ -24,16 +24,30 @@ jobs:
       - name: images from all apps
         id: imgs
         run: |
+          # Record app-name -> image pairs, so a finding can name the app
+          # it came from, not just the image (a chart-inflated sub-image
+          # like the grafana kubectl toolbox does not name its owner).
+          : > pairs.txt
+          for app in kubernetes/apps/*/; do
+            [ -f "$app/kustomization.yaml" ] || continue
+            name=$(basename "$app")
+            kubectl kustomize --enable-helm "$app" 2>/dev/null \
+              | grep -oE '^[[:space:]]+image:[[:space:]]*"?[^"[:space:]]+' \
+              | sed -E 's/.*image:[[:space:]]*"?//' \
+              | while read -r img; do printf '%s\t%s\n' "$name" "$img"; done
+          done | sort -u > pairs.txt
+          # Flat unique image list for the scanner.
           {
             echo "list<<EOF"
-            for app in kubernetes/apps/*/; do
-              [ -f "$app/kustomization.yaml" ] || continue
-              kubectl kustomize --enable-helm "$app" 2>/dev/null \
-                | grep -oE '^[[:space:]]+image:[[:space:]]*"?[^"[:space:]]+' \
-                | sed -E 's/.*image:[[:space:]]*"?//'
-            done | sort -u
+            cut -f2 pairs.txt | sort -u
             echo EOF
           } >> "$GITHUB_OUTPUT"
+          # image (digest stripped) -> comma-joined owning apps.
+          jq -Rn '[inputs | split("\t")
+              | {app: .[0], image: (.[1] | sub("@sha256:.*"; ""))}]
+            | group_by(.image)
+            | map({key: .[0].image, value: ([.[].app] | unique | join(","))})
+            | from_entries' pairs.txt > img-app-map.json
       - name: scan to SARIF (report only)
         uses: ./.github/actions/trivy-scan
         with:
@@ -47,20 +61,29 @@ jobs:
       - name: merge per-image SARIFs into one run
         # Code Scanning rejects multiple runs under one category, so
         # fold every image's results into a single run before upload.
-        # The merge drops per-file image identity, so prepend each
-        # image name (digest stripped) to its finding paths first. A
-        # slash join keeps the path a valid SARIF URI (no spaces).
+        # The merge drops per-file image identity, so prepend the owning
+        # app and image name to each finding path first. A slash join
+        # keeps the path a valid SARIF URI (no spaces).
         run: |
-          jq -s '
-            [ .[] | .runs[0] as $r
-              | (($r.properties.imageName // "unknown") | sub("@sha256:.*";"")) as $img
-              | $r.results[]
-              | .locations[].physicalLocation.artifactLocation.uri |= ($img + "/" + .)
-            ] as $results
+          jq -s --slurpfile map img-app-map.json '
+            ($map[0]) as $m
+            | [ .[] | .runs[0] as $r
+                | (($r.properties.imageName // "unknown") | sub("@sha256:.*";"")) as $img
+                | ($m[$img] // "unknown") as $app
+                | $r.results[]
+                | .locations[].physicalLocation.artifactLocation.uri |= ($app + "/" + $img + "/" + .)
+              ] as $results
             | .[0].runs[0].results = $results
             | .[0].runs[0].tool.driver.rules =
                 ([.[].runs[0].tool.driver.rules[]] | unique_by(.id))
             | .[0]' sarif/*.sarif > trivy.sarif
+          # Guard: an app it could not map stamps "unknown/" and would
+          # silently defeat the point. Fail loud instead.
+          if grep -q '"unknown/' trivy.sarif; then
+            echo "::error::unmapped image in SARIF; img-app-map.json key mismatch"
+            grep -o '"uri": "unknown/[^"]*' trivy.sarif | sort -u
+            exit 1
+          fi
       - name: upload to code scanning
         uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
         with:
