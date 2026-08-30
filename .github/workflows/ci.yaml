@@ -25,7 +25,7 @@ jobs:
   image-scan:
     # Gate image bumps (incl. renovate automerges) before they reach the
     # cluster: scan the images of the apps this PR changes, fail on a
-    # fixable HIGH/CRITICAL. Only on PRs; on main the merge already
+    # fixable CRITICAL. Only on PRs; on main the merge already
     # happened. Scoped to changed apps so an untouched app's new CVE
     # never fails an unrelated PR.
     if: github.event_name == 'pull_request'
@@ -53,11 +53,15 @@ jobs:
             done | sort -u
             echo EOF
           } >> "$GITHUB_OUTPUT"
-      - name: scan (fail on fixable HIGH/CRITICAL)
+      - name: scan (fail on fixable CRITICAL)
         if: steps.imgs.outputs.list != ''
         uses: ./.github/actions/trivy-scan
         with:
           images: ${{ steps.imgs.outputs.list }}
+          # CRITICAL only, matching the weekly sweep. The gate scans a
+          # changed app's whole image and cannot tell a new HIGH from one
+          # already in the base image, so a HIGH gate false-blocks bumps.
+          severity: CRITICAL
           soft-fail: "false"
 
   opentofu:
