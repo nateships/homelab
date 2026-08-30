@@ -18,9 +18,11 @@ locals {
   ])
 }
 
-resource "cloudflare_account_token" "tunnel_ingress" {
-  account_id = var.r2_account_id
-  name       = "cloudflare-tunnel-ingress-controller"
+# A user-owned token, not account-owned: account tokens reject the
+# all-zones wildcard, and the controller needs DNS write across every
+# zone a public Ingress might use.
+resource "cloudflare_api_token" "tunnel_ingress" {
+  name = "cloudflare-tunnel-ingress-controller"
   policies = [
     {
       effect            = "allow"
@@ -47,6 +49,6 @@ resource "onepassword_item" "cloudflare_tunnel" {
   vault      = data.onepassword_vault.homelab.uuid
   title      = "cloudflare-tunnel"
   category   = "password"
-  password   = cloudflare_account_token.tunnel_ingress.value
+  password   = cloudflare_api_token.tunnel_ingress.value
   note_value = "API token for the strrl tunnel ingress controller; minted by the cloudflare stack."
 }
