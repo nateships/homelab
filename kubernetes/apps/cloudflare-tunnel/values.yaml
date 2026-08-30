@@ -7,3 +7,9 @@ cloudflare:
     apiTokenKey: api_token
 ingressClass:
   name: cloudflare-tunnel
+cloudflared:
+  # Two connectors for HA public ingress, spread across nodes. The
+  # count must stay at or below the schedulable node count or the
+  # extra pods stay pending.
+  replicaCount: 2
+  podAntiAffinity: true
