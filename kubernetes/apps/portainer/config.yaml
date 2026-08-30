@@ -1,0 +1,8 @@
+# Portainer server managing the external docker hosts through their
+# agents. Deliberately holds no cluster RBAC: ArgoCD owns this
+# cluster, so the local Kubernetes environment stays unconfigured.
+# Reachable at https://portainer.<tailnet>.ts.net.
+name: portainer
+namespace: portainer
+labels:
+  category: infra
