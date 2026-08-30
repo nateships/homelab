@@ -53,6 +53,28 @@ podLogsViaLoki:
   # last regex re-captures only a non-empty level: structured
   # metadata with an empty value makes Loki reject the line.
   extraLogProcessingStages: |
+    // Known-benign noise, dropped before shipping. Each drop is
+    // namespace-scoped so the pattern cannot hide similar lines from
+    // other apps.
+    // The ArgoCD config validator runs before $secret:key
+    // substitution and warns on every settings reload.
+    // TODO: remove this drop when the upstream fix ships in the
+    // deployed ArgoCD version:
+    // https://github.com/argoproj/argo-cd/pull/29443
+    stage.match {
+      selector = "{namespace=\"argocd\"}"
+      stage.drop {
+        expression = ".*Failed to validate OIDC config.*"
+      }
+    }
+    // The tsnet proxy logs an error whenever a client disconnects
+    // mid-request (closed tab); harmless and constant on ingress.
+    stage.match {
+      selector = "{namespace=\"tailscale\"}"
+      stage.drop {
+        expression = ".*http: proxy error: context canceled.*"
+      }
+    }
     stage.regex {
       expression = "^(?P<klog_severity>[IWEF])[0-9]{4} "
     }
