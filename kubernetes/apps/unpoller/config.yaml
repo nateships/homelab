@@ -1,0 +1,6 @@
+# UniFi controller poller: exports network gear and client metrics
+# for Grafana Cloud via the annotation autodiscovery scrape.
+name: unpoller
+namespace: unpoller
+labels:
+  category: network
