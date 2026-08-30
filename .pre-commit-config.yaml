@@ -22,6 +22,14 @@ repos:
         entry: 'mise exec -- yamllint -d "{rules: {key-duplicates: enable}}"'
         language: system
         files: \.ya?ml$
+      # Static analysis of GitHub Actions (injection, credential
+      # persistence, unpinned actions). Offline: the high-value audits
+      # are static and it needs no token.
+      - id: zizmor
+        name: zizmor
+        entry: mise exec -- zizmor --offline
+        language: system
+        files: ^\.github/(workflows|actions)/.*\.ya?ml$
       # Public repo: block committed secrets before they ever reach GitHub.
       # Binary comes from mise.toml, like the other local hooks.
       - id: trufflehog
