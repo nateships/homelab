@@ -69,9 +69,10 @@ connects to Proxmox at its ts.net address.
    ```
 2. Create the root OAuth client (`tailscale-terraform` item; scopes and
    tags in stage 0). The tailscale stack mints the Spacelift run
-   credential from it into the `tailscale-spacelift` item; the run hook
-   adds `?ephemeral=true&preauthorized=true`. On a bare tailnet, add
-   the tags to the policy before the console accepts the client.
+   credential from it into the `tailscale-spacelift` item. The run hook
+   adds `?ephemeral=true&preauthorized=true`. The console does not
+   accept the client until the tags exist in the policy; on a bare
+   tailnet, add the tags first.
 3. Create the Proxmox API token:
    ```bash
    pveum user token add root@pam spacelift --privsep=0
@@ -82,8 +83,9 @@ connects to Proxmox at its ts.net address.
 
 ## 2. Spacelift
 
-Manual Spacelift objects, total: one context, one stack, two env vars.
-Contexts attach through `autoattach:` labels, not clicks.
+You create these Spacelift objects by hand: one context, one stack, and
+two environment variables. Contexts attach to stacks through
+`autoattach:` labels, not through the UI.
 
 1. Create context `bootstrap`. Add env `OP_SERVICE_ACCOUNT_TOKEN`
    (write-only). Add label `autoattach:op`. The context then attaches to each
@@ -93,16 +95,17 @@ Contexts attach through `autoattach:` labels, not clicks.
    **Space Admin** role for the `root` space: Settings → Roles → Manage Roles.
    The role must target `root` because the stack creates a child space.
    Set the runner image (Behavior → Runner image) to
-   `ghcr.io/nateships/spacelift-runner:latest`. It carries the op CLI that
-   the 1Password provider shells out to, plus Tailscale. GitHub Actions
-   builds it on push; after the first build, set the ghcr package
-   visibility to public so Spacelift can pull it.
+   `ghcr.io/nateships/spacelift-runner:latest`. The image contains the op
+   CLI (the 1Password provider runs it) and Tailscale. GitHub Actions
+   builds the image on each push. After the first build, set the ghcr
+   package visibility to public so that Spacelift can pull the image.
    Set one `TF_VAR_*` env for each input in
    `infra/spacelift/terraform.tfvars.example` (that file is the full list).
 3. Behavior → project globs: add `infra/stacks/**/stack.yaml` and
-   `mise.toml`. Manifest changes and opentofu bumps (the stacks' tofu
-   version comes from mise.toml) then trigger the admin stack. Other files
-   in a stack dir trigger only that stack.
+   `mise.toml`. A manifest change then triggers the admin stack. An
+   opentofu bump also triggers it, because the stacks' tofu version
+   comes from mise.toml. Other files in a stack dir trigger only that
+   stack.
 4. Trigger a run. The run creates the `homelab` space, the `homelab` context
    (Proxmox and Tailscale credentials, run hooks, label `autoattach:homelab`),
    and the `homelab-omni` stack (label `homelab`).
@@ -139,8 +142,8 @@ One-time preparation:
 5. Trigger `homelab-omni-config` and confirm the run.
 
 Login uses Tailscale identity through tsidp (an OIDC provider that runs
-next to Omni and joins the tailnet). Two-phase, because the OIDC client can
-only be registered once tsidp runs:
+next to Omni and joins the tailnet). The setup has two phases: you can
+register the OIDC client only after tsidp runs.
 
 1. The tailscale stack fills the `tailscale-omni` and `tailscale-tsidp`
    items (the LXC and tsidp join the tailnet with them). Set the
@@ -153,8 +156,8 @@ only be registered once tsidp runs:
 
 Check the result: open the Omni domain from a tailnet device. Log in
 with your Tailscale identity. `admin-email` in the `omni` item must match
-the email tsidp presents; if login fails, compare with the login screen and
-update the field, then re-run the stack.
+the email that tsidp presents. If login fails, compare the field with the
+login screen, update the field, and re-run the stack.
 
 ## 4. Proxmox infra provider and cluster
 
@@ -173,26 +176,26 @@ update the field, then re-run the stack.
    - Fill the `cloudflare-r2` item: `bucket`, `account-id` (from the R2
      endpoint), username = Access Key ID, password = Secret Access Key.
    Omni encrypts each backup with a per-cluster key before upload, so R2
-   never holds plaintext cluster data. The key lives in Omni's database;
-   backups are only restorable through Omni.
+   never holds plaintext cluster data. The key lives in Omni's database.
+   Only Omni can restore the backups.
 5. Confirm the `homelab-omni-resources` run. It applies the machine classes
    and the etcd backup configuration with omnictl. Omni validates the R2
    credentials by listing the bucket.
 6. Confirm the `homelab-cluster` run. It creates the cluster, machine sets,
    config patches, extensions, and the one-time Cilium bootstrap manifest.
-   The `install-disk` patch is mandatory on Talos 1.13+; without it VMs stop
-   at `stage=UPGRADING` and show no error.
+   The `install-disk` patch is mandatory on Talos 1.13+. Without it, the
+   VMs stop at `stage=UPGRADING` and show no error.
 7. Wait until the VMs provision and the cluster reports Ready in Omni.
    Automatic etcd backups start when the cluster is Ready; the cluster
    stack sets a 1 hour interval. Check: Omni UI → cluster → Backups.
 
 ## 5. ArgoCD and apps
 
-Confirm the `homelab-k8s-bootstrap` run. It fetches a service-account
-kubeconfig from Omni, installs ArgoCD together with the ApplicationSet,
-and creates the one secret ESO needs (the 1Password token, taken from
-the run environment). Nothing here is manual. The repo is public, so
-ArgoCD needs no repo credential.
+Confirm the `homelab-k8s-bootstrap` run. The run fetches a
+service-account kubeconfig from Omni. It installs ArgoCD together with
+the ApplicationSet. It creates the one secret that ESO needs: the
+1Password token, taken from the run environment. Nothing here is manual.
+The repo is public, so ArgoCD needs no repo credential.
 
 The ApplicationSet generates one Application per
 `kubernetes/apps/<name>/config.yaml`. A config file holds the app name,
@@ -202,12 +205,12 @@ app, commit a new directory with a `config.yaml`. To remove one, delete
 the file; the Application and its resources go with it. ArgoCD adopts the
 bootstrapped Cilium and manages itself, ApplicationSet included.
 
-ArgoCD UI login uses tsidp directly (no Dex). One-time: open
+ArgoCD UI login uses tsidp directly (no Dex). One-time setup: open
 `https://tsidp.<tailnet>.ts.net` and register a client with redirect URI
 `https://argocd.<tailnet>.ts.net/auth/callback`. Fill the `tsidp-argocd`
 item: username = client ID, password = client secret, and an `issuer`
-field = `https://tsidp.<tailnet>.ts.net`. ESO delivers these to ArgoCD;
-until then the local admin account works
+field = `https://tsidp.<tailnet>.ts.net`. ESO delivers these values to
+ArgoCD. Until then, the local admin account works
 (`kubectl -n argocd get secret argocd-initial-admin-secret`).
 
 For your own kubectl access:
@@ -215,13 +218,13 @@ For your own kubectl access:
 omnictl kubeconfig --cluster homelab
 ```
 
-GitHub push webhooks (optional; without them ArgoCD polls every 3
-minutes): the cloudflare stack routes the two webhook hostnames
-(`TF_VAR_argocd_webhook_public_hostname`,
-`TF_VAR_argocd_appset_webhook_public_hostname`) and mints the shared
-secret into the `argocd-webhook` item; ESO merges it into
-`argocd-secret`. One-time, after the stack applies and the CNAMEs
-publish, create one repo webhook per hostname:
+GitHub push webhooks are optional. Without them, ArgoCD polls every 3
+minutes. The cloudflare stack routes the two webhook hostnames
+(`TF_VAR_argocd_webhook_public_hostname` and
+`TF_VAR_argocd_appset_webhook_public_hostname`). The same stack mints
+the shared secret into the `argocd-webhook` item, and ESO merges the
+secret into `argocd-secret`. After the stack applies and the CNAMEs
+publish, create one repo webhook per hostname (one-time):
 
 ```bash
 for h in argocd-webhook.example.com argocd-appset-webhook.example.com; do

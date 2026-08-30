@@ -17,6 +17,7 @@ immutable Talos nodes on Proxmox, and ArgoCD deploys everything under
 | Networking | [Cilium](https://cilium.io/): kube-proxy replacement, LB-IPAM + L2, DSR, network policy |
 | Ingress | [Tailscale operator](https://tailscale.com/kb/1236/kubernetes-operator) (tailnet UIs) + [cloudflared](https://github.com/cloudflare/cloudflared) (public, tunnel-only) |
 | GitOps | [ArgoCD](https://argo-cd.readthedocs.io/) + one ApplicationSet |
+| Identity | [tsidp](https://github.com/tailscale/tsidp): tailnet OIDC for Omni, ArgoCD, and admin UIs |
 | IaC | [OpenTofu](https://opentofu.org/) on [Spacelift](https://spacelift.io/) |
 | Secrets | [1Password](https://1password.com/) service account + [External Secrets Operator](https://external-secrets.io/) |
 | Storage | [proxmox-csi](https://github.com/sergelogvinov/proxmox-csi-plugin) (ZFS-backed PVCs) + NFS media exports |
