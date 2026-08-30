@@ -1,0 +1,42 @@
+# Public GitHub push-webhook routes through the cloudflare-tunnel
+# ingress controller. Only the /api/webhook path is exposed on each
+# host; the controller creates the tunnel route and DNS record.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-webhook
+  namespace: argocd
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+    # site-specific: public hostname (docs/SITE.md)
+    - host: argocd-webhook.nate.cx
+      http:
+        paths:
+          - path: /api/webhook
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-appset-webhook
+  namespace: argocd
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+    # site-specific: public hostname (docs/SITE.md)
+    - host: argocd-appset-webhook.nate.cx
+      http:
+        paths:
+          - path: /api/webhook
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-applicationset-controller
+                port:
+                  number: 7000

@@ -17,25 +17,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k8s" {
   account_id = var.r2_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.k8s.id
   config = {
+    # Public routes migrated to the cloudflare-tunnel ingress
+    # controller (per-app Ingresses). This tunnel is idle, pending
+    # teardown once the controller cutover is verified.
     ingress = [
-      {
-        hostname = var.seerr_public_hostname
-        service  = "http://seerr.seerr:5055"
-      },
-      # GitHub push webhooks. Only the webhook path routes to each
-      # controller; every other path on these hostnames hits the 404
-      # rule below. Two hostnames because both controllers serve the
-      # same path and cloudflared cannot rewrite paths.
-      {
-        hostname = var.argocd_webhook_public_hostname
-        path     = "/api/webhook"
-        service  = "http://argocd-server.argocd:80"
-      },
-      {
-        hostname = var.argocd_appset_webhook_public_hostname
-        path     = "/api/webhook"
-        service  = "http://argocd-applicationset-controller.argocd:7000"
-      },
       {
         service = "http_status:404"
       },
@@ -46,26 +31,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k8s" {
 data "cloudflare_zero_trust_tunnel_cloudflared_token" "k8s" {
   account_id = var.r2_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.k8s.id
-}
-
-# The cutover switch: publishing this name sends public traffic
-# through the tunnel to the in-cluster seerr.
-locals {
-  # Last two labels: works for a subdomain and for the zone apex.
-  seerr_zone_name = join(".", slice(split(".", var.seerr_public_hostname), length(split(".", var.seerr_public_hostname)) - 2, length(split(".", var.seerr_public_hostname))))
-}
-
-data "cloudflare_zones" "seerr" {
-  name = local.seerr_zone_name
-}
-
-resource "cloudflare_dns_record" "seerr" {
-  zone_id = data.cloudflare_zones.seerr.result[0].id
-  name    = var.seerr_public_hostname
-  type    = "CNAME"
-  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
-  ttl     = 1 # proxied records use automatic TTL
-  proxied = true
 }
 
 # Shared secret for the GitHub push webhook. ESO merges it into
@@ -91,36 +56,4 @@ resource "onepassword_item" "cloudflared" {
   category   = "password"
   password   = data.cloudflare_zero_trust_tunnel_cloudflared_token.k8s.token
   note_value = "Tunnel token for the in-cluster cloudflared; minted by the cloudflare stack."
-}
-
-# GitHub reaches the webhook paths through these names.
-locals {
-  argocd_webhook_zone_name        = join(".", slice(split(".", var.argocd_webhook_public_hostname), length(split(".", var.argocd_webhook_public_hostname)) - 2, length(split(".", var.argocd_webhook_public_hostname))))
-  argocd_appset_webhook_zone_name = join(".", slice(split(".", var.argocd_appset_webhook_public_hostname), length(split(".", var.argocd_appset_webhook_public_hostname)) - 2, length(split(".", var.argocd_appset_webhook_public_hostname))))
-}
-
-data "cloudflare_zones" "argocd_webhook" {
-  name = local.argocd_webhook_zone_name
-}
-
-resource "cloudflare_dns_record" "argocd_webhook" {
-  zone_id = data.cloudflare_zones.argocd_webhook.result[0].id
-  name    = var.argocd_webhook_public_hostname
-  type    = "CNAME"
-  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
-  ttl     = 1 # proxied records use automatic TTL
-  proxied = true
-}
-
-data "cloudflare_zones" "argocd_appset_webhook" {
-  name = local.argocd_appset_webhook_zone_name
-}
-
-resource "cloudflare_dns_record" "argocd_appset_webhook" {
-  zone_id = data.cloudflare_zones.argocd_appset_webhook.result[0].id
-  name    = var.argocd_appset_webhook_public_hostname
-  type    = "CNAME"
-  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
-  ttl     = 1 # proxied records use automatic TTL
-  proxied = true
 }
