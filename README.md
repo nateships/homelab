@@ -7,15 +7,17 @@
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
 </p>
 
-```
-                              ┌────────────── this repo ──────────────┐
-                              │                                       │
-  merge ──► GitHub Actions ── gates: tofu validate · kubeconform · trufflehog
-    │
-    ├──► Spacelift ──► OpenTofu ──► Proxmox ── LXC: Omni (self-hosted)
-    │                                          VMs: Talos nodes ◄── provisioned by Omni
-    │
-    └──► webhook ──► ArgoCD ──► kubernetes/apps: one directory = one Application
+```mermaid
+flowchart LR
+  repo([this repo])
+  repo -- PR gates --> ci["GitHub Actions<br>tofu validate · kubeconform · trufflehog"]
+  repo -- merge --> sl[Spacelift] -- OpenTofu --> pve[Proxmox]
+  pve --> omni["Omni (LXC)"]
+  omni -- provisions --> cluster
+  repo -- webhook --> argo
+  subgraph cluster ["Talos Kubernetes"]
+    argo[ArgoCD] -- "one directory = one app" --> apps[(kubernetes/apps)]
+  end
 ```
 
 > This repo is public and contains no secrets, encrypted or otherwise.
