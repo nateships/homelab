@@ -9,6 +9,17 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+      # Every prek hook, enforced so --no-verify cannot skip them.
+      # trufflehog runs too: --all-files makes it a whole-tree scan.
+      # Deep render/validate lives in the jobs below.
+      - name: prek
+        run: prek run --all-files --color always
+
   opentofu:
     runs-on: ubuntu-latest
     steps:
