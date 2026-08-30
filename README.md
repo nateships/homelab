@@ -1,25 +1,34 @@
-# homelab
+<h1 align="center">homelab</h1>
 
-GitOps-driven homelab: Proxmox → Omni + Talos → ArgoCD. Spacelift runs the
-OpenTofu. GitHub Actions runs the CI checks.
+<p align="center">
+  <a href="https://github.com/nateships/homelab/actions/workflows/ci.yaml"><img src="https://github.com/nateships/homelab/actions/workflows/ci.yaml/badge.svg" alt="ci"></a>
+  <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
+</p>
 
-This repo is public. It contains no secrets, encrypted or otherwise. All
-secrets live in 1Password and reach each system at runtime (see
-[Secrets](#secrets)). Committed site values carry a `site-specific:`
-marker; [docs/SITE.md](docs/SITE.md) indexes what a fork must change.
+A GitOps homelab: OpenTofu builds the infrastructure, Omni provisions
+immutable Talos nodes on Proxmox, and ArgoCD deploys everything under
+`kubernetes/apps`. Every change to any layer is a pull request.
 
-## Architecture
+| Layer | Tech |
+|---|---|
+| Hypervisor | [Proxmox VE](https://www.proxmox.com/) (Talos VMs + the Omni LXC) |
+| Cluster lifecycle | [Omni](https://omni.siderolabs.com/) (self-hosted) + its [Proxmox infra provider](https://github.com/siderolabs/omni-infra-provider-proxmox) |
+| Node OS | [Talos Linux](https://www.talos.dev/): immutable, API-only, no SSH |
+| Networking | [Cilium](https://cilium.io/): kube-proxy replacement, LB-IPAM + L2, DSR, network policy |
+| Ingress | [Tailscale operator](https://tailscale.com/kb/1236/kubernetes-operator) (tailnet UIs) + [cloudflared](https://github.com/cloudflare/cloudflared) (public, tunnel-only) |
+| GitOps | [ArgoCD](https://argo-cd.readthedocs.io/) + one ApplicationSet |
+| IaC | [OpenTofu](https://opentofu.org/) on [Spacelift](https://spacelift.io/) |
+| Secrets | [1Password](https://1password.com/) service account + [External Secrets Operator](https://external-secrets.io/) |
+| Storage | [proxmox-csi](https://github.com/sergelogvinov/proxmox-csi-plugin) (ZFS-backed PVCs) + NFS media exports |
+| Backups | [Velero](https://velero.io/) → Cloudflare R2; hourly Omni etcd snapshots → R2 |
+| Observability | [Grafana Cloud](https://grafana.com/products/cloud/) via Alloy; SNMP, PVE, UniFi, ArgoCD exporters; IRM paging |
+| CI / updates | GitHub Actions ([mise](https://mise.jdx.dev/)-pinned tools) + [Renovate](https://docs.renovatebot.com/) |
 
-```
-GitHub (this repo)
-  ├── Spacelift ──► OpenTofu ──► Proxmox (Omni LXC, networks)
-  ├── GitHub Actions ──► lint / validate / kubeconform
-  └── ArgoCD (in-cluster) ──► kubernetes/apps (ApplicationSet)
-
-Proxmox host
-  ├── LXC: Omni (self-hosted, Docker Compose) + Proxmox infra provider
-  └── VMs: Talos nodes (provisioned by Omni via the Proxmox provider)
-```
+> This repo is public and contains no secrets, encrypted or otherwise.
+> Secrets live in 1Password and reach each system at runtime (see
+> [So you want to run this](#so-you-want-to-run-this)). Committed site
+> values carry a `site-specific:` marker; [docs/SITE.md](docs/SITE.md)
+> indexes what a fork must change.
 
 ## Repo layout
 
@@ -36,37 +45,21 @@ docs/BOOTSTRAP.md   Bring-up guide, zero to cluster
 docs/SITE.md        Every site-specific value: what a fork must change
 ```
 
-## Secrets
+## So you want to run this
 
-One source of truth: a 1Password **service account** scoped to a dedicated
-`homelab` vault. It needs no Connect server.
-
-| Consumer | How the token gets there |
-|---|---|
-| Spacelift | Hand-made `bootstrap` context with label `autoattach:op`; a stack opts in with `labels: [op]` in its stack.yaml |
-| GitHub Actions | Not needed: CI only lints and validates |
-| Kubernetes | The `homelab-k8s-bootstrap` stack creates one secret from its run environment; External Secrets Operator (`onepasswordSDK` provider) syncs the rest |
-
-The service account token is the only bootstrap secret. Everything else
-derives from it. Family-plan rate limits are low, so keep the ESO refresh
-interval at 1h.
-
-## Tooling
-
-[mise.toml](mise.toml) pins every tool: opentofu, omnictl, talosctl, kubectl,
-kubeconform, helm, prek, and the 1Password CLI. Run `mise install` to get them. CI
-installs from the same file.
-
-Run `prek install` once to enable the git hooks
-([.pre-commit-config.yaml](.pre-commit-config.yaml)): secret detection
-(trufflehog), tofu fmt, kubeconform, YAML checks.
-
-Renovate ([.github/renovate.json5](.github/renovate.json5)) updates all
-version pins. Coupled pins update as one grouped PR each: Omni server +
-omnictl, Talos + talosctl, Kubernetes + kubectl. To track a new pin, add a
-`# renovate: datasource=... depName=...` comment above it.
-
-## Bring-up
-
-Follow [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md) top to bottom. Order matters:
-1Password → Spacelift → Proxmox LXC → Omni → Talos cluster → ArgoCD → apps.
+1. **Tools**: `mise install` gets everything pinned in [mise.toml](mise.toml);
+   `prek install` enables the git hooks
+   ([.pre-commit-config.yaml](.pre-commit-config.yaml): trufflehog, tofu fmt,
+   kubeconform). CI installs from the same file, and Renovate keeps every pin
+   fresh (add a `# renovate:` comment above a new pin to track it).
+2. **One secret**: create a 1Password service account scoped to a dedicated
+   `homelab` vault; it needs no Connect server. It is the only bootstrap
+   secret. Spacelift holds it in a hand-made context, the
+   `homelab-k8s-bootstrap` stack seeds it into the cluster, and External
+   Secrets Operator syncs everything else from it at runtime.
+3. **Your values**: [docs/SITE.md](docs/SITE.md) indexes every committed
+   site-specific value a fork must change. Everything else arrives as
+   Spacelift TF_VARs or 1Password items, never as commits.
+4. **Bring-up**: follow [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md) top to bottom.
+   Order matters: 1Password → Spacelift → Proxmox LXC → Omni → Talos
+   cluster → ArgoCD → apps.
