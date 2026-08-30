@@ -145,10 +145,11 @@ integrations:
             - alloy-logs
         # The two component histograms are ~60% of the alloy job's
         # series; the status card only needs alloy_build_info.
-        metricsTuning:
-          excludeMetrics:
-            - alloy_component_dependencies_wait_seconds_bucket
-            - alloy_component_evaluation_seconds_bucket
+        metrics:
+          tuning:
+            excludeMetrics:
+              - alloy_component_dependencies_wait_seconds_bucket
+              - alloy_component_evaluation_seconds_bucket
 
 collectors:
   alloy-metrics:
