@@ -7,9 +7,21 @@ cloudflare:
     apiTokenKey: api_token
 ingressClass:
   name: cloudflare-tunnel
+# Controller metrics (sync freshness, API calls, reconciles) via the
+# monitoring chart's annotation autodiscovery. Feeds dashboard 25659.
+podAnnotations:
+  k8s.grafana.com/scrape: "true"
+  k8s.grafana.com/metrics.portNumber: "9090"
+  k8s.grafana.com/job: integrations/cloudflare-tunnel
 cloudflared:
   # Two connectors for HA public ingress, spread across nodes. The
   # count must stay at or below the schedulable node count or the
   # extra pods stay pending.
   replicaCount: 2
   podAntiAffinity: true
+  # Connector traffic metrics (requests, status, latency by hostname)
+  # scraped the same way. Feeds dashboard 25660.
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/metrics.portNumber: "44483"
+    k8s.grafana.com/job: integrations/cloudflared
