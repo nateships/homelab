@@ -29,6 +29,10 @@ controllers:
           tag: nightly@sha256:d22c9cc1df1e6f081d90deb0fee96938014262f49406c547cda772982229103a
 defaultPodOptions:
   securityContext:
+    # The image runs as www-data (UID/GID 33); fsGroup makes the PVC
+    # writable so it can create the SQLite database.
+    fsGroup: 33
+    fsGroupChangePolicy: OnRootMismatch
     seccompProfile:
       type: RuntimeDefault
 service:
