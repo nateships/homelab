@@ -28,11 +28,28 @@ destinations:
 clusterMetrics:
   enabled: true
   collector: alloy-metrics
+  # Series-budget trims (free tier): drop per-object metrics nothing
+  # charts or alerts on.
+  kube-state-metrics:
+    metricsTuning:
+      excludeMetrics:
+        - kube_pod_restart_policy
+        - kube_replicaset_created
+        - kube_replicaset_metadata_generation
   # The Grafana Cloud CoreDNSDown alert expects this exact job label;
-  # without the scrape, absent() fires forever.
+  # without the scrape, absent() fires forever. Keep the request and
+  # forward duration histograms (the latency alerts feed on them);
+  # drop the rest of the buckets.
   kubeDNS:
     enabled: true
     jobLabel: integrations/coredns
+    metricsTuning:
+      excludeMetrics:
+        - coredns_proxy_request_duration_seconds_bucket
+        - coredns_kubernetes_dns_programming_duration_seconds_bucket
+        - coredns_dns_request_size_bytes_bucket
+        - coredns_dns_response_size_bytes_bucket
+        - coredns_health_request_duration_seconds_bucket
 
 # Node hardware metrics: the exporter deploys via telemetryServices;
 # this feature is what scrapes it.
@@ -108,8 +125,8 @@ kubernetesManifests:
   enabled: true
   collector: alloy-singleton
 
-# Scrape anything carrying prometheus.io/scrape annotations
-# (velero today).
+# Scrape anything carrying k8s.grafana.com/scrape annotations
+# (velero, argocd, external-secrets).
 annotationAutodiscovery:
   enabled: true
   collector: alloy-metrics
@@ -126,6 +143,12 @@ integrations:
             - alloy-metrics
             - alloy-singleton
             - alloy-logs
+        # The two component histograms are ~60% of the alloy job's
+        # series; the status card only needs alloy_build_info.
+        metricsTuning:
+          excludeMetrics:
+            - alloy_component_dependencies_wait_seconds_bucket
+            - alloy_component_evaluation_seconds_bucket
 
 collectors:
   alloy-metrics:

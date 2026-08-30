@@ -42,7 +42,12 @@ schedules:
       includedNamespaces:
         - "*"
 # Scraped via the monitoring chart's annotation autodiscovery; the
-# backup-failure alerts feed on these.
+# backup-failure alerts feed on these. The annotations do the actual
+# opt-in: without them the alerts evaluate against nothing.
 metrics:
   enabled: true
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/metrics.portNumber: "8085"
+    k8s.grafana.com/job: integrations/velero
 upgradeCRDs: true

@@ -32,3 +32,45 @@ patches:
           apiGroups: [""]
           resources: [pods/exec]
           verbs: [create]
+  # Metrics via the monitoring chart's annotation autodiscovery; one
+  # shared job label so dashboards select all four components.
+  - target:
+      kind: Service
+      name: argocd-metrics
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          k8s.grafana.com/scrape: "true"
+          k8s.grafana.com/metrics.portNumber: "8082"
+          k8s.grafana.com/job: integrations/argocd
+  - target:
+      kind: Service
+      name: argocd-server-metrics
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          k8s.grafana.com/scrape: "true"
+          k8s.grafana.com/metrics.portNumber: "8083"
+          k8s.grafana.com/job: integrations/argocd
+  - target:
+      kind: Service
+      name: argocd-repo-server
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          k8s.grafana.com/scrape: "true"
+          k8s.grafana.com/metrics.portNumber: "8084"
+          k8s.grafana.com/job: integrations/argocd
+  - target:
+      kind: Service
+      name: argocd-applicationset-controller
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          k8s.grafana.com/scrape: "true"
+          k8s.grafana.com/metrics.portNumber: "8080"
+          k8s.grafana.com/job: integrations/argocd
