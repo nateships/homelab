@@ -126,10 +126,16 @@ kubernetesManifests:
   collector: alloy-singleton
 
 # Scrape anything carrying k8s.grafana.com/scrape annotations
-# (velero, argocd, external-secrets).
+# (velero, argocd, external-secrets, unpoller).
 annotationAutodiscovery:
   enabled: true
   collector: alloy-metrics
+  # Series budget: unpoller mirrors static firewall rules and DHCP
+  # lease bookkeeping as per-entity metrics; nothing charts them.
+  metricsTuning:
+    excludeMetrics:
+      - unpoller_firewall_rule_.+
+      - unpoller_dhcp_.+
 
 # The collectors' own health metrics (the "Grafana Alloy" status
 # card feeds on alloy_build_info).
