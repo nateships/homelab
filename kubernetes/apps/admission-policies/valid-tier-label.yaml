@@ -1,0 +1,31 @@
+# The homelab/tier namespace label drives the CiliumClusterwide
+# network policies. It is opt-in (infra namespaces have none), so this
+# does not require the label; it only rejects an invalid value, which
+# would silently land a namespace in no tier.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: valid-tier-label
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["namespaces"]
+  validations:
+    - expression: >-
+        !has(object.metadata.labels) ||
+        !('homelab/tier' in object.metadata.labels) ||
+        object.metadata.labels['homelab/tier'] in ['edge', 'media', 'public', 'utility']
+      message: "homelab/tier must be one of: edge, media, public, utility"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: valid-tier-label
+spec:
+  policyName: valid-tier-label
+  # Warn + Audit first (non-breaking). Switch to ["Deny"] once clean.
+  validationActions: ["Warn", "Audit"]
