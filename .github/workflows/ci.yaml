@@ -21,6 +21,25 @@ jobs:
       - name: prek
         run: SKIP=trufflehog prek run --all-files --color always
 
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # full history: the scan needs the base commit
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+      # Deeper than the local hook: a PR scans its whole commit range,
+      # a push to main scans full history.
+      - name: trufflehog
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            trufflehog git file://. \
+              --since-commit "${{ github.event.pull_request.base.sha }}" \
+              --branch HEAD --results=verified,unknown --fail
+          else
+            trufflehog git file://. --results=verified,unknown --fail
+          fi
+
   opentofu:
     runs-on: ubuntu-latest
     steps:
