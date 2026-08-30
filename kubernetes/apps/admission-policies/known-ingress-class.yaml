@@ -1,0 +1,29 @@
+# An Ingress must name a known class: tailscale (tailnet) or
+# cloudflare-tunnel (public). Catches a typo'd or missing class at
+# apply time, before it silently fails to route.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: known-ingress-class
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["networking.k8s.io"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["ingresses"]
+  validations:
+    - expression: >-
+        has(object.spec.ingressClassName) &&
+        object.spec.ingressClassName in ['tailscale', 'cloudflare-tunnel']
+      message: "ingressClassName must be tailscale or cloudflare-tunnel"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: known-ingress-class
+spec:
+  policyName: known-ingress-class
+  # Warn + Audit first (non-breaking). Switch to ["Deny"] once clean.
+  validationActions: ["Warn", "Audit"]

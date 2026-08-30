@@ -1,0 +1,8 @@
+# Kubernetes-native ValidatingAdmissionPolicies (CEL, no controller).
+# Enforce repo conventions the API server checks at admit time. The
+# resources are cluster-scoped; kube-system is just the Application's
+# nominal home.
+name: admission-policies
+namespace: kube-system
+labels:
+  category: infra
