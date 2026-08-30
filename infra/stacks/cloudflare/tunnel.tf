@@ -22,10 +22,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k8s" {
         hostname = var.seerr_public_hostname
         service  = "http://seerr.seerr:5055"
       },
-      {
-        hostname = var.birdnet_public_hostname
-        service  = "http://birdnet-go.birdnet-go:8080"
-      },
       # GitHub push webhooks. Only the webhook path routes to each
       # controller; every other path on these hostnames hits the 404
       # rule below. Two hostnames because both controllers serve the
@@ -56,8 +52,7 @@ data "cloudflare_zero_trust_tunnel_cloudflared_token" "k8s" {
 # through the tunnel to the in-cluster seerr.
 locals {
   # Last two labels: works for a subdomain and for the zone apex.
-  seerr_zone_name   = join(".", slice(split(".", var.seerr_public_hostname), length(split(".", var.seerr_public_hostname)) - 2, length(split(".", var.seerr_public_hostname))))
-  birdnet_zone_name = join(".", slice(split(".", var.birdnet_public_hostname), length(split(".", var.birdnet_public_hostname)) - 2, length(split(".", var.birdnet_public_hostname))))
+  seerr_zone_name = join(".", slice(split(".", var.seerr_public_hostname), length(split(".", var.seerr_public_hostname)) - 2, length(split(".", var.seerr_public_hostname))))
 }
 
 data "cloudflare_zones" "seerr" {
@@ -98,10 +93,6 @@ resource "onepassword_item" "cloudflared" {
   note_value = "Tunnel token for the in-cluster cloudflared; minted by the cloudflare stack."
 }
 
-data "cloudflare_zones" "birdnet" {
-  name = local.birdnet_zone_name
-}
-
 # GitHub reaches the webhook paths through these names.
 locals {
   argocd_webhook_zone_name        = join(".", slice(split(".", var.argocd_webhook_public_hostname), length(split(".", var.argocd_webhook_public_hostname)) - 2, length(split(".", var.argocd_webhook_public_hostname))))
@@ -128,15 +119,6 @@ data "cloudflare_zones" "argocd_appset_webhook" {
 resource "cloudflare_dns_record" "argocd_appset_webhook" {
   zone_id = data.cloudflare_zones.argocd_appset_webhook.result[0].id
   name    = var.argocd_appset_webhook_public_hostname
-  type    = "CNAME"
-  content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
-  ttl     = 1 # proxied records use automatic TTL
-  proxied = true
-}
-
-resource "cloudflare_dns_record" "birdnet" {
-  zone_id = data.cloudflare_zones.birdnet.result[0].id
-  name    = var.birdnet_public_hostname
   type    = "CNAME"
   content = "${cloudflare_zero_trust_tunnel_cloudflared.k8s.id}.cfargotunnel.com"
   ttl     = 1 # proxied records use automatic TTL
