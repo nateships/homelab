@@ -41,6 +41,11 @@ schedules:
       ttl: 168h
       includedNamespaces:
         - "*"
+      # kube-system is fully declarative (git and the Omni bootstrap
+      # manifests); its daemonset pods also run on control planes,
+      # where no node-agent exists for the default fs-backup.
+      excludedNamespaces:
+        - kube-system
 # Scraped via the monitoring chart's annotation autodiscovery; the
 # backup-failure alerts feed on these. The annotations do the actual
 # opt-in: without them the alerts evaluate against nothing.
