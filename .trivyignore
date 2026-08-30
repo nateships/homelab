@@ -1,0 +1,8 @@
+# Accepted vulnerabilities, one CVE id per line with a comment saying
+# why and when to revisit. Use this when the PR gate flags a fixable
+# HIGH/CRITICAL that only the upstream image maintainer can fix (the
+# fix exists in a package, but the app has not shipped a rebuild yet).
+# Trivy reads this file automatically.
+#
+# Example:
+#   CVE-2026-9675  # seerr bundles old undici; drop when seerr ships a fix
