@@ -6,3 +6,8 @@
 #
 # Example:
 #   CVE-2026-9675  # seerr bundles old undici; drop when seerr ships a fix
+
+# Not applicable: heap overflow on 32-bit platforms only (needs a >1 GB
+# X.509 cert). The cluster runs 64-bit (amd64). openssl in the grafana
+# kubectl toolbox image.
+CVE-2026-31789
