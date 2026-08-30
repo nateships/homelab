@@ -6,5 +6,4 @@ labels:
 # baseline PSA, so the namespace opts up.
 namespaceLabels:
   pod-security.kubernetes.io/enforce: privileged
-namespaceLabels:
   homelab/tier: edge

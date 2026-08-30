@@ -19,7 +19,7 @@ repos:
       # hook, so gitignored charts/ need no exclusion.
       - id: yamllint
         name: yamllint
-        entry: mise exec -- yamllint -d "{rules: {key-duplicates: enable}}"
+        entry: 'mise exec -- yamllint -d "{rules: {key-duplicates: enable}}"'
         language: system
         files: \.ya?ml$
       # Public repo: block committed secrets before they ever reach GitHub.
