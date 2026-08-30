@@ -1,0 +1,12 @@
+# strrl cloudflare-tunnel-ingress-controller: exposes Ingresses with
+# ingressClassName cloudflare-tunnel to the internet through a
+# controller-managed Cloudflare Tunnel, and creates the DNS records.
+# Runs alongside the terraform-managed tunnel during migration.
+name: cloudflare-tunnel
+namespace: cloudflare-tunnel
+labels:
+  category: network
+# The controller's cloudflared connects out and proxies to backend
+# services in other tiers, so it is an edge entry point.
+namespaceLabels:
+  homelab/tier: edge
