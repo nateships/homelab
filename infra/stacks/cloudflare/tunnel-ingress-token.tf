@@ -2,7 +2,7 @@
 # (kubernetes/apps/cloudflare-tunnel). Minted here so it is not a
 # hand-made token: the controller creates its own tunnel and DNS
 # records, so it needs account-level tunnel write plus zone-level DNS
-# write and zone read across every zone.
+# write and zone read.
 locals {
   tunnel_write_id = one([
     for g in data.cloudflare_account_api_token_permission_groups_list.all.result :
@@ -16,13 +16,23 @@ locals {
     for g in data.cloudflare_account_api_token_permission_groups_list.all.result :
     g.id if g.name == "Zone Read"
   ])
+  # Account-owned tokens reject an all-zones wildcard; enumerate each
+  # zone as its own resource instead (also tighter than a wildcard).
+  zone_dns_resources = {
+    for z in data.cloudflare_zones.all.result :
+    "com.cloudflare.api.account.zone.${z.id}" => "*"
+  }
 }
 
-# A user-owned token, not account-owned: account tokens reject the
-# all-zones wildcard, and the controller needs DNS write across every
-# zone a public Ingress might use.
-resource "cloudflare_api_token" "tunnel_ingress" {
-  name = "cloudflare-tunnel-ingress-controller"
+data "cloudflare_zones" "all" {
+  account = {
+    id = var.r2_account_id
+  }
+}
+
+resource "cloudflare_account_token" "tunnel_ingress" {
+  account_id = var.r2_account_id
+  name       = "cloudflare-tunnel-ingress-controller"
   policies = [
     {
       effect            = "allow"
@@ -37,9 +47,7 @@ resource "cloudflare_api_token" "tunnel_ingress" {
         { id = local.dns_write_id },
         { id = local.zone_read_id },
       ]
-      resources = jsonencode({
-        "com.cloudflare.api.account.zone.*" = "*"
-      })
+      resources = jsonencode(local.zone_dns_resources)
     },
   ]
 }
@@ -49,6 +57,6 @@ resource "onepassword_item" "cloudflare_tunnel" {
   vault      = data.onepassword_vault.homelab.uuid
   title      = "cloudflare-tunnel"
   category   = "password"
-  password   = cloudflare_api_token.tunnel_ingress.value
+  password   = cloudflare_account_token.tunnel_ingress.value
   note_value = "API token for the strrl tunnel ingress controller; minted by the cloudflare stack."
 }
