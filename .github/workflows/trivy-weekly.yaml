@@ -59,7 +59,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - name: scan to SARIF (report only)
         if: steps.imgs.outputs.list != ''
-        uses: ./.github/actions/trivy-scan
+        uses: $/.github/actions/trivy-scan
         with:
           images: ${{ steps.imgs.outputs.list }}
           severity: CRITICAL
