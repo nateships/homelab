@@ -1,0 +1,7 @@
+# PVE API exporter: node, guest, and storage-pool metrics for the
+# virtualization host. Scraped by an explicit alloy-metrics job (the
+# exporter needs a ?target= parameter, which annotations cannot set).
+name: pve-exporter
+namespace: pve-exporter
+labels:
+  category: infra
