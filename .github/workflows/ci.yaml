@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
       # Every prek hook, enforced so --no-verify cannot skip them.
       # trufflehog runs too: --all-files makes it a whole-tree scan.
@@ -32,11 +34,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0 # need the base ref to diff
+          persist-credentials: false
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
       - name: images from changed apps
         id: imgs
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          apps=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" \
+          apps=$(git diff --name-only "origin/${BASE_REF}...HEAD" \
             | grep '^kubernetes/apps/' | cut -d/ -f1-3 | sort -u || true)
           {
             echo "list<<EOF"
@@ -59,6 +64,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
       - name: fmt
         run: tofu fmt -check -recursive infra/
@@ -73,6 +80,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
       - name: appset config schema
         run: uv run --with pyyaml scripts/validate-app-configs.py

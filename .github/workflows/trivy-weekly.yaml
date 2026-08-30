@@ -18,30 +18,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
-      - name: cache trivy db
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
-          path: ~/.cache/trivy
-          key: trivy-db-${{ github.run_id }}
-          restore-keys: trivy-db-
-      - name: scan all app images to SARIF
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+      - name: images from all apps
+        id: imgs
         run: |
-          mkdir -p sarif
-          n=0
-          for app in kubernetes/apps/*/; do
-            [ -f "$app/kustomization.yaml" ] || continue
-            kubectl kustomize --enable-helm "$app" 2>/dev/null \
-              | grep -oE '^[[:space:]]+image:[[:space:]]*"?[^"[:space:]]+' \
-              | sed -E 's/.*image:[[:space:]]*"?//'
-          done | sort -u > /tmp/images.txt
-          while read -r img; do
-            n=$((n + 1))
-            echo "::group::trivy $img"
-            trivy image --format sarif -o "sarif/$n.sarif" \
-              --severity HIGH,CRITICAL --ignore-unfixed --no-progress "$img" || true
-            echo "::endgroup::"
-          done < /tmp/images.txt
+          {
+            echo "list<<EOF"
+            for app in kubernetes/apps/*/; do
+              [ -f "$app/kustomization.yaml" ] || continue
+              kubectl kustomize --enable-helm "$app" 2>/dev/null \
+                | grep -oE '^[[:space:]]+image:[[:space:]]*"?[^"[:space:]]+' \
+                | sed -E 's/.*image:[[:space:]]*"?//'
+            done | sort -u
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+      - name: scan to SARIF (report only)
+        uses: ./.github/actions/trivy-scan
+        with:
+          images: ${{ steps.imgs.outputs.list }}
+          format: sarif
+          soft-fail: "true"
       - name: upload to code scanning
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
         with:
