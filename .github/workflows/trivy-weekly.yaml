@@ -40,8 +40,16 @@ jobs:
           images: ${{ steps.imgs.outputs.list }}
           format: sarif
           soft-fail: "true"
+      - name: merge per-image SARIFs into one run
+        # Code Scanning rejects multiple runs under one category, so
+        # fold every image's results into a single run before upload.
+        run: |
+          jq -s '.[0].runs[0].results = [.[].runs[0].results[]]
+            | .[0].runs[0].tool.driver.rules =
+                ([.[].runs[0].tool.driver.rules[]] | unique_by(.id))
+            | .[0]' sarif/*.sarif > trivy.sarif
       - name: upload to code scanning
         uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
         with:
-          sarif_file: sarif
+          sarif_file: trivy.sarif
           category: trivy-weekly
