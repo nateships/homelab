@@ -11,16 +11,17 @@ repos:
       - id: check-added-large-files
       - id: detect-private-key
 
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
-    hooks:
-      # Catches duplicate mapping keys, which every YAML parser
-      # downstream silently collapses (config in .yamllint).
-      - id: yamllint
-        args: [-c, .yamllint]
-
   - repo: local
     hooks:
+      # Catches duplicate mapping keys, which every YAML parser
+      # downstream silently collapses (it once dropped the tailscale
+      # namespace's privileged PSA label). Only tracked files reach the
+      # hook, so gitignored charts/ need no exclusion.
+      - id: yamllint
+        name: yamllint
+        entry: mise exec -- yamllint -d "{rules: {key-duplicates: enable}}"
+        language: system
+        files: \.ya?ml$
       # Public repo: block committed secrets before they ever reach GitHub.
       # Binary comes from mise.toml, like the other local hooks.
       - id: trufflehog
