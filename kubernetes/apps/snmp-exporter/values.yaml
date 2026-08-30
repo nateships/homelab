@@ -4,14 +4,17 @@ controllers:
       app:
         image:
           repository: quay.io/prometheus/snmp-exporter
+          # The main build carries the Synology string-type fixes
+          # (snmp_exporter#1603) that v0.30.1 predates; without them
+          # diskID labels render as hex dumps. Swap to a release pin
+          # BY HAND when a release after v0.30.1 ships.
           # renovate: datasource=docker depName=quay.io/prometheus/snmp-exporter
-          tag: v0.30.1@sha256:e5fd5e8b43ace6c088fe9bf0b37b7fff0e04380bee352be7ec41b853a4dd5859
+          tag: main@sha256:34488870daaa857162d69ff348e8436a68807c5f1499b628ffa7f509c1244522
         args:
-          # Bundled modules plus the credentials fragment and the
-          # module override; later files replace same-named keys.
+          # Bundled modules plus the credentials fragment; the files
+          # merge, duplicate module names are rejected.
           - --config.file=/etc/snmp_exporter/snmp.yml
           - --config.file=/etc/snmp_exporter/auth/auth.yml
-          - --config.file=/etc/snmp_exporter/modules/synology-module.yml
         probes:
           liveness:
             enabled: true
@@ -41,8 +44,3 @@ persistence:
     name: snmp-exporter
     globalMounts:
       - path: /etc/snmp_exporter/auth
-  modules:
-    type: configMap
-    name: snmp-exporter-modules
-    globalMounts:
-      - path: /etc/snmp_exporter/modules

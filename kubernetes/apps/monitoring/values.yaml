@@ -180,9 +180,7 @@ collectors:
           "__param_target" = "10.16.10.100", // site-specific: NFS server address
           // The dashboard needs the generic MIB modules alongside the
           // vendor one: interface counters, CPU, memory, load, uptime.
-          // synology_fixed is the bundled vendor module with the
-          // diskID string type fixed (snmp-exporter app).
-          "__param_module" = "synology_fixed,if_mib,ucd_system_stats,ucd_memory,ucd_la_table,system",
+          "__param_module" = "synology,if_mib,ucd_system_stats,ucd_memory,ucd_la_table,system",
           "__param_auth"   = "nfs_v3",
           "instance"       = "nfs-server",
         }]

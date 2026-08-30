@@ -3,14 +3,6 @@ kind: Kustomization
 resources:
   # SNMPv3 credentials rendered into an auths config fragment (ESO)
   - external-secret.yaml
-configMapGenerator:
-  # Bundled synology module with the diskID string type fixed; see
-  # the file header.
-  - name: snmp-exporter-modules
-    files:
-      - synology-module.yml
-    options:
-      disableNameSuffixHash: true
 helmCharts:
   - name: app-template
     repo: oci://ghcr.io/bjw-s-labs/helm
