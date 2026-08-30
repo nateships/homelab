@@ -1,6 +1,6 @@
 # Tier-based ingress control. Tiers come from namespaceLabels in each
 # app's config.yaml (homelab/tier: edge|media|public|utility):
-#   edge     tailscale proxies and cloudflared, the only entry points
+#   edge     tailscale proxies and the cloudflare-tunnel connector, the only entry points
 #   media    the media stack (unauthenticated east-west APIs)
 #   public   internet-facing apps, contained to edge ingress only
 #   utility  standalone tailnet tools; same ingress as public, but kept

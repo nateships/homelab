@@ -1,8 +1,0 @@
-# Outbound tunnel connector: publishes selected services on public
-# hostnames. Routes live in the cloudflare stack's tunnel config.
-name: cloudflared
-namespace: cloudflared
-labels:
-  category: network
-namespaceLabels:
-  homelab/tier: edge
