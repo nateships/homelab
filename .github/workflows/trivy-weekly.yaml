@@ -47,8 +47,17 @@ jobs:
       - name: merge per-image SARIFs into one run
         # Code Scanning rejects multiple runs under one category, so
         # fold every image's results into a single run before upload.
+        # The merge drops per-file image identity, so prepend each
+        # image name (digest stripped) to its finding paths first. A
+        # slash join keeps the path a valid SARIF URI (no spaces).
         run: |
-          jq -s '.[0].runs[0].results = [.[].runs[0].results[]]
+          jq -s '
+            [ .[] | .runs[0] as $r
+              | (($r.properties.imageName // "unknown") | sub("@sha256:.*";"")) as $img
+              | $r.results[]
+              | .locations[].physicalLocation.artifactLocation.uri |= ($img + "/" + .)
+            ] as $results
+            | .[0].runs[0].results = $results
             | .[0].runs[0].tool.driver.rules =
                 ([.[].runs[0].tool.driver.rules[]] | unique_by(.id))
             | .[0]' sarif/*.sarif > trivy.sarif
