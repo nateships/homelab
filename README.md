@@ -5,15 +5,6 @@
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
 </p>
 
-- One app = one directory: an ApplicationSet turns each `config.yaml` into an ArgoCD Application.
-- Merges deploy in seconds: GitHub webhooks reach ArgoCD through a path-scoped tunnel route.
-
-> This repo is public and contains no secrets, encrypted or otherwise.
-> Secrets live in 1Password and reach each system at runtime (see
-> [So you want to run this](#so-you-want-to-run-this)). Committed site
-> values carry a `site-specific:` marker; [docs/SITE.md](docs/SITE.md)
-> indexes what a fork must change.
-
 ## Stack
 
 | Layer | Tech |
@@ -30,6 +21,12 @@
 | Backups | [Velero](https://velero.io/) → Cloudflare R2; hourly Omni etcd snapshots → R2 |
 | Observability | [Grafana Cloud](https://grafana.com/products/cloud/) via Alloy; SNMP, PVE, UniFi, ArgoCD exporters; IRM paging |
 | CI / updates | GitHub Actions ([mise](https://mise.jdx.dev/)-pinned tools) + [Renovate](https://docs.renovatebot.com/) |
+
+> This repo is public and contains no secrets, encrypted or otherwise.
+> Secrets live in 1Password and reach each system at runtime (see
+> [So you want to run this](#so-you-want-to-run-this)). Committed site
+> values carry a `site-specific:` marker; [docs/SITE.md](docs/SITE.md)
+> indexes what a fork must change.
 
 ## Repo layout
 
