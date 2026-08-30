@@ -1,0 +1,37 @@
+controllers:
+  pve-exporter:
+    containers:
+      app:
+        image:
+          repository: prompve/prometheus-pve-exporter
+          # renovate: datasource=docker depName=prompve/prometheus-pve-exporter
+          tag: 3.10.0@sha256:4867684c0a937716f11f770a32d32958bded507cf570fc334f774392afcb2f37
+        env:
+          # The host serves a self-signed certificate.
+          PVE_VERIFY_SSL: "false"
+        envFrom:
+          - secretRef:
+              name: pve-exporter
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+defaultPodOptions:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: pve-exporter
+    ports:
+      http:
+        port: 9221

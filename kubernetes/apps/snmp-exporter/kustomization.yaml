@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # SNMPv3 credentials rendered into an auths config fragment (ESO)
+  - external-secret.yaml
+helmCharts:
+  - name: app-template
+    repo: oci://ghcr.io/bjw-s-labs/helm
+    version: 5.1.0
+    releaseName: snmp-exporter
+    namespace: snmp-exporter
+    valuesFile: values.yaml

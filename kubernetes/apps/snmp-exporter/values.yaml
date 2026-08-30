@@ -1,0 +1,42 @@
+controllers:
+  snmp-exporter:
+    containers:
+      app:
+        image:
+          repository: quay.io/prometheus/snmp-exporter
+          # renovate: datasource=docker depName=quay.io/prometheus/snmp-exporter
+          tag: v0.30.1@sha256:e5fd5e8b43ace6c088fe9bf0b37b7fff0e04380bee352be7ec41b853a4dd5859
+        args:
+          # Bundled modules plus the credentials fragment; later files
+          # merge over earlier ones.
+          - --config.file=/etc/snmp_exporter/snmp.yml
+          - --config.file=/etc/snmp_exporter/auth/auth.yml
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+defaultPodOptions:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+service:
+  app:
+    controller: snmp-exporter
+    ports:
+      http:
+        port: 9116
+persistence:
+  auth:
+    type: secret
+    name: snmp-exporter
+    globalMounts:
+      - path: /etc/snmp_exporter/auth
