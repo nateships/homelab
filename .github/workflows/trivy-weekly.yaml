@@ -13,8 +13,14 @@ on:
 permissions:
   contents: read
 
+# One weekly sweep at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   setup:
+    name: list apps
     runs-on: ubuntu-latest
     outputs:
       apps: ${{ steps.list.outputs.apps }}
@@ -31,6 +37,7 @@ jobs:
           echo "apps=$apps" >> "$GITHUB_OUTPUT"
 
   scan:
+    name: scan
     needs: setup
     runs-on: ubuntu-latest
     permissions:
@@ -59,7 +66,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - name: scan to SARIF (report only)
         if: steps.imgs.outputs.list != ''
-        uses: ./.github/actions/trivy-scan
+        uses: $/.github/actions/trivy-scan
         with:
           images: ${{ steps.imgs.outputs.list }}
           severity: CRITICAL
