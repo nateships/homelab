@@ -5,8 +5,6 @@
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
 </p>
 
-## Stack
-
 | Layer | Tech |
 |---|---|
 | Hypervisor | [Proxmox VE](https://www.proxmox.com/) (Talos VMs + the Omni LXC) |
