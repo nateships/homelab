@@ -5,6 +5,10 @@
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
 </p>
 
+A GitOps homelab: OpenTofu builds the infrastructure, Omni provisions
+immutable Talos nodes on Proxmox, and ArgoCD deploys everything under
+`kubernetes/apps`. Every change to any layer is a pull request.
+
 | Layer | Tech |
 |---|---|
 | Hypervisor | [Proxmox VE](https://www.proxmox.com/) (Talos VMs + the Omni LXC) |
