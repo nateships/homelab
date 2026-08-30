@@ -5,16 +5,6 @@
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
 </p>
 
-GitOps-driven homelab: Proxmox → [Omni](https://omni.siderolabs.com/) +
-[Talos](https://www.talos.dev/) → [ArgoCD](https://argo-cd.readthedocs.io/).
-[Spacelift](https://spacelift.io/) runs the OpenTofu; GitHub Actions runs
-the CI checks.
-
-> This repo is public and contains no secrets, encrypted or otherwise.
-> Secrets live in 1Password and reach each system at runtime (see
-> [So you want to run this](#so-you-want-to-run-this)). Committed site values carry a `site-specific:`
-> marker; [docs/SITE.md](docs/SITE.md) indexes what a fork must change.
-
 ## Highlights
 
 - Immutable [Talos](https://www.talos.dev/) nodes, provisioned by a self-hosted [Omni](https://omni.siderolabs.com/): machine classes and patches in git.
@@ -23,6 +13,12 @@ the CI checks.
 - Cilium everywhere: kube-proxy replacement, LB-IPAM VIPs, DSR client IPs, tier-based network policy.
 - One 1Password service account is the only bootstrap secret; everything else derives from it.
 - Observability that pages a phone: Grafana Cloud, host and network exporters, IRM push.
+
+> This repo is public and contains no secrets, encrypted or otherwise.
+> Secrets live in 1Password and reach each system at runtime (see
+> [So you want to run this](#so-you-want-to-run-this)). Committed site
+> values carry a `site-specific:` marker; [docs/SITE.md](docs/SITE.md)
+> indexes what a fork must change.
 
 ## Stack
 
