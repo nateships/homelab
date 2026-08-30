@@ -15,7 +15,7 @@ immutable Talos nodes on Proxmox, and ArgoCD deploys everything under
 | Cluster lifecycle | [Omni](https://omni.siderolabs.com/) (self-hosted) + its [Proxmox infra provider](https://github.com/siderolabs/omni-infra-provider-proxmox) |
 | Node OS | [Talos Linux](https://www.talos.dev/): immutable, API-only, no SSH |
 | Networking | [Cilium](https://cilium.io/): kube-proxy replacement, LB-IPAM + L2, DSR, network policy |
-| Ingress | [Tailscale operator](https://tailscale.com/kb/1236/kubernetes-operator) (tailnet UIs) + [cloudflared](https://github.com/cloudflare/cloudflared) (public, tunnel-only) |
+| Ingress | [Tailscale operator](https://tailscale.com/kb/1236/kubernetes-operator) for tailnet, [strrl controller](https://github.com/strrl/cloudflare-tunnel-ingress-controller) for public |
 | GitOps | [ArgoCD](https://argo-cd.readthedocs.io/) + one ApplicationSet |
 | Identity | [tsidp](https://github.com/tailscale/tsidp): tailnet OIDC for Omni, ArgoCD, and admin UIs |
 | IaC | [OpenTofu](https://opentofu.org/) on [Spacelift](https://spacelift.io/) |

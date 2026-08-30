@@ -205,6 +205,16 @@ app, commit a new directory with a `config.yaml`. To remove one, delete
 the file; the Application and its resources go with it. ArgoCD adopts the
 bootstrapped Cilium and manages itself, ApplicationSet included.
 
+Ingress model: two operators, one ingressClass each. An app reaches the
+tailnet with a `tailscale` Ingress (the Tailscale operator advertises it
+as a Tailscale Service). An app reaches the internet with a
+`cloudflare-tunnel` Ingress (the strrl controller programs a route on
+one shared Cloudflare Tunnel and creates the DNS record from the host).
+An app can carry both. Public hostnames live in the Ingress and are
+committed (marked `site-specific:`, indexed in SITE.md); there is no
+separate DNS cutover step. The controller needs a Cloudflare token
+(scoped, minted by the cloudflare stack) in the cluster via ESO.
+
 ArgoCD UI login uses tsidp directly (no Dex). One-time setup: open
 `https://tsidp.<tailnet>.ts.net` and register a client with redirect URI
 `https://argocd.<tailnet>.ts.net/auth/callback`. Fill the `tsidp-argocd`
@@ -219,12 +229,13 @@ omnictl kubeconfig --cluster homelab
 ```
 
 GitHub push webhooks are optional. Without them, ArgoCD polls every 3
-minutes. The cloudflare stack routes the two webhook hostnames
-(`TF_VAR_argocd_webhook_public_hostname` and
-`TF_VAR_argocd_appset_webhook_public_hostname`). The same stack mints
-the shared secret into the `argocd-webhook` item, and ESO merges the
-secret into `argocd-secret`. After the stack applies and the CNAMEs
-publish, create one repo webhook per hostname (one-time):
+minutes. Public exposure uses the cloudflare-tunnel controller (see
+Ingress model below): the webhook routes are two path-scoped Ingresses
+in `kubernetes/bootstrap/argocd/webhook-ingress.yaml`, which the
+controller turns into tunnel routes and DNS records. The cloudflare
+stack mints the shared secret into the `argocd-webhook` item, and ESO
+merges it into `argocd-secret`. Once the Ingresses reconcile, create
+one repo webhook per hostname (one-time):
 
 ```bash
 for h in argocd-webhook.example.com argocd-appset-webhook.example.com; do
