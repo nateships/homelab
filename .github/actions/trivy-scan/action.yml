@@ -1,0 +1,40 @@
+# Scan a list of container images with Trivy. Reused by the PR gate
+# (changed apps, fails on findings) and the weekly sweep (all apps,
+# report only). Trivy comes from mise, so the caller must run
+# mise-action first. Accepted-but-unfixable CVEs live in .trivyignore.
+name: trivy-scan
+description: Scan container images with Trivy at a severity threshold.
+inputs:
+  images:
+    description: Newline-separated image references to scan.
+    required: true
+  severity:
+    description: Comma-separated severities to report.
+    default: "HIGH,CRITICAL"
+  soft-fail:
+    description: "true = report only (exit 0); false = fail on findings."
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: cache trivy db
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: ~/.cache/trivy
+        key: trivy-db-${{ github.run_id }}
+        restore-keys: trivy-db-
+    - name: scan
+      shell: bash
+      run: |
+        set -o pipefail
+        code=1
+        [ "${{ inputs.soft-fail }}" = "true" ] && code=0
+        printf '%s\n' "${{ inputs.images }}" | sort -u | grep -v '^$' > /tmp/trivy-images.txt
+        rc=0
+        while read -r img; do
+          echo "::group::trivy $img"
+          trivy image --severity "${{ inputs.severity }}" --ignore-unfixed \
+            --no-progress --exit-code "$code" "$img" || rc=1
+          echo "::endgroup::"
+        done < /tmp/trivy-images.txt
+        exit $rc

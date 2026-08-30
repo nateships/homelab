@@ -20,6 +20,41 @@ jobs:
       - name: prek
         run: prek run --all-files --color always
 
+  image-scan:
+    # Gate image bumps (incl. renovate automerges) before they reach the
+    # cluster: scan the images of the apps this PR changes, fail on a
+    # fixable HIGH/CRITICAL. Only on PRs; on main the merge already
+    # happened. Scoped to changed apps so an untouched app's new CVE
+    # never fails an unrelated PR.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # need the base ref to diff
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+      - name: images from changed apps
+        id: imgs
+        run: |
+          apps=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" \
+            | grep '^kubernetes/apps/' | cut -d/ -f1-3 | sort -u || true)
+          {
+            echo "list<<EOF"
+            for app in $apps; do
+              [ -f "$app/kustomization.yaml" ] || continue
+              kubectl kustomize --enable-helm "$app" 2>/dev/null \
+                | grep -oE '^[[:space:]]+image:[[:space:]]*"?[^"[:space:]]+' \
+                | sed -E 's/.*image:[[:space:]]*"?//'
+            done | sort -u
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+      - name: scan (fail on fixable HIGH/CRITICAL)
+        if: steps.imgs.outputs.list != ''
+        uses: ./.github/actions/trivy-scan
+        with:
+          images: ${{ steps.imgs.outputs.list }}
+          soft-fail: "false"
+
   opentofu:
     runs-on: ubuntu-latest
     steps:
