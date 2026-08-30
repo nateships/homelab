@@ -6,6 +6,10 @@
 # entries reject duplicate module names, so this ships under its own
 # name and the scrape requests synology_fixed. Re-extract on exporter
 # major bumps.
+# TODO: delete this file and switch the monitoring scrape back to the
+# bundled synology module once the image ships a release newer than
+# v0.30.1; upstream fixed the types in
+# https://github.com/prometheus/snmp_exporter/pull/1603.
 modules:
   synology_fixed:
     walk:
