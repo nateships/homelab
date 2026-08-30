@@ -56,6 +56,19 @@ ingress:
           number: 5055
     tls:
       - hosts: [seerr]
+  # Public exposure through the cloudflare-tunnel ingress controller,
+  # which creates the tunnel route and the DNS record from this host.
+  public:
+    className: cloudflare-tunnel
+    hosts:
+      # site-specific: public hostname (docs/SITE.md)
+      - host: nateflix.media
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: 5055
 persistence:
   config:
     accessMode: ReadWriteOnce

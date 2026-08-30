@@ -13,6 +13,8 @@ resources:
   - argocd-server-ingress.yaml
   # GitHub webhook secret into argocd-secret
   - argocd-webhook-secret.yaml
+  # Public webhook routes via the cloudflare-tunnel controller
+  - webhook-ingress.yaml
 
 patches:
   - path: argocd-server-replicas.yaml
