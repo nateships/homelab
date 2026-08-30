@@ -5,12 +5,8 @@
   <a href=".github/renovate.json5"><img src="https://img.shields.io/badge/renovate-enabled-1a1f6c?logo=renovate" alt="Renovate"></a>
 </p>
 
-- Immutable [Talos](https://www.talos.dev/) nodes, provisioned by a self-hosted [Omni](https://omni.siderolabs.com/): machine classes and patches in git.
 - One app = one directory: an ApplicationSet turns each `config.yaml` into an ArgoCD Application.
 - Merges deploy in seconds: GitHub webhooks reach ArgoCD through a path-scoped tunnel route.
-- Cilium everywhere: kube-proxy replacement, LB-IPAM VIPs, DSR client IPs, tier-based network policy.
-- One 1Password service account is the only bootstrap secret; everything else derives from it.
-- Observability that pages a phone: Grafana Cloud, host and network exporters, IRM push.
 
 > This repo is public and contains no secrets, encrypted or otherwise.
 > Secrets live in 1Password and reach each system at runtime (see
