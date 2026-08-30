@@ -76,11 +76,6 @@ variable "seerr_public_hostname" {
   type        = string
 }
 
-variable "birdnet_public_hostname" {
-  description = "Public hostname the tunnel routes to birdnet-go, e.g. birds.example.com"
-  type        = string
-}
-
 variable "argocd_webhook_public_hostname" {
   description = "Public hostname the tunnel routes to the ArgoCD webhook path, e.g. argocd-webhook.example.com"
   type        = string

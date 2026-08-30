@@ -19,6 +19,7 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | `argocd.tail34eda.ts.net` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI tailnet name (tailscale ingress) |
 | `10.16.10.100:/volume1/media` | `kubernetes/apps/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
 | `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
+| `birds.nate.cx` | `kubernetes/apps/birdnet-go/values.yaml` (`ingress.public`) | Public hostname; the cloudflare-tunnel controller reads it to make the route and DNS |
 | `10.16.10.55` | `kubernetes/apps/monitoring/values.yaml` (`extraConfig`) | PVE host LAN address (pve-exporter scrape target) |
 | `10.16.10.100` | `kubernetes/apps/monitoring/values.yaml` (`extraConfig`) | NFS server address (snmp-exporter scrape target) |
 | `10.16.101.224/27` | `kubernetes/apps/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |

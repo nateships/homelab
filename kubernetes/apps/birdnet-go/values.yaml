@@ -67,6 +67,19 @@ ingress:
           number: 8080
     tls:
       - hosts: [birdnet]
+  # Public exposure through the cloudflare-tunnel ingress controller,
+  # which creates the tunnel route and the DNS record from this host.
+  public:
+    className: cloudflare-tunnel
+    hosts:
+      # site-specific: public hostname (docs/SITE.md)
+      - host: birds.nate.cx
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: app
+              port: 8080
 persistence:
   config:
     accessMode: ReadWriteOnce
