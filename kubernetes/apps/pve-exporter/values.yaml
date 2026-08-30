@@ -35,3 +35,10 @@ service:
     ports:
       http:
         port: 9221
+persistence:
+  # readOnlyRootFilesystem needs a writable /tmp: gunicorn keeps
+  # worker heartbeat files there.
+  tmp:
+    type: emptyDir
+    globalMounts:
+      - path: /tmp
