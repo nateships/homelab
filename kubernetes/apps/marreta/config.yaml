@@ -1,0 +1,8 @@
+# Marreta: strips paywalls and clutter from web pages. Reachable at
+# https://marreta.<tailnet>.ts.net.
+name: marreta
+namespace: marreta
+labels:
+  category: media
+namespaceLabels:
+  homelab/tier: utility
