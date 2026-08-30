@@ -75,9 +75,20 @@ jobs:
       - name: fold this app's images into one run
         # An app with several images yields several SARIFs; Code Scanning
         # rejects multiple runs under one category, so concatenate them.
+        # Prepend <app>/<image> to each finding path: the category names
+        # the app, but the alert list shows only the path, so stamp it
+        # there too. The app is this job's matrix value, no lookup needed.
         if: steps.imgs.outputs.list != ''
+        env:
+          APP: ${{ matrix.app }}
         run: |
-          jq -s '.[0].runs[0].results = [.[].runs[0].results[]]
+          jq -s --arg app "$APP" '
+            [ .[] | .runs[0] as $r
+              | (($r.properties.imageName // "unknown") | sub("@sha256:.*";"")) as $img
+              | $r.results[]
+              | .locations[].physicalLocation.artifactLocation.uri |= ($app + "/" + $img + "/" + .)
+            ] as $results
+            | .[0].runs[0].results = $results
             | .[0].runs[0].tool.driver.rules =
                 ([.[].runs[0].tool.driver.rules[]] | unique_by(.id))
             | .[0]' sarif/*.sarif > trivy.sarif
