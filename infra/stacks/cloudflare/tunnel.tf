@@ -57,4 +57,3 @@ resource "onepassword_item" "cloudflared" {
   password   = data.cloudflare_zero_trust_tunnel_cloudflared_token.k8s.token
   note_value = "Tunnel token for the in-cluster cloudflared; minted by the cloudflare stack."
 }
-
