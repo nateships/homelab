@@ -50,8 +50,10 @@ manifests. Everything terraform-applied arrives as TF_VAR_* instead
   item list. The `spacelift-site` item holds every non-secret site
   value the admin stack fans out as TF_VAR_* (addresses, names, the
   SSH public key); the stack's only env var is OP_SERVICE_ACCOUNT_TOKEN.
-- Tailscale admin console: OAuth clients (scopes and tags are fixed at
-  creation and cannot be expressed in the policy file).
+- Tailscale admin console: only the root tailscale-terraform OAuth
+  client (a client cannot create itself). Every other client is minted
+  by infra/stacks/tailscale/oauth-clients.tf; scope and tag changes
+  there are plan/apply.
 - Cloudflare console: API tokens only (a token cannot create itself);
   DNS records and the R2 bucket live in infra/stacks/cloudflare.
 - Proxmox console: the "vGPU" PCI resource mapping (iGPU SR-IOV virtual
