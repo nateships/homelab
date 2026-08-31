@@ -51,8 +51,9 @@ Spacelift TF_VAR environment variables and never committed.
 - Spacelift stack environment (TF_VAR_*): set on the admin stack, fanned
   out through the homelab context; `infra/spacelift/terraform.tfvars.example`
   is the full list (includes `omni_domain` and `k8s_vlan_cidr`).
-- Tailscale admin console: OAuth clients (scopes and tags are fixed at
-  creation and cannot be expressed in the policy file).
+- Tailscale admin console: OAuth clients (created and edited there;
+  the policy file cannot express them, though scopes and tags are
+  editable per client after creation).
 - Cloudflare console: API tokens only (a token cannot create itself);
   DNS records and the R2 bucket live in infra/stacks/cloudflare.
 - Proxmox console: the "vGPU" PCI resource mapping (iGPU SR-IOV virtual
