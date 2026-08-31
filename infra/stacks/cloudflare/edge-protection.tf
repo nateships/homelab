@@ -23,7 +23,10 @@ locals {
 }
 
 resource "cloudflare_bot_management" "seerr_zone" {
-  zone_id    = local.all_zone_ids["nateflix.media"]
+  zone_id = local.all_zone_ids["nateflix.media"]
+  # Fight mode detects bots with an injected JS probe; the API rejects
+  # it unless JS detections are enabled in the same call.
+  enable_js  = true
   fight_mode = true
 }
 
