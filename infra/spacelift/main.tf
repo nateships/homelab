@@ -39,10 +39,12 @@ locals {
   # API token lives in the item's password field: root@pam!spacelift=<uuid>
   proxmox_api_token  = data.onepassword_item.proxmox.password
   tailscale_auth_key = data.onepassword_item.tailscale.password
-  # field label -> value, across the item's sections
+  # field label -> value, across the item's sections. The provider
+  # marks every field value sensitive; these are non-secret site
+  # values, and a sensitive-derived map cannot drive for_each.
   site = {
     for f in flatten([for s in data.onepassword_item.site.section : s.field]) :
-    f.label => f.value
+    f.label => nonsensitive(f.value)
   }
 }
 
