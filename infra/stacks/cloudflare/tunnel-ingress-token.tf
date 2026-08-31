@@ -21,19 +21,19 @@ locals {
 
 data "cloudflare_zones" "all" {
   account = {
-    id = var.r2_account_id
+    id = local.cloudflare_account_id
   }
 }
 
 resource "cloudflare_account_token" "tunnel_ingress" {
-  account_id = var.r2_account_id
+  account_id = local.cloudflare_account_id
   name       = "cloudflare-tunnel-ingress-controller"
   policies = [
     {
       effect            = "allow"
       permission_groups = [{ id = local.perm_id["Cloudflare Tunnel Write"] }]
       resources = jsonencode({
-        "com.cloudflare.api.account.${var.r2_account_id}" = "*"
+        "com.cloudflare.api.account.${local.cloudflare_account_id}" = "*"
       })
     },
     {

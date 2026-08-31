@@ -9,10 +9,6 @@ variable "omni_ct_ip" {
   type        = string
 }
 
-variable "r2_account_id" {
-  description = "Cloudflare account id that holds the R2 bucket"
-  type        = string
-}
 
 variable "r2_bucket" {
   description = "R2 bucket for Omni etcd backups"

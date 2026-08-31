@@ -2,12 +2,12 @@
 # (backup_interval on the cluster). The lifecycle rule bounds
 # retention; without it the bucket grows forever.
 resource "cloudflare_r2_bucket" "etcd_backups" {
-  account_id = var.r2_account_id
+  account_id = local.cloudflare_account_id
   name       = var.r2_bucket
 }
 
 resource "cloudflare_r2_bucket_lifecycle" "etcd_backups" {
-  account_id  = var.r2_account_id
+  account_id  = local.cloudflare_account_id
   bucket_name = cloudflare_r2_bucket.etcd_backups.name
 
   rules = [{

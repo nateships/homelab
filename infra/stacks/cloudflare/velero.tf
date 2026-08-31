@@ -1,12 +1,12 @@
 # Velero writes file-system backups of the config PVCs here. Retention
 # is velero's job (backup TTL), so no lifecycle rule.
 resource "cloudflare_r2_bucket" "velero" {
-  account_id = var.r2_account_id
+  account_id = local.cloudflare_account_id
   name       = "velero-backups"
 }
 
 data "cloudflare_account_api_token_permission_groups_list" "all" {
-  account_id = var.r2_account_id
+  account_id = local.cloudflare_account_id
 }
 
 locals {
@@ -19,7 +19,7 @@ locals {
 # R2's S3 credentials derive from an account token: the access key id
 # is the token id and the secret is the sha256 of the token value.
 resource "cloudflare_account_token" "velero_r2" {
-  account_id = var.r2_account_id
+  account_id = local.cloudflare_account_id
   name       = "velero-r2"
   policies = [{
     effect = "allow"
@@ -27,7 +27,7 @@ resource "cloudflare_account_token" "velero_r2" {
       id = local.r2_item_write_id
     }]
     resources = jsonencode({
-      "com.cloudflare.edge.r2.bucket.${var.r2_account_id}_default_${cloudflare_r2_bucket.velero.name}" = "*"
+      "com.cloudflare.edge.r2.bucket.${local.cloudflare_account_id}_default_${cloudflare_r2_bucket.velero.name}" = "*"
     })
   }]
 }

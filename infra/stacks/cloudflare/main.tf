@@ -31,3 +31,11 @@ resource "cloudflare_dns_record" "omni" {
   ttl     = 300
   proxied = false
 }
+
+# The API token is scoped to exactly one account; derive its id
+# instead of threading it through as a TF_VAR.
+data "cloudflare_accounts" "all" {}
+
+locals {
+  cloudflare_account_id = one(data.cloudflare_accounts.all.result).id
+}

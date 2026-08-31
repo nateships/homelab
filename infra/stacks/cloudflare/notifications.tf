@@ -10,13 +10,13 @@ data "onepassword_item" "grafana_irm_cloudflare" {
 }
 
 resource "cloudflare_notification_policy_webhooks" "grafana_irm" {
-  account_id = var.r2_account_id
+  account_id = local.cloudflare_account_id
   name       = "grafana-irm"
   url        = data.onepassword_item.grafana_irm_cloudflare.credential
 }
 
 resource "cloudflare_notification_policy" "tunnel_health" {
-  account_id  = var.r2_account_id
+  account_id  = local.cloudflare_account_id
   name        = "tunnel health"
   description = "cloudflared tunnel status changes (all tunnels)"
   enabled     = true
