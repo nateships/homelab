@@ -11,3 +11,11 @@
 # X.509 cert). The cluster runs 64-bit (amd64). openssl in the grafana
 # kubectl toolbox image.
 CVE-2026-31789
+
+# Not applicable: handlebars RCE via crafted AST in compile(). In seerr,
+# handlebars is an unused optional peer dependency of @ladjs/consolidate
+# (via email-templates); all templates are pug and consolidate loads
+# engines by file extension, so Handlebars.compile() is never reached.
+# Maintainers confirmed and declined the pin:
+# https://github.com/seerr-team/seerr/pull/3444
+CVE-2026-33937
