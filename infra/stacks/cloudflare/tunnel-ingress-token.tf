@@ -4,18 +4,13 @@
 # records, so it needs account-level tunnel write plus zone-level DNS
 # write and zone read.
 locals {
-  tunnel_write_id = one([
+  # Permission-group ids by name. A duplicate name fails the plan on
+  # the duplicate map key, matching the guarantee one() gave.
+  perm_id = {
     for g in data.cloudflare_account_api_token_permission_groups_list.all.result :
-    g.id if g.name == "Cloudflare Tunnel Write"
-  ])
-  dns_write_id = one([
-    for g in data.cloudflare_account_api_token_permission_groups_list.all.result :
-    g.id if g.name == "DNS Write"
-  ])
-  zone_read_id = one([
-    for g in data.cloudflare_account_api_token_permission_groups_list.all.result :
-    g.id if g.name == "Zone Read"
-  ])
+    g.name => g.id
+    if contains(["Cloudflare Tunnel Write", "DNS Write", "Zone Read"], g.name)
+  }
   # Account-owned tokens reject an all-zones wildcard; enumerate each
   # zone as its own resource instead (also tighter than a wildcard).
   zone_dns_resources = {
@@ -36,7 +31,7 @@ resource "cloudflare_account_token" "tunnel_ingress" {
   policies = [
     {
       effect            = "allow"
-      permission_groups = [{ id = local.tunnel_write_id }]
+      permission_groups = [{ id = local.perm_id["Cloudflare Tunnel Write"] }]
       resources = jsonencode({
         "com.cloudflare.api.account.${var.r2_account_id}" = "*"
       })
@@ -44,8 +39,8 @@ resource "cloudflare_account_token" "tunnel_ingress" {
     {
       effect = "allow"
       permission_groups = [
-        { id = local.dns_write_id },
-        { id = local.zone_read_id },
+        { id = local.perm_id["DNS Write"] },
+        { id = local.perm_id["Zone Read"] },
       ]
       resources = jsonencode(local.zone_dns_resources)
     },
