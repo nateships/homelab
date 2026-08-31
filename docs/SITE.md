@@ -22,6 +22,7 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
 | `birds.nate.cx` | `kubernetes/apps/birdnet-go/values.yaml` (`ingress.public`) | Public hostname; the cloudflare-tunnel controller reads it to make the route and DNS |
 | `nateflix.media` | `kubernetes/apps/seerr/values.yaml` (`ingress.public`) | Public hostname for seerr; cloudflare-tunnel controller route and DNS |
+| `nateflix.media`, `nate.cx`, `birds.nate.cx` | `infra/stacks/cloudflare/edge-protection.tf` | Zone/host names the login rate limits and bot fight mode attach to |
 | `argocd-webhook.nate.cx` | `kubernetes/bootstrap/argocd/webhook-ingress.yaml` | Public GitHub webhook host for argocd-server; cloudflare-tunnel route and DNS |
 | `argocd-appset-webhook.nate.cx` | `kubernetes/bootstrap/argocd/webhook-ingress.yaml` | Public GitHub webhook host for the applicationset controller |
 | `10.16.10.55` | `kubernetes/apps/monitoring/values.yaml` (`extraConfig`) | PVE host LAN address (pve-exporter scrape target) |
