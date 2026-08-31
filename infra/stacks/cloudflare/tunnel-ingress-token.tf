@@ -51,7 +51,8 @@ resource "cloudflare_account_token" "tunnel_ingress" {
 resource "onepassword_item" "cloudflare_tunnel" {
   vault      = data.onepassword_vault.homelab.uuid
   title      = "cloudflare-tunnel"
-  category   = "password"
+  category   = "login"
+  username   = local.cloudflare_account_id
   password   = cloudflare_account_token.tunnel_ingress.value
-  note_value = "API token for the strrl tunnel ingress controller; minted by the cloudflare stack."
+  note_value = "API token for the strrl tunnel ingress controller; minted by the cloudflare stack. username = account id."
 }
