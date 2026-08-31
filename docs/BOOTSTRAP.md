@@ -12,6 +12,21 @@ Do the stages in order. Each stage needs the stage before it.
 3. Create these items in the `homelab` vault:
    - `omni`: fields `account-uuid`, `admin-email` (stage 3 adds `domain`,
      `lxc-ip`, and `tailnet-dns`; `omni.env.example` reads `tailnet-dns`)
+   - `spacelift-site`: one text field per non-secret site value the
+     admin stack fans out:
+
+     | Field | Meaning |
+     |---|---|
+     | `proxmox_endpoint` | PVE API URL at its ts.net name, e.g. `https://pve.tailnet-name.ts.net:8006` |
+     | `proxmox_node` | PVE node name |
+     | `omni_ct_ip` | Omni LXC static IP with CIDR suffix |
+     | `omni_ct_gateway` | Omni LXC gateway address |
+     | `omni_domain` | Bare Omni FQDN, e.g. `omni.example.com` |
+     | `k8s_vlan_cidr` | k8s VLAN CIDR the PVE host advertises to the tailnet |
+     | `r2_bucket` | R2 bucket for Omni etcd backups |
+     | `ssh_public_key` | Public key installed on the LXC |
+     | `omni_ct_id` | Optional; Omni LXC VMID (default 200) |
+     | `omni_ct_vlan` | Optional; Omni LXC VLAN tag (default untagged) |
    - `proxmox`: password field = the API token from stage 1. Three more
      fields feed the infra provider (stage 4): `lan-url` (the LAN API URL,
      for example `https://<pve-lan-ip>:8006`), `token-id`
@@ -41,7 +56,8 @@ Do the stages in order. Each stage needs the stage before it.
      `kubernetes-csi@pve!csi` API token (role CSI; the item's notes
      carry the pveum commands). The CSI plugin provisions worker
      volumes on the zpool with it.
-   - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit, for certbot)
+   - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit; the omni-config
+     stack's certbot DNS challenge reads it)
    - `cloudflare-terraform`: password = an API token with Zone DNS Edit
      and Account R2 Write; the cloudflare stack manages the DNS records
      and the R2 bucket with it
@@ -99,8 +115,8 @@ two environment variables. Contexts attach to stacks through
    CLI (the 1Password provider runs it) and Tailscale. GitHub Actions
    builds the image on each push. After the first build, set the ghcr
    package visibility to public so that Spacelift can pull the image.
-   Set one `TF_VAR_*` env for each input in
-   `infra/spacelift/terraform.tfvars.example` (that file is the full list).
+   The stack reads every site input from the `spacelift-site` item
+   (stage 0).
 3. Behavior → project globs: add `infra/stacks/**/stack.yaml` and
    `mise.toml`. A manifest change then triggers the admin stack. An
    opentofu bump also triggers it, because the stacks' tofu version
