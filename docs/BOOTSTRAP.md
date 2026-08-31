@@ -12,6 +12,11 @@ Do the stages in order. Each stage needs the stage before it.
 3. Create these items in the `homelab` vault:
    - `omni`: fields `account-uuid`, `admin-email` (stage 3 adds `domain`,
      `lxc-ip`, and `tailnet-dns`; `omni.env.example` reads `tailnet-dns`)
+   - `spacelift-site`: one text field per non-secret site value the
+     admin stack fans out: `proxmox_endpoint`, `proxmox_node`,
+     `omni_ct_ip`, `omni_ct_gateway`, `omni_domain`, `k8s_vlan_cidr`,
+     `r2_bucket`, `ssh_public_key`, plus optional `omni_ct_id`
+     (default 200) and `omni_ct_vlan` (default untagged)
    - `proxmox`: password field = the API token from stage 1. Three more
      fields feed the infra provider (stage 4): `lan-url` (the LAN API URL,
      for example `https://<pve-lan-ip>:8006`), `token-id`
@@ -100,8 +105,8 @@ two environment variables. Contexts attach to stacks through
    CLI (the 1Password provider runs it) and Tailscale. GitHub Actions
    builds the image on each push. After the first build, set the ghcr
    package visibility to public so that Spacelift can pull the image.
-   Set one `TF_VAR_*` env for each input in
-   `infra/spacelift/terraform.tfvars.example` (that file is the full list).
+   No `TF_VAR_*` env vars: the stack reads every site input from the
+   `spacelift-site` item (stage 0).
 3. Behavior → project globs: add `infra/stacks/**/stack.yaml` and
    `mise.toml`. A manifest change then triggers the admin stack. An
    opentofu bump also triggers it, because the stacks' tofu version

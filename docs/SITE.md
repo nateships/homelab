@@ -41,17 +41,15 @@ manifests. Everything terraform-applied arrives as TF_VAR_* instead
 
 ## 2. Values in `.example` files
 
-`omni/omni.env.example` and `infra/**/terraform.tfvars.example` are
-templates; the real files are generated (op inject) or supplied as
-Spacelift TF_VAR environment variables and never committed.
+`omni/omni.env.example` is a template; the real file is generated
+(op inject) and never committed.
 
 ## 3. Values outside git
 
 - 1Password `homelab` vault items: see docs/BOOTSTRAP.md for the full
-  item list.
-- Spacelift stack environment (TF_VAR_*): set on the admin stack, fanned
-  out through the homelab context; `infra/spacelift/terraform.tfvars.example`
-  is the full list (includes `omni_domain` and `k8s_vlan_cidr`).
+  item list. The `spacelift-site` item holds every non-secret site
+  value the admin stack fans out as TF_VAR_* (addresses, names, the
+  SSH public key); the stack's only env var is OP_SERVICE_ACCOUNT_TOKEN.
 - Tailscale admin console: OAuth clients (scopes and tags are fixed at
   creation and cannot be expressed in the policy file).
 - Cloudflare console: API tokens only (a token cannot create itself);

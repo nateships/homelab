@@ -27,10 +27,23 @@ data "onepassword_item" "tailscale" {
   title = "tailscale-spacelift"
 }
 
+# Non-secret site values (addresses, names, the SSH public key), one
+# field per value. Sourcing them here leaves OP_SERVICE_ACCOUNT_TOKEN
+# as the only env var the admin stack needs.
+data "onepassword_item" "site" {
+  vault = data.onepassword_vault.homelab.uuid
+  title = "spacelift-site"
+}
+
 locals {
   # API token lives in the item's password field: root@pam!spacelift=<uuid>
   proxmox_api_token  = data.onepassword_item.proxmox.password
   tailscale_auth_key = data.onepassword_item.tailscale.password
+  # field label -> value, across the item's sections
+  site = {
+    for f in flatten([for s in data.onepassword_item.site.section : s.field]) :
+    f.label => f.value
+  }
 }
 
 # ------------------------------------------------------------------------------
@@ -102,7 +115,7 @@ resource "spacelift_environment_variable" "https_proxy" {
 resource "spacelift_environment_variable" "proxmox_endpoint" {
   context_id = spacelift_context.homelab.id
   name       = "PROXMOX_VE_ENDPOINT"
-  value      = var.proxmox_endpoint
+  value      = local.site["proxmox_endpoint"]
   write_only = false
 }
 
@@ -116,16 +129,16 @@ resource "spacelift_environment_variable" "proxmox_api_token" {
 # Fan the admin-stack inputs out to stacks as TF_VAR_* env vars.
 locals {
   shared_tfvars = {
-    proxmox_node    = var.proxmox_node
-    omni_ct_id      = tostring(var.omni_ct_id)
-    omni_ct_ip      = var.omni_ct_ip
-    omni_ct_gateway = var.omni_ct_gateway
-    omni_ct_vlan    = var.omni_ct_vlan == null ? null : tostring(var.omni_ct_vlan)
-    omni_domain     = var.omni_domain
-    k8s_vlan_cidr   = var.k8s_vlan_cidr
-    r2_bucket       = var.r2_bucket
+    proxmox_node    = local.site["proxmox_node"]
+    omni_ct_id      = lookup(local.site, "omni_ct_id", "200")
+    omni_ct_ip      = local.site["omni_ct_ip"]
+    omni_ct_gateway = local.site["omni_ct_gateway"]
+    omni_ct_vlan    = lookup(local.site, "omni_ct_vlan", null)
+    omni_domain     = local.site["omni_domain"]
+    k8s_vlan_cidr   = local.site["k8s_vlan_cidr"]
+    r2_bucket       = local.site["r2_bucket"]
 
-    ssh_public_key = var.ssh_public_key
+    ssh_public_key = local.site["ssh_public_key"]
   }
 }
 
