@@ -2,6 +2,7 @@
 # library. Reachable at https://radarr.<tailnet>.ts.net.
 name: radarr
 namespace: radarr
+url: https://radarr.tail34eda.ts.net
 labels:
   category: media
 namespaceLabels:

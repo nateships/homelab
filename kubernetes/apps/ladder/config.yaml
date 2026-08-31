@@ -3,6 +3,7 @@
 # https://ladder.<tailnet>.ts.net.
 name: ladder
 namespace: ladder
+url: https://ladder.tail34eda.ts.net
 labels:
   category: media
 namespaceLabels:

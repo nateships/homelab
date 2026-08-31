@@ -18,6 +18,7 @@ ALLOWED_KEYS = {
     "autosync",
     "namespaceLabels",
     "labels",
+    "url",
 }
 
 errors = []
@@ -53,6 +54,11 @@ for path in files:
     dirname = os.path.basename(os.path.dirname(path))
     if isinstance(cfg.get("name"), str) and cfg["name"] and cfg["name"] != dirname:
         err(path, f"'name' is '{cfg['name']}' but the directory is '{dirname}'")
+
+    if "url" in cfg and (
+        not isinstance(cfg["url"], str) or not cfg["url"].startswith("https://")
+    ):
+        err(path, "'url' must be an https:// URL string")
 
     unknown = set(cfg) - ALLOWED_KEYS
     if unknown:

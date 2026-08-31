@@ -2,6 +2,7 @@
 # Reachable at https://seerr.<tailnet>.ts.net.
 name: seerr
 namespace: seerr
+url: https://seerr.tail34eda.ts.net
 labels:
   category: media
 namespaceLabels:

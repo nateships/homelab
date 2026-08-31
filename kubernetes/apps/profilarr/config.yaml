@@ -2,6 +2,7 @@
 # Reachable at https://profilarr.<tailnet>.ts.net.
 name: profilarr
 namespace: profilarr
+url: https://profilarr.tail34eda.ts.net
 labels:
   category: media
 namespaceLabels:

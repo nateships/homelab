@@ -2,6 +2,7 @@
 # sources: the bootstrap dir plus the secret kustomization here.
 name: argocd
 namespace: argocd
+url: https://argocd.tail34eda.ts.net
 labels:
   category: infra
 sources:

@@ -10,6 +10,10 @@
 #   labels            optional; labels on the generated Application
 #                     (category: infra|network|storage|media by
 #                     convention, for UI filtering)
+#   url               optional; the app's UI, shown as a launch icon on
+#                     the Application. Needed for tailscale ingresses:
+#                     their class ignores host rules, so ArgoCD cannot
+#                     derive an external URL from the Ingress.
 # Prune is off: resources removed from git stay until manual pruning.
 # Deletion of a config file deletes the Application.
 # preserveResourcesOnDeletion keeps app resources if someone deletes
@@ -67,10 +71,16 @@ spec:
   # The flat template fields cannot carry nested YAML; this patch
   # injects it. The patch strategic-merges into the template.
   templatePatch: |
-    {{- if hasKey . "labels" }}
+    {{- if or (hasKey . "labels") (hasKey . "url") }}
     metadata:
+    {{- if hasKey . "labels" }}
       labels:
     {{- get . "labels" | toYaml | nindent 8 }}
+    {{- end }}
+    {{- if hasKey . "url" }}
+      annotations:
+        link.argocd.argoproj.io/external-link: "{{ .url }}"
+    {{- end }}
     {{- end }}
     spec:
       sources:

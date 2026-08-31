@@ -3,6 +3,7 @@
 # https://birdnet.<tailnet>.ts.net.
 name: birdnet-go
 namespace: birdnet-go
+url: https://birdnet.tail34eda.ts.net
 labels:
   category: media
 namespaceLabels:

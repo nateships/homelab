@@ -2,6 +2,7 @@
 # Reachable at https://tautulli.<tailnet>.ts.net.
 name: tautulli
 namespace: tautulli
+url: https://tautulli.tail34eda.ts.net
 labels:
   category: media
 namespaceLabels:
