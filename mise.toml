@@ -23,7 +23,7 @@ zizmor = "1.30.0"
 # Runner-image tools (runner/Dockerfile installs this whole file via mise)
 "aqua:tailscale/tailscale" = "1.102.3"
 # uv powers the pipx backend
-uv = "0.12.7"
+uv = "0.12.8"
 "pipx:ansible-core" = "2.21.3"
 # Spacelift's ansible workflow drives playbooks through ansible-runner
 "pipx:ansible-runner" = "2.4.3"
