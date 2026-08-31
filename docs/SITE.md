@@ -17,6 +17,7 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | Value | Where | Meaning |
 |---|---|---|
 | `argocd.tail34eda.ts.net` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI tailnet name (tailscale ingress) |
+| `*.tail34eda.ts.net` | `kubernetes/apps/*/config.yaml` (`url`) | App UI tailnet hostnames; the ApplicationSet turns them into ArgoCD launch-icon links |
 | `10.16.10.100:/volume1/media` | `kubernetes/apps/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
 | `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
 | `birds.nate.cx` | `kubernetes/apps/birdnet-go/values.yaml` (`ingress.public`) | Public hostname; the cloudflare-tunnel controller reads it to make the route and DNS |
