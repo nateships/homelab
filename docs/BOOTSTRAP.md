@@ -13,10 +13,20 @@ Do the stages in order. Each stage needs the stage before it.
    - `omni`: fields `account-uuid`, `admin-email` (stage 3 adds `domain`,
      `lxc-ip`, and `tailnet-dns`; `omni.env.example` reads `tailnet-dns`)
    - `spacelift-site`: one text field per non-secret site value the
-     admin stack fans out: `proxmox_endpoint`, `proxmox_node`,
-     `omni_ct_ip`, `omni_ct_gateway`, `omni_domain`, `k8s_vlan_cidr`,
-     `r2_bucket`, `ssh_public_key`, plus optional `omni_ct_id`
-     (default 200) and `omni_ct_vlan` (default untagged)
+     admin stack fans out:
+
+     | Field | Meaning |
+     |---|---|
+     | `proxmox_endpoint` | PVE API URL at its ts.net name, e.g. `https://pve.tailnet-name.ts.net:8006` |
+     | `proxmox_node` | PVE node name |
+     | `omni_ct_ip` | Omni LXC static IP with CIDR suffix |
+     | `omni_ct_gateway` | Omni LXC gateway address |
+     | `omni_domain` | Bare Omni FQDN, e.g. `omni.example.com` |
+     | `k8s_vlan_cidr` | k8s VLAN CIDR the PVE host advertises to the tailnet |
+     | `r2_bucket` | R2 bucket for Omni etcd backups |
+     | `ssh_public_key` | Public key installed on the LXC |
+     | `omni_ct_id` | Optional; Omni LXC VMID (default 200) |
+     | `omni_ct_vlan` | Optional; Omni LXC VLAN tag (default untagged) |
    - `proxmox`: password field = the API token from stage 1. Three more
      fields feed the infra provider (stage 4): `lan-url` (the LAN API URL,
      for example `https://<pve-lan-ip>:8006`), `token-id`
@@ -105,8 +115,8 @@ two environment variables. Contexts attach to stacks through
    CLI (the 1Password provider runs it) and Tailscale. GitHub Actions
    builds the image on each push. After the first build, set the ghcr
    package visibility to public so that Spacelift can pull the image.
-   No `TF_VAR_*` env vars: the stack reads every site input from the
-   `spacelift-site` item (stage 0).
+   The stack reads every site input from the `spacelift-site` item
+   (stage 0).
 3. Behavior → project globs: add `infra/stacks/**/stack.yaml` and
    `mise.toml`. A manifest change then triggers the admin stack. An
    opentofu bump also triggers it, because the stacks' tofu version
