@@ -2,6 +2,7 @@
 # volumes opt out per pod; git and Omni cover everything else.
 name: velero
 namespace: velero
+url: https://velero.tail34eda.ts.net # site-specific: tailnet name
 # The node agent mounts kubelet pod dirs (hostPath).
 namespaceLabels:
   pod-security.kubernetes.io/enforce: privileged
