@@ -6,20 +6,27 @@ locals {
   all_zone_ids = {
     for z in data.cloudflare_zones.all.result : z.name => z.id
   }
+  # One entry per setting, applied to every zone below.
+  zone_settings = {
+    always_use_https = "on"
+    min_tls_version  = "1.2"
+  }
 }
 
-resource "cloudflare_zone_setting" "always_use_https" {
-  for_each   = local.all_zone_ids
-  zone_id    = each.value
-  setting_id = "always_use_https"
-  value      = "on"
-}
-
-resource "cloudflare_zone_setting" "min_tls_version" {
-  for_each   = local.all_zone_ids
-  zone_id    = each.value
-  setting_id = "min_tls_version"
-  value      = "1.2"
+resource "cloudflare_zone_setting" "hardening" {
+  for_each = merge([
+    for name, zone_id in local.all_zone_ids : {
+      for setting, value in local.zone_settings :
+      "${name}/${setting}" => {
+        zone_id = zone_id
+        setting = setting
+        value   = value
+      }
+    }
+  ]...)
+  zone_id    = each.value.zone_id
+  setting_id = each.value.setting
+  value      = each.value.value
 }
 
 resource "cloudflare_zone_dnssec" "zones" {
