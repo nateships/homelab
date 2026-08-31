@@ -19,3 +19,16 @@ CVE-2026-31789
 # Maintainers confirmed and declined the pin:
 # https://github.com/seerr-team/seerr/pull/3444
 CVE-2026-33937
+
+# Not reachable: Go crypto/tls skips cert re-validation on session
+# resumption only when Config CAs are mutated between handshakes. The
+# grafana kubectl toolbox runs kubectl as a short-lived client with one
+# config per invocation, so that path never executes. Drop when
+# helm-chart-toolbox-kubectl rebuilds with Go >= 1.24.13.
+CVE-2025-68121
+
+# Not reachable: node-tar gzip-bomb DoS needs the app to extract an
+# attacker-supplied archive. Two hits are npm's vendored tar, which only
+# runs at npm install time; seerr and velero-ui do not extract untrusted
+# archives at runtime. Drop when they rebuild with tar >= 7.5.19.
+CVE-2026-59873
