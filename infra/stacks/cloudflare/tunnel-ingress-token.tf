@@ -51,6 +51,7 @@ resource "cloudflare_account_token" "tunnel_ingress" {
 resource "onepassword_item" "cloudflare_tunnel" {
   vault      = data.onepassword_vault.homelab.uuid
   title      = "cloudflare-tunnel"
+  tags       = ["terraform"]
   category   = "login"
   username   = local.cloudflare_account_id
   password   = cloudflare_account_token.tunnel_ingress.value

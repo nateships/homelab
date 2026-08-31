@@ -15,6 +15,7 @@ resource "onepassword_item" "tailscale_spacelift" {
   vault      = data.onepassword_vault.homelab.uuid
   note_value = "tailscale OAuth client id: ${tailscale_oauth_client.spacelift.id}"
   title      = "tailscale-spacelift"
+  tags       = ["terraform"]
   category   = "password"
   password   = tailscale_oauth_client.spacelift.key
 }
@@ -31,6 +32,7 @@ resource "onepassword_item" "tailscale_omni" {
   vault      = data.onepassword_vault.homelab.uuid
   note_value = "tailscale OAuth client id: ${tailscale_oauth_client.omni.id}"
   title      = "tailscale-omni"
+  tags       = ["terraform"]
   category   = "password"
   password   = tailscale_oauth_client.omni.key
 }
@@ -47,6 +49,7 @@ resource "onepassword_item" "tailscale_tsidp" {
   vault      = data.onepassword_vault.homelab.uuid
   note_value = "tailscale OAuth client id: ${tailscale_oauth_client.tsidp.id}"
   title      = "tailscale-tsidp"
+  tags       = ["terraform"]
   category   = "password"
   password   = tailscale_oauth_client.tsidp.key
 }
@@ -62,6 +65,7 @@ resource "tailscale_oauth_client" "k8s_operator" {
 resource "onepassword_item" "tailscale_operator" {
   vault    = data.onepassword_vault.homelab.uuid
   title    = "tailscale-operator"
+  tags     = ["terraform"]
   category = "login"
   username = tailscale_oauth_client.k8s_operator.id
   password = tailscale_oauth_client.k8s_operator.key

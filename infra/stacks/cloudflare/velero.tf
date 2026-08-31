@@ -36,6 +36,7 @@ resource "cloudflare_account_token" "velero_r2" {
 resource "onepassword_item" "velero" {
   vault = data.onepassword_vault.homelab.uuid
   title = "velero"
+  tags  = ["terraform"]
   # Password-category items drop the username attribute; login keeps
   # both fields ESO reads.
   category   = "login"
