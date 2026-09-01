@@ -32,3 +32,9 @@ CVE-2025-68121
 # runs at npm install time; seerr and velero-ui do not extract untrusted
 # archives at runtime. Drop when they rebuild with tar >= 7.5.19.
 CVE-2026-59873
+
+# Waiting on rebuilds: golang.org/x/crypto/ssh fix is 0.55.0, and every
+# Go image that bundles 0.53/0.54 flags it (grafana toolbox, alloy
+# operator, node-exporter, kube-state-metrics). None of them run ssh.
+# Drop when the monitoring images rebuild with x/crypto >= 0.55.
+CVE-2026-56854
