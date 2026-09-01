@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate kubernetes/apps/*/config.yaml against the ApplicationSet schema.
+"""Validate kubernetes/apps/<category>/<app>/config.yaml against the ApplicationSet schema.
 
 One malformed config file stops Application generation for every app.
 """
@@ -21,6 +21,11 @@ ALLOWED_KEYS = {
     "url",
 }
 
+# The category folder becomes the Application's category label; a tier,
+# when set, names a known Cilium policy tier.
+CATEGORIES = {"infra", "network", "storage", "media"}
+TIERS = {"edge", "public", "media", "utility"}
+
 errors = []
 
 
@@ -28,9 +33,9 @@ def err(path: str, msg: str) -> None:
     errors.append(f"{path}: {msg}")
 
 
-files = sorted(glob.glob("kubernetes/apps/*/config.yaml"))
+files = sorted(glob.glob("kubernetes/apps/*/*/config.yaml"))
 if not files:
-    sys.exit("no kubernetes/apps/*/config.yaml files found")
+    sys.exit("no kubernetes/apps/*/*/config.yaml files found")
 
 for path in files:
     with open(path) as f:
@@ -54,6 +59,15 @@ for path in files:
     dirname = os.path.basename(os.path.dirname(path))
     if isinstance(cfg.get("name"), str) and cfg["name"] and cfg["name"] != dirname:
         err(path, f"'name' is '{cfg['name']}' but the directory is '{dirname}'")
+
+    category = os.path.basename(os.path.dirname(os.path.dirname(path)))
+    if category not in CATEGORIES:
+        err(path, f"category folder is {category!r} (must be one of {sorted(CATEGORIES)})")
+    if isinstance(cfg.get("labels"), dict) and "category" in cfg["labels"]:
+        err(path, "labels.category is set by the category folder, not here")
+    tier = (cfg.get("namespaceLabels") or {}).get("homelab/tier")
+    if tier is not None and tier not in TIERS:
+        err(path, f"homelab/tier is {tier!r} (must be one of {sorted(TIERS)})")
 
     if "url" in cfg and (
         not isinstance(cfg["url"], str) or not cfg["url"].startswith("https://")

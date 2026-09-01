@@ -1,0 +1,97 @@
+---
+global:
+  # -- Override the namespace for namespaced resources created by this chart.
+  # @section -- Global Settings
+  namespaceOverride: ""
+
+# -- Only capture logs from pods in these namespaces (`[]` means all namespaces).
+# @section -- Pod Discovery
+namespaces: []
+
+# -- Do not capture logs from any pods in these namespaces.
+# @section -- Pod Discovery
+excludeNamespaces: []
+
+# -- Controls the behavior of discovering pods for logs. Possible values: `all`, `annotation`.
+# When set to "all", every pod (filtered by the namespace and label selectors) will have their logs gathered.
+# When set to "annotation", only pods with the annotation selector set to something other than "false", "no" or "skip"
+# will have their logs gathered.
+# @section -- Pod Discovery
+discoveryMethod: "all"
+
+# The annotation to control the behavior of gathering logs from this pod.
+# -- Pod annotation to use for controlling log discovery. If a pod has this annotation, it will either enable or disable
+# gathering of logs, depending on the value of the discoveryMethod.
+# @section -- Pod Discovery
+annotationSelector: "logs.grafana.com/pods.enabled"
+
+# -- Log attributes to set with values copied from the Kubernetes Pod labels.
+# Format: `<log_label>: <kubernetes_label>`.
+# @section -- Log Processing
+labels:
+  app_kubernetes_io_name: app.kubernetes.io/name
+
+# -- Log attributes to set with values copied from the Kubernetes Node labels.
+# Format: `<log_label>: <kubernetes_node_label>`.
+# @section -- Log Processing
+nodeLabels: {}
+
+# -- Log attributes to set with values copied from the Kubernetes Namespace labels.
+# Format: `<log_label>: <kubernetes_namespace_label>`.
+# @section -- Log Processing
+namespaceLabels: {}
+
+# -- Log attributes to set with static values.
+# @section -- Log Processing
+staticAttributes: {}
+
+# -- Log attributes to set with static values, not quoted so it can reference config components.
+# @section -- Log Processing
+staticAttributesFrom: {}
+
+# -- Log attributes to set with values copied from the Kubernetes Pod annotations.
+# Format: `<log_label>: <kubernetes_annotation>`.
+# @section -- Log Processing
+annotations: {}
+
+# -- Log attributes to set with values copied from the Kubernetes Node annotations.
+# Format: `<log_label>: <kubernetes_node_annotation>`.
+# @section -- Log Processing
+nodeAnnotations: {}
+
+# -- Log attributes to set with values copied from the Kubernetes Namespace annotations.
+# Format: `<log_label>: <kubernetes_namespace_annotation>`.
+# @section -- Log Processing
+namespaceAnnotations: {}
+
+# -- Whether to automatically set the recommended OpenTelemetry
+# [resource attributes](https://opentelemetry.io/docs/specs/semconv/non-normative/k8s-attributes/).
+# @section -- Log Processing
+otelAnnotations: false
+
+# -- Drop pod logs based on the pod's annotations or labels. A pod's logs are dropped if any of the configured
+# filters match.
+# @section -- Log Processing
+filters:
+  # -- Drop pod logs based on pod annotations. Map of Kubernetes annotation key to the value that drops the
+  # pod's logs when matched. Set the value to `null` to drop whenever the annotation is present, regardless of
+  # its value.
+  # @section -- Log Processing
+  annotations: {}
+  # -- Drop pod logs based on pod labels. Map of Kubernetes label key to the value that drops the pod's logs
+  # when matched. Set the value to `null` to drop whenever the label is present, regardless of its value.
+  # @section -- Log Processing
+  labels: {}
+
+# -- Only gather new log lines since this was deployed. Do not gather historical log lines.
+# @section -- Volume Log Gathering
+onlyGatherNewLogLines: true
+
+# -- Align the `service.name` resource attribute with the
+# [OpenTelemetry semantic conventions for Kubernetes attributes](https://opentelemetry.io/docs/specs/semconv/non-normative/k8s-attributes/)
+# (which is what Grafana Beyla uses). When enabled, the detection chain becomes:
+# pod annotation `resource.opentelemetry.io/service.name` → pod label `app.kubernetes.io/instance` → pod label
+# `app.kubernetes.io/name` → owner workload name (Deployment, StatefulSet, etc.) → pod name → container name.
+# The `service.version` resource attribute is similarly detected from the `app.kubernetes.io/version` pod label.
+# @section -- Log Processing
+alignServiceNameWithOTelSemConv: false

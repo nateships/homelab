@@ -1,0 +1,7 @@
+name: tailscale-operator
+namespace: tailscale
+# Tailscale proxy pods (egress/ingress) run privileged; Talos enforces
+# baseline PSA, so the namespace opts up.
+namespaceLabels:
+  pod-security.kubernetes.io/enforce: privileged
+  homelab/tier: edge

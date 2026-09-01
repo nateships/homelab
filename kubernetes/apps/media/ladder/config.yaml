@@ -1,0 +1,8 @@
+# ladder: strips paywalls and clutter with per-site rulesets and
+# archive fallback. Pure HTTP, no headless browser. Reachable at
+# https://ladder.<tailnet>.ts.net.
+name: ladder
+namespace: ladder
+url: https://ladder.tail34eda.ts.net # site-specific: tailnet name
+namespaceLabels:
+  homelab/tier: utility

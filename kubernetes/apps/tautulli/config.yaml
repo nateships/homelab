@@ -1,9 +1,0 @@
-# Plex activity monitor and stats.
-# Reachable at https://tautulli.<tailnet>.ts.net.
-name: tautulli
-namespace: tautulli
-url: https://tautulli.tail34eda.ts.net # site-specific: tailnet name
-labels:
-  category: media
-namespaceLabels:
-  homelab/tier: media

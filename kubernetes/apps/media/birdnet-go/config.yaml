@@ -1,0 +1,8 @@
+# Bird sound detection from an RTSP stream (SQLite on the data
+# volume). Public via the cloudflare-tunnel controller; admin at
+# https://birdnet.<tailnet>.ts.net.
+name: birdnet-go
+namespace: birdnet-go
+url: https://birdnet.tail34eda.ts.net # site-specific: tailnet name
+namespaceLabels:
+  homelab/tier: public
