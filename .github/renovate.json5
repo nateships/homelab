@@ -7,11 +7,12 @@
   // Renovate skips assigning automerge-bound PRs; assign them anyway.
   "assignAutomerge": true,
   // Automerge non-major once CI passes; majors stay manual via the rule below.
-  // Renovate merges during the overnight window itself: GitHub-native
-  // automerge would merge the moment checks pass and ignore the window.
+  // Stateless bumps merge whenever checks pass. Data-bearing apps and
+  // node-disruptive cluster bumps wait for the overnight window (rules
+  // below); Renovate itself merges during the window, because
+  // GitHub-native automerge would ignore it.
   "automerge": true,
   "platformAutomerge": false,
-  "automergeSchedule": ["after 3am and before 6am"],
   // Off by default in Renovate; tracks `rev:` pins in .pre-commit-config.yaml.
   "pre-commit": { "enabled": true },
   "customManagers": [
@@ -84,6 +85,38 @@
       "matchUpdateTypes": ["major"],
       "automerge": false,
       "addLabels": ["major-update"]
+    },
+    {
+      // Restarts interrupt playback and image bumps can migrate the
+      // apps' databases; merge while the household sleeps.
+      "description": "Data-bearing media apps: automerge overnight only",
+      "matchFileNames": [
+        "kubernetes/apps/birdnet-go/**",
+        "kubernetes/apps/nzbfast/**",
+        "kubernetes/apps/plex/**",
+        "kubernetes/apps/profilarr/**",
+        "kubernetes/apps/prowlarr/**",
+        "kubernetes/apps/radarr/**",
+        "kubernetes/apps/seerr/**",
+        "kubernetes/apps/sonarr/**",
+        "kubernetes/apps/tautulli/**"
+      ],
+      "automergeSchedule": ["after 3am and before 6am"]
+    },
+    {
+      // Node reboots (talos/kubernetes), control-plane redeploys
+      // (omni), and dataplane restarts (cilium) also wait for night.
+      "description": "Node-disruptive cluster bumps: automerge overnight only",
+      "matchDepNames": [
+        "siderolabs/talos",
+        "talosctl",
+        "kubernetes/kubernetes",
+        "kubectl",
+        "siderolabs/omni",
+        "omnictl",
+        "cilium"
+      ],
+      "automergeSchedule": ["after 3am and before 6am"]
     },
     {
       // Dated releases parse as single integers, so every bump reads
