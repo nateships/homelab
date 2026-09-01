@@ -7,11 +7,12 @@
   // Renovate skips assigning automerge-bound PRs; assign them anyway.
   "assignAutomerge": true,
   // Automerge non-major once CI passes; majors stay manual via the rule below.
-  // Renovate merges during the overnight window itself: GitHub-native
-  // automerge would merge the moment checks pass and ignore the window.
+  // Stateless bumps merge whenever checks pass. Data-bearing apps and
+  // node-disruptive cluster bumps wait for the overnight window (rules
+  // below); Renovate itself merges during the window, because
+  // GitHub-native automerge would ignore it.
   "automerge": true,
   "platformAutomerge": false,
-  "automergeSchedule": ["after 3am and before 6am"],
   // Off by default in Renovate; tracks `rev:` pins in .pre-commit-config.yaml.
   "pre-commit": { "enabled": true },
   "customManagers": [
@@ -84,6 +85,30 @@
       "matchUpdateTypes": ["major"],
       "automerge": false,
       "addLabels": ["major-update"]
+    },
+    {
+      // Media apps interrupt playback on restart and image bumps
+      // migrate their databases; merge while the household sleeps.
+      // The category folder is the matcher, so filing an app under
+      // media/ is the whole opt-in.
+      "description": "Media apps: automerge overnight only",
+      "matchFileNames": ["kubernetes/apps/media/**"],
+      "automergeSchedule": ["after 3am and before 6am"]
+    },
+    {
+      // Node reboots (talos/kubernetes), control-plane redeploys
+      // (omni), and dataplane restarts (cilium) also wait for night.
+      "description": "Node-disruptive cluster bumps: automerge overnight only",
+      "matchDepNames": [
+        "siderolabs/talos",
+        "talosctl",
+        "kubernetes/kubernetes",
+        "kubectl",
+        "siderolabs/omni",
+        "omnictl",
+        "cilium"
+      ],
+      "automergeSchedule": ["after 3am and before 6am"]
     },
     {
       // Dated releases parse as single integers, so every bump reads
