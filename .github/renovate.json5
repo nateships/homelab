@@ -87,20 +87,12 @@
       "addLabels": ["major-update"]
     },
     {
-      // Restarts interrupt playback and image bumps can migrate the
-      // apps' databases; merge while the household sleeps.
-      "description": "Data-bearing media apps: automerge overnight only",
-      "matchFileNames": [
-        "kubernetes/apps/birdnet-go/**",
-        "kubernetes/apps/nzbfast/**",
-        "kubernetes/apps/plex/**",
-        "kubernetes/apps/profilarr/**",
-        "kubernetes/apps/prowlarr/**",
-        "kubernetes/apps/radarr/**",
-        "kubernetes/apps/seerr/**",
-        "kubernetes/apps/sonarr/**",
-        "kubernetes/apps/tautulli/**"
-      ],
+      // Anything running in the cluster restarts on merge (ArgoCD
+      // autosync): media apps interrupt playback and migrate their
+      // databases, so every workload waits for night. Tooling, CI,
+      // and infra pins outside this tree merge on green.
+      "description": "Cluster workloads: automerge overnight only",
+      "matchFileNames": ["kubernetes/apps/**"],
       "automergeSchedule": ["after 3am and before 6am"]
     },
     {
