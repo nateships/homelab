@@ -1,6 +1,6 @@
 # Generates one Application for each
 # kubernetes/apps/<category>/<name>/config.yaml. The category folder
-# (infra|network|storage|media) becomes the Application's category
+# (infra|network|storage|media|utility) becomes the Application's category
 # label, for UI filtering.
 # Config keys (CI validates the schema):
 #   name, namespace   required

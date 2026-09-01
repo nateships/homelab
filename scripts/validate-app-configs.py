@@ -23,7 +23,7 @@ ALLOWED_KEYS = {
 
 # The category folder becomes the Application's category label; a tier,
 # when set, names a known Cilium policy tier.
-CATEGORIES = {"infra", "network", "storage", "media"}
+CATEGORIES = {"infra", "network", "storage", "media", "utility"}
 TIERS = {"edge", "public", "media", "utility"}
 
 errors = []

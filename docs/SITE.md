@@ -19,8 +19,8 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | `argocd.tail34eda.ts.net` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI tailnet name (tailscale ingress) |
 | `*.tail34eda.ts.net` | `kubernetes/apps/*/*/config.yaml` (`url`) | App UI tailnet hostnames; the ApplicationSet turns them into ArgoCD launch-icon links |
 | `10.16.10.100:/volume1/media` | `kubernetes/apps/media/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
-| `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/media/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
-| `birds.nate.cx` | `kubernetes/apps/media/birdnet-go/values.yaml` (`ingress.public`) | Public hostname; the cloudflare-tunnel controller reads it to make the route and DNS |
+| `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/utility/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
+| `birds.nate.cx` | `kubernetes/apps/utility/birdnet-go/values.yaml` (`ingress.public`) | Public hostname; the cloudflare-tunnel controller reads it to make the route and DNS |
 | `nateflix.media` | `kubernetes/apps/media/seerr/values.yaml` (`ingress.public`) | Public hostname for seerr; cloudflare-tunnel controller route and DNS |
 | `nateflix.media`, `nate.cx`, `birds.nate.cx` | `infra/stacks/cloudflare/edge-protection.tf` | Zone/host names the login rate limits and bot fight mode attach to |
 | `argocd-webhook.nate.cx` | `kubernetes/bootstrap/argocd/webhook-ingress.yaml` | Public GitHub webhook host for argocd-server; cloudflare-tunnel route and DNS |
