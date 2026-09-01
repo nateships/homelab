@@ -21,6 +21,9 @@ ALLOWED_KEYS = {
     "url",
 }
 
+CATEGORIES = {"infra", "network", "storage", "media"}
+TIERS = {"edge", "public", "media", "utility"}
+
 errors = []
 
 
@@ -74,6 +77,15 @@ for path in files:
             or not all(isinstance(v, str) for v in val.values())
         ):
             err(path, f"'{key}' must be a mapping of string values")
+
+    # The taxonomy: every app declares a category (ArgoCD UI filtering),
+    # and a tier, when set, names a known Cilium policy tier.
+    category = (cfg.get("labels") or {}).get("category")
+    if category not in CATEGORIES:
+        err(path, f"labels.category is {category!r} (must be one of {sorted(CATEGORIES)})")
+    tier = (cfg.get("namespaceLabels") or {}).get("homelab/tier")
+    if tier is not None and tier not in TIERS:
+        err(path, f"homelab/tier is {tier!r} (must be one of {sorted(TIERS)})")
 
     sources = cfg.get("sources")
     if sources is None:
