@@ -1,43 +1,21 @@
 controllers:
-  nzbget:
+  nzbfast:
     containers:
       app:
         image:
-          repository: ghcr.io/home-operations/nzbget
-          # renovate: datasource=docker depName=ghcr.io/home-operations/nzbget
-          tag: 26.3.0@sha256:7b8c77ede65ad37b55e318a38e09249e196736c319bd3c24034f7d53a2f1ba5a
+          repository: ghcr.io/nzbfast/nzbfast
+          # renovate: datasource=docker depName=ghcr.io/nzbfast/nzbfast
+          tag: 1.3.1@sha256:7a0cd161a19bd025871342d4ae6e2323fde87e664e2d845bff9bb10fbb6d3da7
         env:
           TZ: America/New_York
-        # -o overrides beat the config file, so a settings restore
-        # cannot change these. ${AppDir} is expanded by nzbget.
-        args:
-          - -o
-          - MainDir=/config
-          - -o
-          - DestDir=/data/usenet/complete
-          - -o
-          - InterDir=/data/usenet/incomplete
-          - -o
-          - WebDir=${AppDir}/webui
-          - -o
-          - ConfigTemplate=${AppDir}/webui/nzbget.conf.template
-          - -o
-          - CertStore=${AppDir}/cacert.pem
-          - -o
-          - ScriptDir=/config/scripts
-          - -o
-          - TempDir=/tmp
-          - -o
-          - LockFile=/config/nzbget.lock
-          - -o
-          - WriteLog=none
-          - -o
-          - UpdateCheck=none
-          # Auth is delegated to the tailnet ingress.
-          - -o
-          - ControlUsername=
-          - -o
-          - ControlPassword=
+          # nzbfast writes at the final path from the first article on;
+          # there is no separate incomplete dir to configure. This keeps
+          # finished (and in-flight) jobs where NZBGet's DestDir was, so
+          # the *arrs import from the same tree.
+          NZBFAST_OUT: /data/usenet/complete
+          # Auth is delegated to the tailnet ingress: run keyless. The
+          # entrypoint's API-key preflight and the daemon both skip auth.
+          NZBFAST_OPEN: "1"
         probes:
           liveness:
             enabled: true
@@ -51,8 +29,10 @@ controllers:
 defaultPodOptions:
   annotations:
     # Library and scratch volumes stay out of velero's file backups.
-    backup.velero.io/backup-volumes-excludes: media,tmp
+    backup.velero.io/backup-volumes-excludes: media,tmp,watch
   # Media-stack identity: files on the media export are UID 1024 / GID 100.
+  # Non-root also skips the image entrypoint's PUID/gosu path: the daemon
+  # is exec'd directly as this user.
   securityContext:
     runAsNonRoot: true
     runAsUser: 1024
@@ -63,7 +43,7 @@ defaultPodOptions:
       type: RuntimeDefault
 service:
   app:
-    controller: nzbget
+    controller: nzbfast
     ports:
       http:
         port: 6789
@@ -81,17 +61,24 @@ ingress:
     # name comes from tls.hosts and the backend is the default.
     defaultBackend:
       service:
-        name: nzbget
+        name: nzbfast
         port:
           number: 6789
     tls:
-      - hosts: [nzbget]
+      - hosts: [nzbfast]
 persistence:
+  # /config is the install: settings.json, the queue journal and index.db
+  # (WORKDIR is /config, so relative state lands here too).
   config:
     accessMode: ReadWriteOnce
     size: 2Gi
   # readOnlyRootFilesystem needs a writable /tmp.
   tmp:
+    type: emptyDir
+  # The image's default watch folder (NZBFAST_WATCH=/watch) sits on the
+  # read-only root filesystem; an emptyDir keeps it writable. Unused in
+  # practice - the *arrs hand over NZBs via the API.
+  watch:
     type: emptyDir
   media:
     existingClaim: media

@@ -7,7 +7,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: nzbget-media
+  name: nzbfast-media
 spec:
   capacity:
     storage: 1Ti # informational for a static NFS volume
@@ -25,12 +25,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: media
-  namespace: nzbget
+  namespace: nzbfast
 spec:
   accessModes:
     - ReadWriteMany
   storageClassName: ""
-  volumeName: nzbget-media
+  volumeName: nzbfast-media
   resources:
     requests:
       storage: 1Ti
