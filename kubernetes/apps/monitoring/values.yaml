@@ -36,6 +36,12 @@ clusterMetrics:
         - kube_pod_restart_policy
         - kube_replicaset_created
         - kube_replicaset_metadata_generation
+        # Label/annotation mirrors: one series per object that restates
+        # metadata the API already holds.
+        - kube_.+_labels
+        - kube_.+_annotations
+        - kube_pod_tolerations
+        - kube_pod_status_qos_class
   # The Grafana Cloud CoreDNSDown alert expects this exact job label;
   # without the scrape, absent() fires forever. Keep the request and
   # forward duration histograms (the latency alerts feed on them);
@@ -136,6 +142,22 @@ annotationAutodiscovery:
     excludeMetrics:
       - unpoller_firewall_rule_.+
       - unpoller_dhcp_.+
+      # Per-client bandwidth bookkeeping: one series per device on the
+      # LAN; the UniFi app already shows this live.
+      - unpoller_client_.+
+      # Go runtime and process internals of every scraped pod; nothing
+      # charts or alerts on them.
+      - go_.+
+      - process_.+
+      # ArgoCD's per-method/per-code gRPC counters and controller
+      # plumbing; app health lives in the argocd_.+ series.
+      - grpc_server_.+
+      - workqueue_.+
+      - rest_client_.+
+      - controller_runtime_.+
+      # Per-public-host latency histograms from the cloudflared fork;
+      # the _sum/_count pairs still give average latency per host.
+      - cloudflared_tunnel_host_.+_bucket
 
 # The collectors' own health metrics (the "Grafana Alloy" status
 # card feeds on alloy_build_info).
