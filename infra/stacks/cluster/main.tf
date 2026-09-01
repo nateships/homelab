@@ -130,7 +130,7 @@ resource "omni_config_patch" "control_plane_labels" {
 
 # Cilium bootstrap: the cluster ships no CNI, and ArgoCD pods cannot
 # start without one. Omni applies this render one time; ArgoCD
-# (kubernetes/apps/cilium) then owns upgrades. The render uses the same
+# (kubernetes/apps/network/cilium) then owns upgrades. The render uses the same
 # values.yaml as the Application. Keep this version equal to the app's
 # chart version (Renovate groups the two pins).
 data "helm_template" "cilium_bootstrap" {
@@ -141,7 +141,7 @@ data "helm_template" "cilium_bootstrap" {
   version      = "1.20.1"
   namespace    = "kube-system"
   kube_version = local.kubernetes_version
-  values       = [file("${path.module}/../../../kubernetes/apps/cilium/values.yaml")]
+  values       = [file("${path.module}/../../../kubernetes/apps/network/cilium/values.yaml")]
 
   lifecycle {
     # Helm-generated TLS material must never reach the Omni manifest.

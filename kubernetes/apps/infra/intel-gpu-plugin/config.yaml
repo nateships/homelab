@@ -1,0 +1,4 @@
+# Registers the workers' iGPU virtual functions as gpu.intel.com/xe.
+# The DaemonSet registers nothing on nodes without /dev/dri.
+name: intel-gpu-plugin
+namespace: kube-system

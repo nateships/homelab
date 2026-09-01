@@ -1,0 +1,7 @@
+# Media request portal for plex users.
+# Reachable at https://seerr.<tailnet>.ts.net.
+name: seerr
+namespace: seerr
+url: https://seerr.tail34eda.ts.net # site-specific: tailnet name
+namespaceLabels:
+  homelab/tier: public

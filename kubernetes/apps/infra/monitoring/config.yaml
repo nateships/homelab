@@ -1,0 +1,12 @@
+# Alloy collectors shipping cluster metrics, events, and pod logs to
+# Grafana Cloud. Endpoints and credentials ride the grafana-cloud
+# 1Password item; nothing site-specific in git.
+name: monitoring
+namespace: monitoring
+# node-exporter and the log reader mount host paths. Warn and audit
+# must match enforce: the cluster default (restricted) makes the API
+# server warn on every alloy-operator reconcile.
+namespaceLabels:
+  pod-security.kubernetes.io/enforce: privileged
+  pod-security.kubernetes.io/warn: privileged
+  pod-security.kubernetes.io/audit: privileged

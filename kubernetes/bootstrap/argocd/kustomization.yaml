@@ -7,7 +7,7 @@ resources:
   - namespace.yaml
   # Pin to a release; check https://github.com/argoproj/argo-cd/releases
   - https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.2/manifests/install.yaml
-  # Generates the Applications from kubernetes/apps/*/config.yaml
+  # Generates the Applications from kubernetes/apps/*/*/config.yaml
   - appset.yaml
   # ArgoCD UI as a Tailscale Service
   - argocd-server-ingress.yaml

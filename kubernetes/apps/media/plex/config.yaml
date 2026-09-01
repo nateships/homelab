@@ -1,0 +1,4 @@
+# Media server. Clients connect to the LoadBalancer VIP directly;
+# remote access goes through plex.tv.
+name: plex
+namespace: plex

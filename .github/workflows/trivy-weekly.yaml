@@ -31,9 +31,14 @@ jobs:
       - name: app list as matrix json
         id: list
         run: |
-          apps=$(for d in kubernetes/apps/*/; do
-            [ -f "$d/kustomization.yaml" ] && basename "$d"
-          done | jq -R . | jq -sc .)
+          # Objects, not bare names: the scan needs the category/app
+          # path, while the Code Scanning category keeps the bare app
+          # name so existing alerts survive the folder layout.
+          apps=$(for d in kubernetes/apps/*/*/; do
+            [ -f "$d/kustomization.yaml" ] || continue
+            rel="${d#kubernetes/apps/}"
+            printf '%s\n' "${rel%/}"
+          done | jq -R '{path: ., name: (split("/")[1])}' | jq -sc .)
           echo "apps=$apps" >> "$GITHUB_OUTPUT"
 
   scan:
@@ -55,7 +60,7 @@ jobs:
       - name: images for this app
         id: imgs
         env:
-          APP: ${{ matrix.app }}
+          APP: ${{ matrix.app.path }}
         run: |
           {
             echo "list<<EOF"
@@ -80,7 +85,7 @@ jobs:
         # there too. The app is this job's matrix value, no lookup needed.
         if: steps.imgs.outputs.list != ''
         env:
-          APP: ${{ matrix.app }}
+          APP: ${{ matrix.app.path }}
         run: |
           jq -s --arg app "$APP" '
             [ .[] | .runs[0] as $r
@@ -97,4 +102,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
         with:
           sarif_file: trivy.sarif
-          category: trivy-weekly/${{ matrix.app }}
+          category: trivy-weekly/${{ matrix.app.name }}
