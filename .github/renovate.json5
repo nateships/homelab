@@ -87,12 +87,12 @@
       "addLabels": ["major-update"]
     },
     {
-      // Anything running in the cluster restarts on merge (ArgoCD
-      // autosync): media apps interrupt playback and migrate their
-      // databases, so every workload waits for night. Tooling, CI,
-      // and infra pins outside this tree merge on green.
-      "description": "Cluster workloads: automerge overnight only",
-      "matchFileNames": ["kubernetes/apps/**"],
+      // Media apps interrupt playback on restart and image bumps
+      // migrate their databases; merge while the household sleeps.
+      // The category folder is the matcher, so filing an app under
+      // media/ is the whole opt-in.
+      "description": "Media apps: automerge overnight only",
+      "matchFileNames": ["kubernetes/apps/media/**"],
       "automergeSchedule": ["after 3am and before 6am"]
     },
     {

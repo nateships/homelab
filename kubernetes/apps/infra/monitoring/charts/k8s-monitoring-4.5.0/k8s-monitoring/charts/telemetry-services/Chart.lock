@@ -1,0 +1,27 @@
+dependencies:
+- name: kepler
+  repository: https://sustainable-computing-io.github.io/kepler-helm-chart
+  version: 0.6.1
+- name: prometheus-node-exporter
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 4.56.1
+- name: prometheus-windows-exporter
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 0.12.8
+- name: kube-state-metrics
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 8.4.0
+- name: opencost
+  repository: oci://ghcr.io/opencost/charts
+  version: 2.5.29
+- name: k8s-manifest-tail
+  repository: https://grafana.github.io/helm-charts
+  version: 0.1.5
+- name: beyla
+  repository: https://grafana.github.io/helm-charts
+  version: 1.16.11
+- name: k8s-injection-controller
+  repository: https://grafana.github.io/helm-charts
+  version: 0.2.1
+digest: sha256:5a8dba4c921cb1ed6c130eb365250c0bd9b7dedaee931475fc43352ae978304f
+generated: "2026-08-24T10:35:36.132447-05:00"

@@ -1,0 +1,165 @@
+# Default values for cloudflare-tunnel-ingress-controller.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+cloudflare:
+  accountId: ""
+  tunnelName: ""
+  apiToken: ""
+
+  # Uncomment if you would like to use an existing secret instead of the creating a new one.
+  # secretRef:
+  #   name: cloudflare-external-secret
+  #   accountIDKey: account_id
+  #   tunnelNameKey: tunnel_name
+  #   apiTokenKey: api_token
+
+ingressClass:
+  name: cloudflare-tunnel
+  controllerValue: strrl.dev/cloudflare-tunnel-ingress-controller
+  isDefaultClass: false
+
+replicaCount: 1
+
+image:
+  repository: cr.strrl.dev/strrl/cloudflare-tunnel-ingress-controller
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# If specified, this priority class name is applied to the pods.
+# priorityClassName: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Kubernetes cluster domain, used to construct FQDN for services
+# (e.g. <service>.<namespace>.svc.<clusterDomain>).
+# This should match the kubelet --cluster-domain flag (default: "cluster.local").
+
+# Go template for DNS CNAME record comments. This is purely informational and
+# does NOT affect record ownership (which is tracked via TXT records).
+# Available template variables: {{.TunnelName}}, {{.TunnelId}}, {{.Hostname}}
+# Set to empty string "" to disable comments entirely.
+#
+# Note: Cloudflare enforces comment length limits per plan:
+#   Free: 100 chars | Pro/Business/Enterprise: 500 chars
+# If the rendered comment exceeds your plan's limit, the Cloudflare API will reject it.
+# See: https://developers.cloudflare.com/dns/manage-dns-records/reference/record-attributes/
+dnsCommentTemplate: "managed by cloudflare-tunnel-ingress-controller, tunnel [{{.TunnelName}}]"
+
+clusterDomain: cluster.local
+
+leaderElection:
+  enabled: false
+
+# Port of the controller metrics endpoint. It serves the controller-runtime
+# built-in metrics (reconcile counts, workqueue depth, and so on) plus custom
+# metrics like cloudflare_tunnel_ingress_controller_last_successful_sync_timestamp_seconds.
+metrics:
+  port: 9090
+
+# ServiceMonitor objects for the Prometheus Operator. One switch creates
+# ServiceMonitors for both metrics endpoints: the controller and the managed
+# cloudflared connectors. Requires the Prometheus Operator CRDs.
+serviceMonitor:
+  create: false
+  labels: {}
+  interval: ""
+  scrapeTimeout: ""
+  metricRelabelings: []
+  relabelings: []
+  # Settings that only apply to the cloudflared connectors endpoint.
+  cloudflared:
+    jobLabel: ""
+    honorLabels: false
+    scheme: http
+
+# Health endpoint of the controller, used by liveness and readiness probes.
+healthProbe:
+  port: 8081
+
+cloudflared:
+  image:
+    repository: ghcr.io/strrl/cloudflared
+    pullPolicy: IfNotPresent
+    tag: 2026.7.3-host-metrics.1
+  replicaCount: 1
+  protocol: auto
+  # Convenience switch that renders a required pod anti-affinity on
+  # kubernetes.io/hostname into the customization below, spreading cloudflared
+  # pods across nodes. Ignored when cloudflared.affinity is set explicitly.
+  # When enabled, replicaCount must not exceed the number of schedulable nodes,
+  # otherwise the extra pods stay pending.
+  podAntiAffinity: false
+  # Extra arguments to pass to cloudflared command
+  # Example: ["--post-quantum", "--edge-ip-version", "4"]
+  extraArgs: []
+
+  # Pod template customization for the controlled-cloudflared-connector Deployment.
+  # These fields are applied to the cloudflared pods managed by the controller.
+  resources: {}
+  securityContext: {}
+  podSecurityContext: {}
+  podLabels: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  # priorityClassName: ""
+  probes:
+    liveness: {}
+    readiness: {}
+    startup: {}
+  volumes: []
+  volumeMounts: []
+
+  # PodDisruptionBudget for the controlled-cloudflared-connector Deployment.
+  pdb:
+    enabled: false
+    # minAvailable: 1
+    # maxUnavailable: 1

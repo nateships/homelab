@@ -1,0 +1,476 @@
+# Changelog
+
+## 4.5.0
+
+*   Add the `prometheusMetricsReceiver` feature, which opens a receiver so applications can push Prometheus-formatted metrics to the in-cluster Alloy, which then forwards them to any metrics-capable destination. (#2179) (@petewall)
+*   Add the `lokiLogsReceiver` feature, which opens a Loki API receiver so applications can push Loki-formatted logs to the in-cluster Alloy, which then forwards them to any logs-capable destination. (#2179) (@petewall)
+*   Route integration instances to different collectors by setting collector on each instance. (#2616) (@TylerHelmuth)
+*   Route the Profiling sub-features to different collectors by setting collector on each sub-feature. (#2949) (@TylerHelmuth)
+*   When collector is experimental, use the new `prometheus.exporter.static` for selfReporting. (#2923) (@petewall)
+*   Destinations now have the option to overwrite the cluster labels. Pyroscope and OTLP are enabled by default, maintaining existing behavior. (#2985) (@petewall)
+
+## 4.4.1
+
+*   Fix the Prometheus destination so the cluster label honors `cluster.nameFrom`. (#2963) (@TylerHelmuth)
+*   Cluster Metrics: when `kubeScheduler.discoveryMode` is `eks-proxy`, collect the EKS Control Plane resource metrics (`kube_pod_resource_request` and `kube_pod_resource_limit`). (#2977)
+*   Host Metrics: honor `windowsHosts.scheme` and `windowsHosts.bearerTokenFile` when scraping an external Windows Exporter. (#2961) (@petewall)
+*   Update Beyla to 1.16.11 and kube-state-metrics to 8.4.0. (@petewall)
+
+## 4.4.0
+
+*   Allow for regexes to be used in the `namespaces` list for many features. (#2860) (@petewall)
+*   Add a validation that detects a host port conflict before the Auto-Instrumentation feature deploys Beyla. Beyla runs with `hostNetwork` enabled, so any existing DaemonSet already binding the same host port would collide with it. Disable with `autoInstrumentation.beyla.portConflictCheck: false`. (#2893) (@petewall)
+*   Add `attachNamespaceMetadata` to the annotationAutodiscovery feature to add namespace labels available for relabeling rules. (#2874) (@petewall)
+*   Collect Windows host metrics directly with Alloy by setting `hostMetrics.windowsHosts.source: alloy`, which uses the built-in `prometheus.exporter.windows` instead of deploying and scraping a separate Windows Exporter. (@petewall)
+*   Route the Host Metrics sub-features to different collectors. `hostMetrics.linuxHosts`, `hostMetrics.windowsHosts`, and `hostMetrics.energyMetrics` each accept their own `collector`, falling back to the feature-level `hostMetrics.collector`. This makes it possible to collect Linux host metrics on a Linux DaemonSet and Windows host metrics on a Windows DaemonSet at the same time. (@petewall)
+*   Add the `windowsEventLogs` feature, which gathers Windows event logs from Windows Nodes. (@petewall)
+*   Add a `windows` collector preset, which schedules Alloy onto Windows nodes as a process-isolated container. (@petewall)
+*   Add a `windows-host-process` preset, which layers on the HostProcess settings needed for host access such as reading the Windows Event Log. (@petewall)
+*   Add a `windows-scrapeable` preset, which opens the Alloy metrics port on the Windows Node's host firewall so other collectors can scrape it. (@petewall)
+*   Add the `router` destination, which routes telemetry to different destinations based on the value of a resource attribute or label (default `k8s.namespace.name`). Routes are evaluated in order and the first match wins; unmatched data goes to the required `defaultDestinations`. (#2849) (@mbaykara)
+*   Improve the "No destinations found" validation error: when capable destinations exist but are only reachable through a `router` destination, the error now lists those destinations, names the signal-capable router(s), and shows the exact `destinations:` setting to opt the feature in. (#2924) (@mbaykara)
+*   Fix stray blank lines in the post-install notes output when the Host Metrics feature is enabled. (#2924) (@mbaykara)
+
+## 4.3.3
+
+*   Update Alloy Operator to 0.6.3 (@TylerHelmuth)
+*   Service Integrations: Fix an issue where validation wouldn't catch if a collector was not assigned. (@petewall)
+*   Cluster Metrics: add a `discoveryMode` option to `kubeScheduler` and `kubeControllerManager`, `eks-proxy` to scrape the control plane from the Amazon EKS Control Plane Metrics API (`metrics.eks.amazonaws.com`). (#2915) (@petewall)
+*   Add `extraResourceAttributes` and `extraResourceAttributesFrom` options to the OTLP destination. (#2913) (@petewall)
+*   Update kube-state-metrics to 8.1.3 and OpenCost to 2.5.29 (@petewall)
+
+## 4.3.2
+
+*   Fix chart schemas where the only valid type was `null`. (#2926) (@petewall)
+*   Validate `replaceComponent` entries across collectors, and make it possible to mark them as optional. (#2912) (@petewall)
+*   Fix the comment on the closing brace of generated Alloy config components so it always names the component that opened the block. (@petewall)
+*   Add an `overrideUnknownServiceNames` option to the Application Observability feature. When enabled, the `service.name` resource attribute will be overridden if its value is `unknown_service*`. (@petewall)
+*   Update Windows Exporter to 0.12.8 (@petewall)
+*   Database Observability: add support for specifying additional custom labels. (#2929) (@cristiangreco)
+
+## 4.3.1
+
+*   Validate that each collector's Alloy stability level is high enough for the experimental or public-preview components in its rendered configuration. (@petewall)
+*   Add `connectors.spanMetrics.metricsExpiration` and `connectors.spanMetrics.seriesExpiration` options to the Application Observability feature, so stale metrics and series can be expired instead of accumulating indefinitely. (#2875) (@petewall)
+*   Add a validation that detects another Alloy Operator already running in the cluster that would compete to manage the same Alloy instances. Disable with `alloy-operator.conflictCheck: false`. (@petewall)
+*   When the Alloy Operator is not deployed by this chart (`alloy-operator.deploy: false`), pin the Alloy image tag on the Alloy instances so an external (possibly older) operator does not substitute its own default Alloy image. Set `image.tag` on a collector to override. (@petewall)
+*   Update Alloy Operator to 0.6.2, kube-state-metrics to 8.0.0, Node Exporter to 4.56.1, and OpenCost to 2.5.28 (@petewall)
+
+## 4.3.0
+
+*   Add a `presets` attribute to the remote configuration (`remotecfg`) collector attributes, containing the comma-separated list of the collector's presets. (@petewall)
+*   Fix standardize on upper-case in level labels (#2844) (@saruprim)
+*   Add missing extra metric processing rules for Istio metrics integration (@1azunna)
+*   Add the ability to set the resolver and timeout for `processors.serviceGraphMetrics` in OTLP destinations, choosing how the load balancing exporter routes traces to the service graph Alloy instances. (@petewall)
+*   Update the SDK Injector (k8s-injection-controller) to 0.2.1. Its container image now defaults to the pinned chart appVersion (`0.2.0`) instead of the `main` tag. (@TylerHelmuth)
+*   Align `service.name`/`service.namespace` detection on logs (new opt-in `alignServiceNameWithOTelSemConv` flag) and profiles with the [OpenTelemetry Kubernetes semantic conventions](https://opentelemetry.io/docs/specs/semconv/non-normative/k8s-attributes/) that Grafana Beyla uses, so telemetry correlates across metrics, logs, traces, and profiles for the same workload. (#2547) (@petewall)
+*   Allow a destination to be disabled by setting `disabled: true`. Disabled destinations are excluded from all destination lists, secrets, and generated Alloy instances, which makes it possible to remove a destination that was defined in a shared or parent values file. (#2800) (@petewall)
+*   Add the `nop` destination, which drops all telemetry sent to it. (#1461) (@TylerHelmuth)
+*   Add the `otel-receiver` collector preset, which opens the standard OTLP receiver ports on the collector (4317 for OTLP gRPC and 4318 for OTLP HTTP). (@petewall)
+*   Add support for global image settings. `global.image.registry`, `global.image.pullPolicy`, and `global.image.pullSecrets` are now documented and schema-validated, and apply to the Alloy instances, the Alloy Operator, and the Alloy removal hooks. The flat `global.imageRegistry`, `global.imagePullPolicy`, and `global.imagePullSecrets` keys used by dependent charts (kube-state-metrics, Node Exporter, Windows Exporter) are also documented. (#2498) (@TylerHelmuth)
+*   Add a `filters` option to the Pod Logs via OpenTelemetry feature for dropping pod logs based on the pod's annotations or labels. Set `filters.annotations` or `filters.labels` to a map of Kubernetes annotation/label key to the value that should drop the log, or `null` to drop whenever the annotation/label is present. A pod's logs are dropped if any configured filter matches. (#2846) (@TylerHelmuth)
+
+## 4.2.2
+
+*   Add `attachNamespaceMetadata` option to the Pod Logs (via Loki and via Kubernetes API) features. When enabled, namespace labels are attached to pod discovery targets and made available as `__meta_kubernetes_namespace_label_*`. (@petewall, @tdudas)
+*   Fix Beyla auto-instrumentation discarding the default `discovery` targets (`instrument`/`exclude_instrument`) when a user set any other field under `discovery`, such as `exclude_otel_instrumented_services`. The defaults are now applied per-field, so a partial `discovery` config no longer stops Beyla from discovering services. (#2332) (@petewall)
+*   Add `host-tracefs` collector preset.
+*   Remove empty `image` and `container` labels from cAdvisor's `container_pressure_.*` metrics (#2561) (@petewall)
+*   Infer `auth.type: basic` for remote configuration and destinations when a username and password are set but `auth.type` is not. (#2809) (@TylerHelmuth)
+*   Fix `unrecognized block name "rule_namespace"` error when using the `rules.namespaces` field of the `prometheus` destination to limit the PrometheusRules object discovery to specific namespaces (#2802) (@sebasnabas)
+*   Fix `autoInstrumentation.beyla.service.targetPort` not propagating to the generated Beyla config ports, which previously required setting the port in three places. (#2811) (@TylerHelmuth)
+*   Update Beyla to 1.16.10 (@TylerHelmuth)
+*   Use journald priority as a fallback log level when the log message does not contain a log level. (#2827) (@saruprim)
+*   Update Alloy Operator to 0.6.1, kube-state-metrics to 7.8.1, Node Exporter to 4.56.0, and OpenCost to 2.5.26 (@petewall)
+
+## 4.2.1
+
+*   Add the `root`, `host-network`, `host-storage`, and `host-cgroup` collector presets and deprecate the `privileged` preset. `root` sets the privileged root `securityContext`, `host-network` sets `hostPID`/`hostNetwork`/`dnsPolicy`, and `host-storage`/`host-cgroup` mount host paths. `privileged` is unchanged and still works, but cannot be combined with these new presets. (#2796) (@TylerHelmuth)
+*   Collector presets now append their `alloy.mounts.extra` and `controller.volumes.extra` entries instead of overwriting, and the OpenShift `SecurityContextConstraints` allows host networking and ports when a collector sets `hostNetwork`. (#2796) (@TylerHelmuth)
+*   Add per-instance `extraDiscoveryRules` to the Service Integrations feature, allowing pre-scrape `discovery.relabel` rules — e.g. a `labelmap` from pod annotations — to enrich an integration's scraped metrics with custom labels while the `__meta_*` discovery labels are still present. Set on each integration instance (the targets it discovers are unique); available on all nine Kubernetes service-discovery integrations, with Istio set per sidecar and istiod. (@bradleypettit)
+*   Fix `kubeletResource.extraDiscoveryRules` and `kubeletProbes.extraDiscoveryRules` being silently dropped. (#2743) (@bradleypettit)
+*   Surface `deploy: false` defaults for `telemetryServices.beyla` and `telemetryServices.sdkInjector` in the top-level values, matching the other telemetry services. This prevents them from deploying unintentionally on Helm versions affected by a subchart value coalescing regression (helm/helm#32132). (#2781, #2782) (@petewall)
+*   Change the default remote configuration `pollFrequency` from `5m` to `30s`. (@TylerHelmuth)
+*   Add `CLUSTER_NAME` environment variable to remote-config-enabled collectors alongside `NAMESPACE` and `POD_NAME`. (#2775) (@petewall)
+*   Fix OTLP destinations deriving the wrong service identity for metrics converted from a Prometheus scrape. The conversion sets `service.name` to the full `job` label (e.g. `namespace/workload` from Grafana Beyla), breaking service-to-logs correlation in Application Observability. A new normalization step after `otelcol.receiver.prometheus` prefers the explicit `service_name` label; OTLP-native telemetry is unaffected. (#2783) (@mbaykara)
+*   Fix OTLP destinations producing `;`-joined duplicate label values on `target_info` (e.g. `k8s_cluster_name="c;c"`) when a scrape target exposes its own `target_info` metric. Flat resource attributes from the conversion (`service_namespace`, `deployment_environment`, `deployment_environment_name`, `k8s_cluster_name`) are reconciled into their dotted equivalents and dropped when the values match. (#2786) (@mbaykara)
+
+## 4.2.0
+
+*   Add `hostMetrics.linuxHosts.source` (`node-exporter` (default) or `alloy`). With `alloy`, Linux host metrics are collected directly by the assigned collector via `prometheus.exporter.unix`, requiring no Node Exporter deployment. This needs a privileged DaemonSet that mounts the host filesystem, configured with the new `presets: [linux-host-monitor, daemonset]`. The `nodeLabels` enrichment is not yet supported with `source: alloy`. (#2660) (@petewall)
+*   Introduce Data Processors, a method for transforming data between features and destinations. Initial processors include the `custom` processor.
+*   Add the `kubernetesEnrichment` data processor, which copies Kubernetes namespace and pod labels and annotations onto metrics, logs, traces, and profiles across all supported ecosystems. (@petewall)
+*   Add the `ec2Enrichment` data processor, which uses `discovery.ec2` to copy AWS EC2 instance tags onto Prometheus metrics, Loki logs, and Pyroscope profiles, matching telemetry to its instance by the `node` label. (#2678) (@petewall)
+*   Deprecate the `metricEnrichment` option on the Prometheus destination in favor of the `kubernetesEnrichment` data processor. The option remains functional. (@petewall)
+*   Add a `source="spanmetrics"` resource attribute to metrics generated by the span metrics connector, making it easier to identify and filter span-derived metrics. (@rlankfo)
+*   Include Grafana Beyla's Kubernetes cache as deployable from `telemetryServices`. This is distinct from the Beyla inside the `autoInstrumentation` feature. (@petewall)
+*   Include the Grafana SDK Injector, which complements Grafana Beyla's ability to automatically instrument applications. (@petewall)
+*   Fix Prometheus destinations dropping the `service.name`, `service.namespace`, and `service.instance.id` resource attributes from the `target_info` metric during OTLP to Prometheus conversion. `openTelemetryConversion.keepIdentifyingResourceAttributes` now defaults to `true`, so these are retained as the `service_name`, `service_namespace`, and `service_instance_id` labels. Set it to `false` to restore the previous behavior. (#2722) (@rlankfo)
+
+## 4.1.7
+
+*   Database Observability: add top-level `databaseObservability.excludeCurrentUser` for PostgreSQL (Alloy 1.17.0). The per-collector `databaseObservability.collectors.querySamples.excludeCurrentUser` is now deprecated but still honored when explicitly set. (@cristiangreco)
+*   Database Observability: stop rendering the now-deprecated `schema_details.cache_enabled` / `cache_size` / `cache_ttl` arguments for MySQL and PostgreSQL (Alloy 1.17.0 ignores them). The `cacheEnabled` / `cacheSize` / `cacheTTL` values keys are kept for backwards compatibility but documented as no-op. (@cristiangreco)
+*   Fix the Beyla `SecurityContextConstraints` on OpenShift to set `allowHostPorts: true`. Beyla runs with host networking when context propagation or the `network` preset is enabled, which OpenShift treats as host-port usage. Without it, the Beyla DaemonSet pods fail SCC admission with `Host ports are not allowed to be used`. (#2734) (@petewall)
+*   Fix the OTLP destination `timeout` setting rendering inside the `client` block for `protocol: grpc`, which Alloy rejects. It now renders as a top-level argument for gRPC and inside `client` for HTTP. (#2710) (@petewall)
+*   Add `openTelemetryConversion.keepIdentifyingResourceAttributes` option to `otelcol.exporter.prometheus` component to optionally preserve `service.name`, `service.namespace`, and `service.instance.id` attributes as labels on `target_info` metric during OTLP to Prometheus conversion. (#2718) (@rlankfo)
+*   Update k8s-manifest-tail to 0.1.5 (@TylerHelmuth)
+*   Update Alloy Operator to 0.5.11 and OpenCost to 2.5.25 (@petewall)
+
+## 4.1.6
+
+*   Fix the deployment notes printing an empty "It will:" section when no local features are enabled (e.g. when only using remote configuration or only deploying telemetry services) (#2711) (@petewall)
+*   Fix the OTLP destination `timeout` setting rendering `timeout` at the top level of the `otelcol.exporter.otlp`/`otelcol.exporter.otlphttp` component instead of inside the `client` block. Alloy 1.16.3+ rejects the misplaced attribute (`unrecognized attribute name "timeout"`), causing the collector to fail to start. (#2710) (@petewall)
+*   Update Alloy Operator to 0.5.10 and kube-state-metrics to 7.5.1 (@petewall)
+*   Expand the platform detection template to recognize Azure AKS, Google GKE, and Amazon EKS (in addition to OpenShift) by inspecting node labels and cloud provider IDs, and expose the detection result through a reusable `validations.platform.detect` template. (@petewall)
+*   Set the `provider` attribute reported by the Remote Configuration (`remotecfg`) feature to the configured or detected platform (`openshift`, `aks`, `gke`, `eks`) when it can be determined. (@petewall)
+*   Report the detected platform in the `platform` label of the `grafana_kubernetes_monitoring_build_info` self-reporting metric when `global.platform` is not set explicitly. (@petewall)
+
+## 4.1.5
+
+*   Fix OpenCost failing to deploy with `duplicate entries for key [name="CONFIG_PATH"]` when `customPricing` is enabled. The GKE GCP-provider workaround no longer sets `CONFIG_PATH` via `extraEnv` (which collided with the `CONFIG_PATH` the OpenCost chart sets for custom pricing); instead it mounts a writable `emptyDir` at OpenCost's default config path (`/var/configs`). (#2692) (@petewall)
+*   Require `labelMatchers` (rather than accepting a `namespace` alone) when connecting Cluster Metrics (kube-state-metrics), Host Metrics (Node Exporter, Windows Exporter, Kepler), or Cost Metrics (OpenCost) to an existing service that is not deployed via `telemetryServices`. Previously a namespace-only configuration rendered an empty `label = ""` selector that matched every pod in the namespace. (@petewall)
+*   Add a best-effort validator that uses Helm `lookup` to confirm the configured `labelMatchers` actually select running pods in the specified `namespace` for an existing kube-state-metrics, Node Exporter, Windows Exporter, Kepler, or OpenCost. The check is skipped during `helm template`/`--dry-run` (no cluster connection) and only runs when a namespace is set. (@petewall)
+*   Update Alloy Operator to 0.5.9, Beyla to 1.16.8, and OpenCost to 2.5.23 (@petewall)
+
+## 4.1.4
+
+*   Add a best-effort validator that checks (via Helm `lookup`) for an existing Node Exporter using the same port when deploying the bundled `telemetryServices.node-exporter`. If a port conflict is detected, the install fails with guidance to either skip the deployment and point Host Metrics at the existing Node Exporter, or deploy on a unique port. (@petewall)
+*   Fix the Service Integrations feature silently rendering no integration modules when `integrations.collector` was left at its default empty string. The feature now relies on the same collector resolution as every other feature, so simply enabling integrations (e.g. `integrations.alloy`, `integrations.cert-manager`, `integrations.istio`) generates the expected Alloy modules without also having to set `integrations.collector` explicitly (#2625) (@petewall)
+*   Add `timeout` setting on the OTLP destination (@petewall)
+*   Fail rendering with a clear error when `profiling.enabled: true` is set but none of `profiling.ebpf.enabled`, `profiling.java.enabled`, or `profiling.pprof.enabled` are enabled, instead of silently producing a profiling feature that collects no data (#2620) (@petewall)
+*   Fix Alloy collector instances cross-contaminating each other's `mounts.extra` (and other nested values from `collectorCommon.alloy` or per-instance `collectors.<name>`) due to Sprig `mergeOverwrite` aliasing nested map/slice references. The user-supplied merge inputs (`$userCommonValues` and `$userValues`) are now `deepCopy`-ed before merging (#2623) (@petewall)
+*   Update Alloy Operator to 0.5.8, OpenCost to 2.5.21 and Windows Exporter to 0.12.7 (@petewall)
+
+## 4.1.3
+
+*   Add support for the write-ahead log (WAL) setting on the Loki destination (@nooboo)
+*   Add `drop` policy support for tail sampling (@petewall)
+*   Add global pull policy support for the hooks and collectors (@petewall)
+*   Fix `spanMetrics.excludeDimensions` rendering: list values are now properly quoted as strings instead of unquoted bareword identifiers, which caused Alloy to fail to parse the rendered config. (#2596) (@savannahostrowski)
+*   Remove scrape protocols from the four `prometheus.operator.*` components, which do not support setting them. (@MattiasSegerdahl)
+
+## 4.1.2
+
+*   Add convertClassicHistogramsToNhcb setting to global (@MattiasSegerdahl)
+*   Update Beyla to 1.16.7 (@petewall)
+*   Fix `global.scrapeNativeHistograms: true` crash-looping the alloy-metrics collector with `scrape_native_histograms is set to true, but PrometheusProto is not in scrape_protocols`. The chart now automatically prepends `PrometheusProto` to the rendered `scrape_protocols` list whenever native histograms are enabled, so the single-knob migration from chart 3.5.x works without also overriding `global.scrapeProtocols` (#2582) (@petewall)
+*   Fix custom destinations with `traces.enabled: true` or `profiles.enabled: true` failing to render with `nil pointer evaluating interface {}.target`. The traces and profiles `target` template lookups now read from the correct template context (`.destination.traces.target` / `.destination.profiles.target`) so the configured target is forwarded into the rendered Alloy config (#2590) (@petewall)
+
+## 4.1.1
+
+*   Fix the pre-delete and post-install Alloy-finalizer hook templates failing to render when `alloy-operator.waitForAlloyRemoval.securityContext` is set to `null` (#2569) (@petewall)
+*   Update Alloy Operator to 0.5.7, Beyla to 1.16.6, and k8s-manifest-tail to 0.1.4 (@petewall)
+*   Fix `extraLogProcessingStages` (and `extraLogProcessingRules` on `podLogsObjects`) failing to render under older Helm versions (e.g. those bundled with the Terraform Helm provider) with `cannot retrieve Template.Basepath from values inside tpl function`, by propagating `Template` through to the feature module includes that call `tpl` (@petewall)
+*   Set `opencost.opencost.exporter.cloudProviderApiKey` to `"disabled"` so OpenCost does not try to write `/var/configs/gcp.json` on GCP/GKE and panic. Removes the placeholder GCP API key (and its `trufflehog:ignore` workarounds) from the chart defaults (@petewall)
+*   Fix OpenCost crashing on GKE: point `CONFIG_PATH` at `/tmp` so the GCP provider can write its `gcp.json` (the default `/var/configs` is not writable by the non-root container user, which caused a nil-pointer panic). Set `CLOUD_PROVIDER_API_KEY=disabled` so the GCP provider can be constructed without a real billing API key, and remove the placeholder API key (and its `trufflehog:ignore` workarounds) from the chart defaults (@petewall)
+*   Add the ability to set `scrapeNativeHistograms` for the Prometheus Operator Objects feature (@lukas-unity)
+
+## 4.1
+
+*   Add `small`, `medium`, `large`, and `xlarge` collector presets that set Alloy resource requests and limits for common cluster sizes (@petewall)
+*   Add `global.namespaceOverride` to deploy namespaced resources into a custom namespace across this chart and its feature subcharts (@petewall)
+*   Add the ability to replace the contents of an Alloy component (@petewall)
+*   Add the ability to set the cluster name using arbitrary sources with `cluster.nameFrom` (@petewall)
+*   Add `clusterEvents.clustering` to allow Cluster Events to run on a clustered collector with multiple replicas, sharding event collection across peers (@petewall)
+*   Database Observability: emit proper relabeling for MySQL and PostgreSQL so both metrics and logs carry `job=integrations/db-o11y`, the configured `instance` name,
+    and a `dsn` label for Knowledge Graph integration. Breaking change for users on `databaseObservability.enabled: true`: the default `job` label is now `integrations/db-o11y`
+    (was `integration/mysql` for MySQL and `integration/postgresql` for PostgreSQL), and the `instance` label on db o11y logs is the instance name (was the raw DSN, which now lives on the `dsn` label) (@cristiangreco)
+*   Database Observability: add `databaseObservability.cloudProvider.gcp` for MySQL and PostgreSQL to label metrics with GCP Cloud SQL instance metadata (@cristiangreco)
+*   Database Observability: add `databaseObservability.collectors.querySamples.sampleMinDuration` and `waitEventMinDuration` for MySQL (@cristiangreco)
+*   Database Observability: emit `disable_collectors` for any MySQL or PostgreSQL collector explicitly turned off via `databaseObservability.collectors.<name>.enabled: false` (@cristiangreco)
+*   Database Observability: realign some default `databaseObservability.collectors` values with Alloy upstream defaults (@cristiangreco)
+*   Database Observability: remove the unused `databaseObservability.collectors.explainPlans.excludeSchemas` value from the PostgreSQL settings (@cristiangreco)
+*   Add the ability to capture Kubernetes Manifests as log data (@petewall)
+
+## 4.0.5
+
+*   Add the ability to set per-signal paths for OTLP/http destinations (@petewall)
+*   Update Node Exporter to 4.55.0 (@petewall)
+
+## 4.0.4
+
+*   Set Prometheus destination cluster labels via `external_labels` instead of `write_relabel_config` blocks, matching the Loki destination pattern (@petewall)
+*   Fix Loki, Mimir, and Grafana integrations spamming `failed to decode logfmt` errors for non-logfmt components like the Loki/Mimir gateway (nginx) and canary, by gating the logfmt parser on lines that look like logfmt (#1726) (@petewall)
+*   Set `appProtocol` on the OTLP, Zipkin, and Jaeger HTTP/gRPC ports registered by the Application Observability feature, and pass `appProtocol` from `collectors.<name>.alloy.extraPorts` through to the optional receiver Service, so Istio sidecars reliably pick the right L7 filter instead of falling back to protocol sniffing (@petewall)
+*   Update Alloy Operator to 0.5.6 and kube-state-metrics to 7.3.0 (@petewall)
+*   Change Alloy collector `labels` and `annotations` defaults from arrays to maps, and accept either type in the schema for backwards compatibility (@petewall)
+*   Warn in NOTES.txt when installing into an Istio-enabled namespace with Alloy clustering using the default "http" port name, which breaks clustering peer discovery and causes duplicate metrics (@petewall)
+*   PostgreSQL: Add `statementsLimit` option to the Database Observability `queryDetails` collector (@petewall)
+*   Normalize collector and destination names to DNS-1123 resource names so mixed-case or underscore-containing keys (e.g. `alloyMetrics`, `my_dest`) render valid Kubernetes resources, and fail when two keys collapse to the same normalized name (@petewall)
+
+## 4.0.3
+
+*   Add `enabled` flag to collectors so they can be disabled without removing them from the values file (@petewall)
+*   Update Alloy Operator, Beyla, Node Exporter and OpenCost (@petewall)
+*   Add validators to require clustering on collectors that are assigned cluster-enabled features (@petewall)
+*   Add validators to warn when deployment-level settings are placed under feature configs instead of telemetryServices (@petewall)
+*   Fix validation error messages referencing `labelSelectors` instead of the correct `labelMatchers` field (@petewall)
+
+## 4.0.2
+
+*   Switch from deprecated Endpoints discovery to EndpointSlice for Kubernetes 1.33+ compatibility (@petewall)
+*   Fix node log level parsing broken since v4.0 due to case mismatch in selectors (@petewall)
+*   Use glob syntax instead of regular expressions in Beyla discovery config (@petewall)
+
+## 4.0.1
+
+*   Remove extra `/var/configs` volume mount from OpenCost (@petewall)
+*   Add node labels to  host metrics feature (@petewall)
+*   Update Alloy Operator, Beyla, Node Exporter, and Windows Exporter (@petewall)
+*   Fix serviceGraphMetrics routing metrics to the wrong OTLP destination when multiple destinations are defined (@petewall)
+*   Fix pre-delete hook failing when the finalizer is not present (@petewall)
+*   Remove /var/configs volume from OpenCost which could cause problems (@petewall)
+
+## 4.0.0
+
+*   Add Loki thanos metrics to the default allowList (@kinolaev)
+*   Rebuild log features to remove `labelsToKeep` and split Loki and OpenTelemetry log gathering (@petewall)
+*   Introducce `collectors` as map, and remove named Alloy instances (@petewall)
+*   Convert destinations into a map (@petewall)
+*   Remove Prometheus Operator Object CRDs (@petewall)
+*   Extract supplemental telemetry services from config features into their own subchart (@petewall)
+
+## 3.8.5
+
+*   Update Beyla, Node Exporter, OpenCost, and Prometheus Operator CRDs. (@petewall)
+*   Fix Application Observability failing to start when only traces are enabled and metrics are disabled. (@petewall)
+
+## 3.8.4
+
+*   Update Alloy Operator to 1.5.2 (@petewall)
+*   Update options for secretFilters in Pod logs features to match changes in Alloy (@petewall)
+*   Fix `tls_config` block name to `tls` in `otelcol.auth.oauth2` for OTLP destinations (@petewall)
+
+## 3.8.3
+
+*   Disable the OpenCost MCP server (@petewall)
+*   Update Alloy Operator to 1.5.1 (@petewall)
+*   PostgreSQL: stat_statements exclude_databases/exclude_users/limit options (@cristiangreco)
+*   Add more settings for profiling features (@petewall)
+
+## 3.8.2
+
+*   Find Pod logs for static pods using the config.mirror annotation (@sebastian-de)
+*   Add label selectors plus a completed Job filter to the Istio integration sidecar scraper and wire namespace/label selectors for Istiod discovery (@petewall)
+*   Fix cAdvisor `includeNamespaces` filter dropping non-namespaced metrics like `machine_*` (@petewall)
+*   Update Beyla auto-instrumentation config to use `instrument`/`exclude_instrument`, replacing the deprecated `services`/`exclude_services` (@petewall)
+*   Update Beyla to 1.13.0 (@petewall)
+*   MySQL: Add perf_schema.eventsstatements collector options (@cristiangreco)
+*   Fix: preserve user extraEnv in service graph collector (@rafix)
+*   Updated Node Exporter, OpenCost, and Alloy Operator (@petewall)
+*   Add TLS configuration support for OAuth2 token endpoints across all destinations (@petewall)
+*   Update database_observability setup for Alloy 1.13.x features (@cristiangreco)
+
+## 3.8.1
+
+*   Add an option to set the semantic convention version for Application Observability span names (@petewall)
+*   Fix Java profiling so annotation targeting no longer scrapes unannotated pods (@petewall)
+*   Fix PSQL integration includeQuery config camel_case (@Dissonant-Tech)
+
+## 3.8.0
+
+*   Add the ability to enrich metrics with pod or namespace labels (@petewall)
+*   Set CRI as default logs processor if runtime is unset (@aleksanderaleksic)
+*   Add the ability to set protobufMessage and a shortcut for the remote_write protocol (@petewall)
+*   Automatically set required environment variables when enabling remote config (@petewall)
+*   Add a feature for gathering logs using PodLogs objects (@petewall)
+*   Update Windows Exporter to 0.12.3 (@petewall)
+*   Update Beyla to 1.11.0 (@petewall)
+*   Update Prometheus Operator Object CRDs to 26.0.1 (@petewall)
+
+## 3.7.5
+
+*   Add Configuration to specify the `overrides` Section of the Span Logs Connector Component for the Application Observability Chart (@SeamusGrafana)
+*   Update Alloy Operator to 0.4.1 (@petewall)
+
+## 3.7.4
+
+*   Improve OTLP destination protocol validation (@petewall)
+*   Update Prometheus Operator Object CRDs (@petewall)
+*   Fix Indentation Issues for Beyla Relabel (@SeamusGrafana)
+*   Add erofs to node-exporter filesystem exclusions (@tyuchx)
+
+## 3.7.3
+
+*   Update Node Exporter (@petewall)
+*   Make the loki.process CRI stage maxPartialLines configurable (@ptodev)
+*   Add eBPF sample rate for profiling (@jo030225)
+*   Add the ability to skip cluster metrics ServiceMonitor checks (@petewall)
+
+## 3.7.2
+
+*   Update Node Exporter and Alloy Operator (@petewall)
+*   Add cloudProvider configuration support to MySQL and Postgresql databaseObservability (@matthewnolf)
+
+## 3.7.1
+
+*   Update Node Exporter and kube-state-metrics (@petewall)
+*   Fix MySQL and PostgreSQL integrations for missing log destinations and secrets. (@petewall)
+
+## 3.7.0
+
+*   Deploy beyla-k8s-cache with 1 replica by default in auto-instrumentation feature chart (@skl)
+*   Update Alloy Operator and Beyla (@petewall)
+*   Add an integration for Istio sidecar and service metrics (@petewall)
+*   Add an integration for PostgreSQL, including support for Database Observability (@petewall)
+*   Add the ability to set otel_annotations flag for the k8sattributes processor (@petewall)
+*   Add more options to the secretFilter component in the pod logs features (@petewall)
+*   Check for the presence of kube-state-metrics or Node Exporter ServiceMonitors if clusterMetrics and
+    prometheusOperatorObjects features are enabled (@petewall)
+
+## 3.6.2
+
+*   Fix extra quotes for the sending queue storage in OTLP destinations (@petewall)
+*   Fix the inclusion of the destination secret for Service Graph instance (@petewall)
+*   Update Alloy Operator to 0.3.14 (@petewall)
+
+## 3.6.1
+
+*   Add the ability to override the security context for the waitForAlloyRemoval Helm Hook (@petewall)
+*   Add the ability to define the sending queue for OTLP destinations (@petewall)
+*   Add the ability to define the remote timeout for Loki destinations (@petewall)
+
+## 3.6.0
+
+*   Add Pod Init container metrics to the kube-state-metrics allow list (@petewall)
+*   Add Database Observability to the MySQL integration (@petewall)
+*   Add the ability to disable sending traces from Beyla to the Application Observability feature (@marctc & @mbaykara)
+*   Add the ability to use ScrapeConfig objects with the Prometheus Operator Objects feature (@petewall)
+*   Update opencost to include an emptydir volume mount for its config path (@petewall)
+
+## 3.5.7
+
+*   Update kube-state-metrics and prometheus-operator-crds (@petewall)
+*   Add the ability to set `scrape_native_histograms` for Prometheus scrape configs (@SeamusGrafana)
+*   Fix port assignment on the etcd integration and several cluster metrics control plane services (@petewall)
+*   Fix MySQL integration (@petewall)
+
+## 3.5.6
+
+*   Add the ability to set resources for the Helm hooks (@petewall)
+*   Add the ability to set K8s Attribute Processor filters (@petewall)
+*   Bump Alloy Operator and Node Exporter (@petewall)
+
+## 3.5.5
+
+*   Set node label for Tempo service integration (@petewall)
+*   Update Beyla chart to 1.9.9 (@petewall)
+
+## 3.5.4
+
+*   Update Alloy Operator and Prometheus Operator CRDs (@petewall)
+*   Update Beyla and OpenCost (@petewall)
+*   Ensure Jaeger Compact and Jeager Thrift protocols use UDP (@simonswine)
+*   Ensure Service Graph utilizes destination defaults (@petewall)
+*   Update default Service Graph dimensions (@rlankfo)
+*   Properly check for integration scrape intervals and timeouts inside the metrics object (@petewall)
+*   Set node label for certain service integrations (@petewall)
+
+## 3.5.3
+
+*   Update Alloy Operator, Beyla, OpenCost, and Prometheus Operator CRDs (@petewall)
+*   Make Alloy Profiles deployable on all nodes (@petewall)
+*   Add label selectors for the Pod Logs feature (@petewall)
+*   Add Labels and Annotations to Alloy CR instances (@petewall)
+
+## 3.5.2
+
+*   Add the ability to change pod associations (@petewall)
+
+## 3.5.1
+
+*   Bump prometheus-node-exporter from 4.47.3 to 4.48.0 (@petewall)
+*   Add the ability to set the mysql protocol (@petewall)
+*   Fix OpenCost validation when using destinationsMap (@petewall)
+
+## 3.5.0
+
+*   Create a separate feature for Pod Logs via Kubernetes API (@petewall)
+*   Update default resource attributes remove list (@rlankfo)
+*   Span metrics: spans prefilter for internal (@rlankfo)
+*   Update the labels set for profiling feature (@petewall)
+*   Add Custom type destinations (@petewall)
+*   Add the ability to set scrape timeout everywhere (@petewall)
+
+## 3.4.1
+
+*   Update kube-state-metrics and OpenCost (@petewall)
+*   Fix the `excludeNamespaces` option in the Prometheus Operator Object feature (@petewall)
+*   Add the ability to set labels and annotations on the hook pod (@petewall)
+*   Update Node Exporter filesystem exclusion list (@petewall)
+
+## 3.4.0
+
+*   Properly truncate tail sampling and service grapher Alloy instances (@petewall)
+*   Remove the "wait for alloy operator" hook (@petewall)
+*   Add default attribute remove list support for otlp dest (@mbaykara)
+*   Add the ability to override attributes and set tls settings for remote config (@petewall)
+
+## 3.3.2
+
+*   Properly truncate tail sampling and service grapher Alloy instances (@petewall)
+*   Add the ability to set the default scrape timeout for Prometheus Operator Objects feature (@petewall)
+*   Update OpenCost to 2.2.2 and Prom Operator CRDs to 23.0.0 (@petewall)
+*   Adding sys.env functions to remoteConfig collector (@AzgadAGZ)
+
+## 3.3.1
+
+*   Update OpenCost to 2.2 (@petewall)
+*   Add Image pull secrets and pull policy to Helm hooks (@petewall)
+*   Fix "scrapeProcotols" typo (@SeamusGrafana)
+*   Add transform support for spanmetrics (@mbaykara)
+*   Fix hook arm64 compatibility and don't fail if Alloy instance already deleted (@petewall)
+
+## 3.3
+
+*   Add passthrough for k8sattributes processor (@patst)
+*   Improve Windows Exporter discovery rules (@petewall)
+*   Add a pair of hooks to add finalizers and Alloy instance cleanup to prevent orphaned resources (@petewall)
+*   Fix timing issues where Alloy custom resources could be created before the Alloy Operator is ready to process them (@AzgadAGZ)
+*   Add pre-install hook to wait for Alloy Operator readiness before creating Alloy resources (@AzgadAGZ)
+*   Add `alloy-operator.waitForReadiness` configuration option to control the timing behavior (@AzgadAGZ)
+*   Allow passing destinations as a map (@thandleman-r7)
+*   Allow for modifying alloy settings in one place. (@petewall)
+*   add span attribute support for skip metrics generation (@mbaykara)
+*   Add kube_cronjob.* to kube-state-metrics default allow lest (@sleepyfoodie)
+
+## 3.2.6
+
+*   Add the ability to set error mode for filter and transform processors (@petewall)
+*   Skip beyla generated traces in span metrics (@rlankfo)
+*   Upgrade beyla helm chart to 1.9.2 in auto-instrumentation feature chart (@rlankfo)
+
+## 3.2.5
+
+*   Bump kube-state-metrics to 6.1.4 (@petewall)
+*   Allow for destination and remoteconfig usernames to be numbers (@petewall)
+
+## 3.2.4
+
+*   Bump beyla, alloy, alloy operator, ksm, prom-operator crds (@petewall)
+
+## 3.2.3
+
+*   Include collector.id in span metrics transform (@rlankfo)
+*   Update annotation handling for profilng targets. (@petewall)
+*   Bump Windows Exporter to 0.12.1 (@petewall)
+*   crd-validation: 🐛 remove bad double quote in crd validation (@jmapro)
+
+## 3.2.2
+
+*   Bump Alloy Operator to 0.3.7 (@petewall)
+*   Improve how integration logs and metrics are enabled so they can be properly disabled (@petewall)
+
+## 3.2.1
+
+*   Try a new method for ensuring that there is a newline at the end of the prom file (@petewall)
+*   Remove check to prevent deploying if /var/log or /var/lib/docker/containers are set when they may not be needed. (@petewall)
+*   Bump Node Exporter to 4.47.3 (@petewall)
+
+## 3.2.0
+
+*   Prevent Node Exporter from even generating metrics about ramfs and tmpfs (@petewall)
+*   New feature: Profiles Receiver (@petewall)
+*   Set the `job` label on sources from the Annotation Autodiscovery feature to more reasonable values (@petewall)
+*   Set `service.namespace` and `service.instance.id` labels from typical sources when using the Pod Logs feature (@petewall)

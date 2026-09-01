@@ -1,0 +1,257 @@
+{{- define "feature.podLogsViaOpenTelemetry.module" }}
+declare "pod_logs_via_opentelemetry" {
+  argument "logs_destinations" {
+    comment = "Must be a list of log destinations where collected logs should be forwarded to"
+  }
+
+  otelcol.receiver.filelog "pod_logs" {
+{{- if .Values.namespaces }}
+    include = [
+{{- range .Values.namespaces }}
+      "/var/log/pods/{{ . }}_*/*/*.log",
+{{- end }}
+    ]
+{{- else }}
+    include = ["/var/log/pods/*/*/*.log"]
+{{- end }}
+{{- if .Values.excludeNamespaces }}
+    exclude = [
+{{- range .Values.excludeNamespaces }}
+      "/var/log/pods/{{ . }}_*/*/*.log",
+{{- end }}
+    ]
+{{- end }}
+    start_at = {{ if .Values.onlyGatherNewLogLines }}"end"{{ else }}"beginning"{{ end }}
+    include_file_name = false
+    include_file_path = true
+
+    operators = [
+      // Container operator will set k8s.pod.name, k8s.pod.uid, k8s.container.name, k8s.container.restart_count, and k8s.namespace.name
+      {
+        type                       = "container",
+        add_metadata_from_filepath = true,
+      },
+    ]
+
+    output {
+      logs = [otelcol.processor.k8sattributes.pod_logs.input]
+    }
+  } // otelcol.receiver.filelog "pod_logs"
+
+  otelcol.processor.k8sattributes "pod_logs" {
+    pod_association {
+      source {
+        from = "resource_attribute"
+        name = "k8s.pod.uid"
+      }
+    }
+
+    extract {
+      otel_annotations = {{ .Values.otelAnnotations }}
+      metadata = [
+        "k8s.deployment.name",
+        "k8s.statefulset.name",
+        "k8s.daemonset.name",
+        "k8s.cronjob.name",
+        "k8s.job.name",
+        "k8s.node.name",
+      ]
+      annotation {
+        key_regex = "resource.opentelemetry.io/(.*)"
+        tag_name  = "$1"
+        from      = "pod"
+      }
+      annotation {
+        tag_name = {{ .Values.annotationSelector | quote }}
+        key      = {{ .Values.annotationSelector | quote }}
+        from     = "pod"
+      }
+{{- range $attribute, $annotation := .Values.annotations }}
+      annotation {
+        tag_name = {{ $attribute | quote }}
+        key      = {{ $annotation | quote }}
+        from     = "pod"
+      }
+{{- end }}
+{{- range $attribute, $annotation := .Values.nodeAnnotations }}
+      annotation {
+        tag_name = {{ $attribute | quote }}
+        key      = {{ $annotation | quote }}
+        from     = "node"
+      }
+{{- end }}
+{{- range $attribute, $annotation := .Values.namespaceAnnotations }}
+      annotation {
+        tag_name = {{ $attribute | quote }}
+        key      = {{ $annotation | quote }}
+        from     = "namespace"
+      }
+{{- end }}
+{{- if .Values.alignServiceNameWithOTelSemConv }}
+      // Extracted into temporary attributes for service.name / service.version detection, then deleted in the
+      // transform processor below. Temporary names are used so the cleanup never deletes an `app.kubernetes.io/*`
+      // attribute the user extracted.
+      label {
+        tag_name = "k8s_monitoring.tmp.instance"
+        key      = "app.kubernetes.io/instance"
+        from     = "pod"
+      }
+      label {
+        tag_name = "k8s_monitoring.tmp.name"
+        key      = "app.kubernetes.io/name"
+        from     = "pod"
+      }
+      label {
+        tag_name = "k8s_monitoring.tmp.version"
+        key      = "app.kubernetes.io/version"
+        from     = "pod"
+      }
+{{- end }}
+{{- range $attribute, $label := .Values.labels }}
+      label {
+        tag_name = {{ $attribute | quote }}
+        key      = {{ $label | quote }}
+        from     = "pod"
+      }
+{{- end }}
+{{- range $attribute, $label := .Values.nodeLabels }}
+      label {
+        tag_name = {{ $attribute | quote }}
+        key      = {{ $label | quote }}
+        from     = "node"
+      }
+{{- end }}
+{{- range $attribute, $label := .Values.namespaceLabels }}
+      label {
+        tag_name = {{ $attribute | quote }}
+        key      = {{ $label | quote }}
+        from     = "namespace"
+      }
+{{- end }}
+{{- range $key, $value := .Values.filters.annotations }}
+      annotation {
+        tag_name = {{ printf "k8s_monitoring.tmp.filter.annotations.%s" $key | quote }}
+        key      = {{ $key | quote }}
+        from     = "pod"
+      }
+{{- end }}
+{{- range $key, $value := .Values.filters.labels }}
+      label {
+        tag_name = {{ printf "k8s_monitoring.tmp.filter.labels.%s" $key | quote }}
+        key      = {{ $key | quote }}
+        from     = "pod"
+      }
+{{- end }}
+    }
+
+    output {
+      logs = [otelcol.processor.filter.pod_logs.input]
+    }
+  } // otelcol.processor.k8sattributes "pod_logs"
+
+  otelcol.processor.filter "pod_logs" {
+    error_mode = "ignore"
+    logs {
+      log_record = [
+{{- if eq .Values.discoveryMethod "annotation" }}
+        `resource.attributes[{{ .Values.annotationSelector | quote }}] == nil`,
+{{- end }}
+        `resource.attributes[{{ .Values.annotationSelector | quote }}] == "false"`,
+        `resource.attributes[{{ .Values.annotationSelector | quote }}] == "no"`,
+        `resource.attributes[{{ .Values.annotationSelector | quote }}] == "skip"`,
+{{- range $key, $value := .Values.filters.annotations }}
+{{- $attribute := printf "k8s_monitoring.tmp.filter.annotations.%s" $key }}
+{{- if kindIs "invalid" $value }}
+        `resource.attributes[{{ $attribute | quote }}] != nil`,
+{{- else }}
+        `resource.attributes[{{ $attribute | quote }}] == {{ $value | quote }}`,
+{{- end }}
+{{- end }}
+{{- range $key, $value := .Values.filters.labels }}
+{{- $attribute := printf "k8s_monitoring.tmp.filter.labels.%s" $key }}
+{{- if kindIs "invalid" $value }}
+        `resource.attributes[{{ $attribute | quote }}] != nil`,
+{{- else }}
+        `resource.attributes[{{ $attribute | quote }}] == {{ $value | quote }}`,
+{{- end }}
+{{- end }}
+      ]
+    }
+    output {
+      logs = [otelcol.processor.transform.pod_logs.input]
+    }
+  } // otelcol.processor.filter "pod_logs"
+
+  otelcol.processor.transform "pod_logs" {
+    error_mode = "ignore"
+    log_statements {
+      context = "resource"
+      statements = [
+        `delete_key(attributes, "k8s.container.restart_count")`,
+        `delete_key(attributes, {{ .Values.annotationSelector | quote }})`,
+{{- range $key, $value := .Values.filters.annotations }}
+        `delete_key(attributes, {{ printf "k8s_monitoring.tmp.filter.annotations.%s" $key | quote }})`,
+{{- end }}
+{{- range $key, $value := .Values.filters.labels }}
+        `delete_key(attributes, {{ printf "k8s_monitoring.tmp.filter.labels.%s" $key | quote }})`,
+{{- end }}
+
+{{- if .Values.alignServiceNameWithOTelSemConv }}
+        // Set service.name by choosing the first value found from the following ordered list:
+        // - pod.annotation[resource.opentelemetry.io/service.name] (set by the k8sattributes processor above)
+        // - pod.label[app.kubernetes.io/instance]
+        // - pod.label[app.kubernetes.io/name]
+        // - k8s.workload.name (Deployment, StatefulSet, DaemonSet, CronJob, Job, ...)
+        // - k8s.pod.name
+        // - k8s.container.name
+        // The instance/name/version pod labels are read from temporary attributes (k8s_monitoring.tmp.*) so the
+        // cleanup below only ever deletes attributes this feature added.
+        `set(resource.attributes["service.name"], resource.attributes["k8s_monitoring.tmp.instance"]) where (resource.attributes["service.name"] == nil or resource.attributes["service.name"] == "") and resource.attributes["k8s_monitoring.tmp.instance"] != nil and resource.attributes["k8s_monitoring.tmp.instance"] != ""`,
+        `set(resource.attributes["service.name"], resource.attributes["k8s_monitoring.tmp.name"]) where (resource.attributes["service.name"] == nil or resource.attributes["service.name"] == "") and resource.attributes["k8s_monitoring.tmp.name"] != nil and resource.attributes["k8s_monitoring.tmp.name"] != ""`,
+{{- end }}
+        `set(attributes["service.name"], attributes["app.kubernetes.io/name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["app.kubernetes.io/name"] != nil and attributes["app.kubernetes.io/name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.deployment.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.deployment.name"] != nil and attributes["k8s.deployment.name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.replicaset.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.replicaset.name"] != nil and attributes["k8s.replicaset.name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.statefulset.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.statefulset.name"] != nil and attributes["k8s.statefulset.name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.daemonset.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.daemonset.name"] != nil and attributes["k8s.daemonset.name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.cronjob.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.cronjob.name"] != nil and attributes["k8s.cronjob.name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.job.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.job.name"] != nil and attributes["k8s.job.name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.pod.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.pod.name"] != nil and attributes["k8s.pod.name"] != ""`,
+        `set(attributes["service.name"], attributes["k8s.container.name"]) where (attributes["service.name"] == nil or attributes["service.name"] == "") and attributes["k8s.container.name"] != nil and attributes["k8s.container.name"] != ""`,
+
+        `set(attributes["service.namespace"], attributes["k8s.namespace.name"]) where (attributes["service.namespace"] == nil or attributes["service.namespace"] == "") and attributes["k8s.namespace.name"] != nil and attributes["k8s.namespace.name"] != ""`,
+{{ if .Values.alignServiceNameWithOTelSemConv }}
+        `set(resource.attributes["service.version"], resource.attributes["k8s_monitoring.tmp.version"]) where resource.attributes["service.version"] == nil and resource.attributes["k8s_monitoring.tmp.version"] != nil and resource.attributes["k8s_monitoring.tmp.version"] != ""`,
+{{- end }}
+        `set(attributes["service.version"], attributes["app.kubernetes.io/version"]) where attributes["service.version"] == nil`,
+
+        `set(attributes["service.instance.id"], Concat([attributes["k8s.namespace.name"], attributes["k8s.pod.name"], attributes["k8s.container.name"]], ".")) where attributes["service.instance.id"] == nil`,
+{{- if .Values.alignServiceNameWithOTelSemConv }}
+
+        // Remove the temporary attributes used for service.name / service.version detection
+        `delete_key(resource.attributes, "k8s_monitoring.tmp.instance")`,
+        `delete_key(resource.attributes, "k8s_monitoring.tmp.name")`,
+        `delete_key(resource.attributes, "k8s_monitoring.tmp.version")`,
+{{- end }}
+{{- range $attribute, $value := .Values.staticAttributes }}
+        `set(attributes[{{ $attribute | quote }}], {{ $value | quote }})`,
+{{- end }}
+{{- range $attribute, $value := .Values.staticAttributesFrom }}
+        `set(attributes[{{ $attribute | quote }}], {{ $value }})`,
+{{- end }}
+      ]
+    }
+
+    log_statements {
+      context = "log"
+      statements = [
+        `delete_key(attributes, "log.file.path")`,
+      ]
+    }
+
+    output {
+      logs = argument.logs_destinations.value
+    }
+  } // otelcol.processor.transform "pod_logs"
+} // declare "pod_logs_via_opentelemetry"
+{{- end -}}
