@@ -8,6 +8,6 @@ helmCharts:
   - name: app-template
     repo: oci://ghcr.io/bjw-s-labs/helm
     version: 5.1.0
-    releaseName: nzbget
-    namespace: nzbget
+    releaseName: nzbfast
+    namespace: nzbfast
     valuesFile: values.yaml

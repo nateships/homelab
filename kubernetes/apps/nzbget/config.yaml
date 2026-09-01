@@ -1,9 +1,0 @@
-# Usenet download client; writes to the media share's usenet tree.
-# Reachable at https://nzbget.<tailnet>.ts.net.
-name: nzbget
-namespace: nzbget
-url: https://nzbget.tail34eda.ts.net # site-specific: tailnet name
-labels:
-  category: media
-namespaceLabels:
-  homelab/tier: media
