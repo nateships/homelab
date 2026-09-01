@@ -56,8 +56,6 @@ Do the stages in order. Each stage needs the stage before it.
      `kubernetes-csi@pve!csi` API token (role CSI; the item's notes
      carry the pveum commands). The CSI plugin provisions worker
      volumes on the zpool with it.
-   - `cloudflare`: field `dns-api-token` (Zone:DNS:Edit; the omni-config
-     stack's certbot DNS challenge reads it)
    - `cloudflare-terraform`: password = an API token with Zone DNS Edit
      and Account R2 Write; the cloudflare stack manages the DNS records
      and the R2 bucket with it
@@ -141,10 +139,10 @@ One-time preparation:
 2. Fill the `omni` item: `domain` (the Omni FQDN), `admin-email`, and
    `lxc-ip` (the LXC's static IP, no CIDR suffix; it must match
    `omni_ct_ip`). The cloudflare stack creates the two DNS A records
-   (domain + wildcard, proxy off); apply it before this stage.
-3. Fill `cloudflare/dns-api-token` (Zone:DNS:Edit) for the certbot
-   DNS challenge.
-4. Generate the etcd encryption key locally and store it in 1Password:
+   (domain + wildcard, proxy off); apply it before this stage. The same
+   apply mints the `cloudflare-certbot` item the certbot DNS challenge
+   reads.
+3. Generate the etcd encryption key locally and store it in 1Password:
    ```bash
    gpg --quick-generate-key "Omni (etcd encryption) <you@example.com>" rsa4096 cert never
    FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
@@ -155,7 +153,7 @@ One-time preparation:
    ```
    Keep the key in your GPG keyring too; without it, etcd data is
    unrecoverable.
-5. Trigger `homelab-omni-config` and confirm the run.
+4. Trigger `homelab-omni-config` and confirm the run.
 
 Login uses Tailscale identity through tsidp (an OIDC provider that runs
 next to Omni and joins the tailnet). The setup has two phases: you can

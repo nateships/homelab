@@ -125,7 +125,7 @@
           loop:
             - name: cloudflare.ini
               content: |
-                dns_cloudflare_api_token = {{ lookup('pipe', 'op read op://homelab/cloudflare/dns-api-token') }}
+                dns_cloudflare_api_token = {{ lookup('pipe', 'op read op://homelab/cloudflare-certbot/password') }}
             - name: omni.asc
               content: "{{ lookup('pipe', 'op document get omni-gpg --vault homelab') }}"
             - name: omni.env
