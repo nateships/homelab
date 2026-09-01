@@ -1,0 +1,8 @@
+# ArgoCD manages itself through the bootstrap directory. Explicit
+# sources: the bootstrap dir plus the secret kustomization here.
+name: argocd
+namespace: argocd
+url: https://argocd.tail34eda.ts.net # site-specific: tailnet name
+sources:
+  - path: kubernetes/bootstrap/argocd
+  - path: kubernetes/apps/infra/argocd

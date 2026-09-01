@@ -1,4 +1,7 @@
-# Generates one Application for each kubernetes/apps/<name>/config.yaml.
+# Generates one Application for each
+# kubernetes/apps/<category>/<name>/config.yaml. The category folder
+# (infra|network|storage|media|utility) becomes the Application's category
+# label, for UI filtering.
 # Config keys (CI validates the schema):
 #   name, namespace   required
 #   sources           optional; default is the app directory, rendered
@@ -7,9 +10,7 @@
 #   ignoreDifferences optional, passed through
 #   autosync: false   optional; disables automated sync
 #   namespaceLabels   optional; labels for the created namespace
-#   labels            optional; labels on the generated Application
-#                     (category: infra|network|storage|media by
-#                     convention, for UI filtering)
+#   labels            optional; extra labels on the generated Application
 #   url               optional; the app's UI, shown as a launch icon on
 #                     the Application. Needed for tailscale ingresses:
 #                     their class ignores host rules, so ArgoCD cannot
@@ -42,7 +43,7 @@ spec:
         repoURL: https://github.com/nateships/homelab
         revision: main
         files:
-          - path: kubernetes/apps/*/config.yaml
+          - path: kubernetes/apps/*/*/config.yaml
   template:
     metadata:
       name: "{{ .name }}"
@@ -71,21 +72,20 @@ spec:
   # The flat template fields cannot carry nested YAML; this patch
   # injects it. The patch strategic-merges into the template.
   templatePatch: |
-    {{- if or (hasKey . "labels") (hasKey . "url") }}
     metadata:
-    {{- if hasKey . "labels" }}
       labels:
+        category: {{ index .path.segments 2 }}
+    {{- if hasKey . "labels" }}
     {{- get . "labels" | toYaml | nindent 8 }}
     {{- end }}
     {{- if hasKey . "url" }}
       annotations:
         link.argocd.argoproj.io/external-link: "{{ .url }}"
     {{- end }}
-    {{- end }}
     spec:
       sources:
     {{- /* sprig get, not .sources: missingkey=error rejects absent keys */}}
-    {{- range (get . "sources" | default (list (dict "path" (printf "kubernetes/apps/%s" .name)))) }}
+    {{- range (get . "sources" | default (list (dict "path" .path.path))) }}
       - {{- mergeOverwrite (dict "repoURL" "https://github.com/nateships/homelab" "targetRevision" "main") . | toYaml | nindent 8 }}
     {{- end }}
     {{- if hasKey . "ignoreDifferences" }}

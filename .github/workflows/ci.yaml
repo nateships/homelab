@@ -49,7 +49,7 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           apps=$(git diff --name-only "origin/${BASE_REF}...HEAD" \
-            | grep '^kubernetes/apps/' | cut -d/ -f1-3 | sort -u || true)
+            | grep '^kubernetes/apps/' | cut -d/ -f1-4 | sort -u || true)
           {
             echo "list<<EOF"
             for app in $apps; do
@@ -108,7 +108,7 @@ jobs:
           # kustomize failure fail the step (kubeconform accepts empty
           # input and exits 0).
           set -o pipefail
-          for d in kubernetes/apps/*/; do
+          for d in kubernetes/apps/*/*/; do
             echo "--- $d"
             kubectl kustomize --enable-helm "$d" \
               | kubeconform -strict -ignore-missing-schemas -summary

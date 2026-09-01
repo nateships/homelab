@@ -1,0 +1,7 @@
+# TV library manager; imports from the media share's usenet tree into the
+# library. Reachable at https://sonarr.<tailnet>.ts.net.
+name: sonarr
+namespace: sonarr
+url: https://sonarr.tail34eda.ts.net # site-specific: tailnet name
+namespaceLabels:
+  homelab/tier: media

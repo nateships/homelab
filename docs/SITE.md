@@ -17,19 +17,19 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | Value | Where | Meaning |
 |---|---|---|
 | `argocd.tail34eda.ts.net` | `kubernetes/bootstrap/argocd/argocd-cm-oidc.yaml` (`url`) | ArgoCD UI tailnet name (tailscale ingress) |
-| `*.tail34eda.ts.net` | `kubernetes/apps/*/config.yaml` (`url`) | App UI tailnet hostnames; the ApplicationSet turns them into ArgoCD launch-icon links |
-| `10.16.10.100:/volume1/media` | `kubernetes/apps/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
-| `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
-| `birds.nate.cx` | `kubernetes/apps/birdnet-go/values.yaml` (`ingress.public`) | Public hostname; the cloudflare-tunnel controller reads it to make the route and DNS |
-| `nateflix.media` | `kubernetes/apps/seerr/values.yaml` (`ingress.public`) | Public hostname for seerr; cloudflare-tunnel controller route and DNS |
+| `*.tail34eda.ts.net` | `kubernetes/apps/*/*/config.yaml` (`url`) | App UI tailnet hostnames; the ApplicationSet turns them into ArgoCD launch-icon links |
+| `10.16.10.100:/volume1/media` | `kubernetes/apps/media/*/media-pv.yaml` | NFS export holding the media library (one PV pair per consuming app) |
+| `10.16.10.100:/volume1/birdnet` | `kubernetes/apps/utility/birdnet-go/birdnet-pv.yaml` | NFS export holding the bird clip library |
+| `birds.nate.cx` | `kubernetes/apps/utility/birdnet-go/values.yaml` (`ingress.public`) | Public hostname; the cloudflare-tunnel controller reads it to make the route and DNS |
+| `nateflix.media` | `kubernetes/apps/media/seerr/values.yaml` (`ingress.public`) | Public hostname for seerr; cloudflare-tunnel controller route and DNS |
 | `nateflix.media`, `nate.cx`, `birds.nate.cx` | `infra/stacks/cloudflare/edge-protection.tf` | Zone/host names the login rate limits and bot fight mode attach to |
 | `argocd-webhook.nate.cx` | `kubernetes/bootstrap/argocd/webhook-ingress.yaml` | Public GitHub webhook host for argocd-server; cloudflare-tunnel route and DNS |
 | `argocd-appset-webhook.nate.cx` | `kubernetes/bootstrap/argocd/webhook-ingress.yaml` | Public GitHub webhook host for the applicationset controller |
-| `10.16.10.55` | `kubernetes/apps/monitoring/values.yaml` (`extraConfig`) | PVE host LAN address (pve-exporter scrape target) |
-| `10.16.10.100` | `kubernetes/apps/monitoring/values.yaml` (`extraConfig`) | NFS server address (snmp-exporter scrape target) |
-| `10.16.101.224/27` | `kubernetes/apps/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
-| `10.16.101.225` | `kubernetes/apps/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |
-| R2 endpoint | `kubernetes/apps/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |
+| `10.16.10.55` | `kubernetes/apps/infra/monitoring/values.yaml` (`extraConfig`) | PVE host LAN address (pve-exporter scrape target) |
+| `10.16.10.100` | `kubernetes/apps/infra/monitoring/values.yaml` (`extraConfig`) | NFS server address (snmp-exporter scrape target) |
+| `10.16.101.224/27` | `kubernetes/apps/network/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
+| `10.16.101.225` | `kubernetes/apps/media/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |
+| R2 endpoint | `kubernetes/apps/storage/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |
 | `network_bridge: vmbr0`, `vlan: 101` | `omni/machine-classes/*.yaml` | PVE bridge and VLAN id the cluster VMs attach to |
 | `storage_selector: name == "zpool"` | `omni/machine-classes/*.yaml` | CEL selector naming the PVE datastore for VM disks |
 | `xe.force_probe=a780` | `omni/machine-classes/worker.yaml` | PCI device id of the host iGPU (xe driver probe) |

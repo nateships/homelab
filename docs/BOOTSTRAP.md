@@ -212,7 +212,7 @@ the ApplicationSet. It creates the one secret that ESO needs: the
 The repo is public, so ArgoCD needs no repo credential.
 
 The ApplicationSet generates one Application per
-`kubernetes/apps/<name>/config.yaml`. A config file holds the app name,
+`kubernetes/apps/<category>/<name>/config.yaml`. A config file holds the app name,
 the destination namespace, and the sources; the shared sync policy lives
 in the template (`kubernetes/bootstrap/argocd/appset.yaml`). To add an
 app, commit a new directory with a `config.yaml`. To remove one, delete

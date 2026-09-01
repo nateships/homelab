@@ -1,0 +1,5 @@
+# Kubernetes Metrics API (kubectl top, Lens overview graphs). Cluster
+# telemetry still flows through Alloy to Grafana Cloud; this only
+# serves the in-cluster resource API.
+name: metrics-server
+namespace: kube-system

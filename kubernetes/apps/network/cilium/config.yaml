@@ -1,0 +1,3 @@
+name: cilium
+namespace: kube-system
+url: https://hubble.tail34eda.ts.net # site-specific: tailnet name
