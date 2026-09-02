@@ -132,19 +132,13 @@ kubernetesManifests:
   collector: alloy-singleton
 
 # Scrape anything carrying k8s.grafana.com/scrape annotations
-# (velero, argocd, external-secrets, unpoller).
+# (velero, argocd, external-secrets).
 annotationAutodiscovery:
   enabled: true
   collector: alloy-metrics
-  # Series budget: unpoller mirrors static firewall rules and DHCP
-  # lease bookkeeping as per-entity metrics; nothing charts them.
+  # Series budget: drop what nothing charts or alerts on.
   metricsTuning:
     excludeMetrics:
-      - unpoller_firewall_rule_.+
-      - unpoller_dhcp_.+
-      # Per-client bandwidth bookkeeping: one series per device on the
-      # LAN; the UniFi app already shows this live.
-      - unpoller_client_.+
       # Go runtime and process internals of every scraped pod; nothing
       # charts or alerts on them.
       - go_.+
@@ -158,6 +152,9 @@ annotationAutodiscovery:
       # Per-public-host latency histograms from the cloudflared fork;
       # the _sum/_count pairs still give average latency per host.
       - cloudflared_tunnel_host_.+_bucket
+      # Velero operation histograms; _sum/_count keep the averages the
+      # backup alerts use.
+      - velero_.+_bucket
 
 # The collectors' own health metrics (the "Grafana Alloy" status
 # card feeds on alloy_build_info).
@@ -194,20 +191,6 @@ collectors:
         }]
         metrics_path = "/pve"
         job_name     = "integrations/proxmox"
-        forward_to   = [prometheus.remote_write.grafana_cloud_metrics.receiver]
-      }
-      prometheus.scrape "nfs_snmp" {
-        targets = [{
-          "__address__"    = "snmp-exporter.snmp-exporter.svc:9116",
-          "__param_target" = "10.16.10.100", // site-specific: NFS server address
-          // The dashboard needs the generic MIB modules alongside the
-          // vendor one: interface counters, CPU, memory, load, uptime.
-          "__param_module" = "synology,if_mib,ucd_system_stats,ucd_memory,ucd_la_table,system",
-          "__param_auth"   = "nfs_v3",
-          "instance"       = "nfs-server",
-        }]
-        metrics_path = "/snmp"
-        job_name     = "integrations/snmp"
         forward_to   = [prometheus.remote_write.grafana_cloud_metrics.receiver]
       }
   alloy-singleton:
