@@ -26,7 +26,6 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | `argocd-webhook.nate.cx` | `kubernetes/bootstrap/argocd/webhook-ingress.yaml` | Public GitHub webhook host for argocd-server; cloudflare-tunnel route and DNS |
 | `argocd-appset-webhook.nate.cx` | `kubernetes/bootstrap/argocd/webhook-ingress.yaml` | Public GitHub webhook host for the applicationset controller |
 | `10.16.10.55` | `kubernetes/apps/infra/monitoring/values.yaml` (`extraConfig`) | PVE host LAN address (pve-exporter scrape target) |
-| `10.16.10.100` | `kubernetes/apps/infra/monitoring/values.yaml` (`extraConfig`) | NFS server address (snmp-exporter scrape target) |
 | `10.16.101.224/27` | `kubernetes/apps/network/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
 | `10.16.101.225` | `kubernetes/apps/media/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |
 | R2 endpoint | `kubernetes/apps/storage/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |

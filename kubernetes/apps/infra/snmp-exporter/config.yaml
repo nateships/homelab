@@ -1,6 +1,0 @@
-# SNMP exporter: volume, disk-health, and system metrics for the NFS
-# server, read-only over SNMPv3. Scraped by an explicit alloy-metrics
-# job (the exporter needs ?target= and ?module= parameters, which
-# annotations cannot set).
-name: snmp-exporter
-namespace: snmp-exporter

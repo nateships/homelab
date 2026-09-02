@@ -193,20 +193,6 @@ collectors:
         job_name     = "integrations/proxmox"
         forward_to   = [prometheus.remote_write.grafana_cloud_metrics.receiver]
       }
-      prometheus.scrape "nfs_snmp" {
-        targets = [{
-          "__address__"    = "snmp-exporter.snmp-exporter.svc:9116",
-          "__param_target" = "10.16.10.100", // site-specific: NFS server address
-          // The dashboard needs the generic MIB modules alongside the
-          // vendor one: interface counters, CPU, memory, load, uptime.
-          "__param_module" = "synology,if_mib,ucd_system_stats,ucd_memory,ucd_la_table,system",
-          "__param_auth"   = "nfs_v3",
-          "instance"       = "nfs-server",
-        }]
-        metrics_path = "/snmp"
-        job_name     = "integrations/snmp"
-        forward_to   = [prometheus.remote_write.grafana_cloud_metrics.receiver]
-      }
   alloy-singleton:
     presets: [singleton]
   alloy-logs:
