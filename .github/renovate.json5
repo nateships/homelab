@@ -7,12 +7,12 @@
   // Renovate skips assigning automerge-bound PRs; assign them anyway.
   "assignAutomerge": true,
   // Automerge non-major once CI passes; majors stay manual via the rule below.
-  // Stateless bumps merge whenever checks pass. Data-bearing apps and
-  // node-disruptive cluster bumps wait for the overnight window (rules
-  // below); Renovate itself merges during the window, because
-  // GitHub-native automerge would ignore it.
+  // GitHub-native automerge lands stateless bumps the moment the
+  // required checks pass. The overnight rules below opt out of it,
+  // because it ignores automergeSchedule: those PRs are merged by
+  // Renovate itself inside the window.
   "automerge": true,
-  "platformAutomerge": false,
+  "platformAutomerge": true,
   // Off by default in Renovate; tracks `rev:` pins in .pre-commit-config.yaml.
   "pre-commit": { "enabled": true },
   "customManagers": [
@@ -93,6 +93,7 @@
       // media/ is the whole opt-in.
       "description": "Media apps: automerge overnight only",
       "matchFileNames": ["kubernetes/apps/media/**"],
+      "platformAutomerge": false,
       "automergeSchedule": ["after 3am and before 6am"]
     },
     {
@@ -108,6 +109,7 @@
         "omnictl",
         "cilium"
       ],
+      "platformAutomerge": false,
       "automergeSchedule": ["after 3am and before 6am"]
     },
     {
