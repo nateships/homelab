@@ -9,7 +9,7 @@ controllers:
           # diskID labels render as hex dumps. Swap to a release pin
           # BY HAND when a release after v0.30.1 ships.
           # renovate: datasource=docker depName=quay.io/prometheus/snmp-exporter
-          tag: main@sha256:7ddf53ade41915da90ed2a5f015764cbd7fc0610db5f2f6724a9b329d41fdde2
+          tag: main@sha256:68d4a350630b58e1da2b5b21c2171374ebcee4cad0859c39a5cae6a98f29abc9
         args:
           # Bundled modules plus the credentials fragment; the files
           # merge, duplicate module names are rejected.
