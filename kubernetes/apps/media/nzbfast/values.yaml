@@ -71,7 +71,7 @@ persistence:
   # (WORKDIR is /config, so relative state lands here too).
   config:
     accessMode: ReadWriteOnce
-    size: 2Gi
+    size: 10Gi
   # readOnlyRootFilesystem needs a writable /tmp.
   tmp:
     type: emptyDir
