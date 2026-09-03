@@ -136,10 +136,10 @@
       // Ceiling tracks the pinned talos version's support matrix
       // (Omni rejects incompatible combos). Raise it when talos moves
       // to a minor that supports the next kubernetes minor.
-      "description": "Kubernetes + kubectl, capped at what talos 1.13 supports",
+      "description": "Kubernetes + kubectl, capped at what talos 1.14 supports",
       "matchDepNames": ["kubernetes/kubernetes", "kubectl"],
       "groupName": "kubernetes",
-      "allowedVersions": "<1.37.0"
+      "allowedVersions": "<1.38.0"
     },
     {
       "description": "Cilium: ArgoCD app + the helm_template pin in infra/stacks/cluster move together.",

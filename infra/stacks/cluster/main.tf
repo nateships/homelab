@@ -186,3 +186,17 @@ resource "omni_machine_extensions" "workers" {
     "siderolabs/xe",
   ]
 }
+
+# Talos 1.14: periodic fstrim on mounted filesystems (weekly). The VM
+# disks are thin zvols with discard enabled in the machine classes, so
+# trimmed blocks return to the PVE zpool.
+resource "omni_config_patch" "filesystem_trim" {
+  name    = "filesystem-trim"
+  cluster = omni_cluster.homelab.name
+
+  data = yamlencode({
+    apiVersion = "v1alpha1"
+    kind       = "FilesystemTrimConfig"
+    interval   = "168h0m0s"
+  })
+}
