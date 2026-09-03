@@ -15,7 +15,7 @@ kubeconform = "0.8.0"
 # Renovate tracks it through the 1password/op Docker image tags.
 "aqua:1password/cli" = "2.39.0"
 prek = "0.5.1"
-trufflehog = "3.97.1"
+trufflehog = "3.97.2"
 trivy = "0.74.0"
 zizmor = "1.30.0"
 "pipx:yamllint" = "1.38.0"
