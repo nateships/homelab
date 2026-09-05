@@ -6,7 +6,7 @@ opentofu = "1.12.6"
 # with obscure gRPC errors
 omnictl = "1.11.0"
 # match talos_version in infra/stacks/cluster/main.tf
-talosctl = "1.13.9"
+talosctl = "1.14.0"
 # within one minor of kubernetes_version in infra/stacks/cluster/main.tf
 kubectl = "1.36"
 helm = "4.2.4"

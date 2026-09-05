@@ -2,7 +2,7 @@ locals {
   # renovate: datasource=github-releases depName=kubernetes/kubernetes extractVersion=^v(?<version>.+)$
   kubernetes_version = "1.36.4"
   # renovate: datasource=github-releases depName=siderolabs/talos extractVersion=^v(?<version>.+)$
-  talos_version = "1.13.9"
+  talos_version = "1.14.0"
 }
 
 data "onepassword_vault" "homelab" {
@@ -170,4 +170,18 @@ resource "omni_machine_extensions" "workers" {
     # loads microcode.
     "siderolabs/xe",
   ]
+}
+
+# Talos 1.14: periodic fstrim on mounted filesystems (weekly). The VM
+# disks are thin zvols with discard enabled in the machine classes, so
+# trimmed blocks return to the PVE zpool.
+resource "omni_config_patch" "filesystem_trim" {
+  name    = "filesystem-trim"
+  cluster = omni_cluster.homelab.name
+
+  data = yamlencode({
+    apiVersion = "v1alpha1"
+    kind       = "FilesystemTrimConfig"
+    interval   = "168h0m0s"
+  })
 }
