@@ -263,9 +263,10 @@ resource "spacelift_stack_dependency" "this" {
 # Head-tracking push policy: see policies/push-track-head.rego. Attaches
 # to every hydrated stack through the shared label.
 resource "spacelift_policy" "push_track_head" {
-  space_id = spacelift_space.homelab.id
-  name     = "push-track-head"
-  type     = "GIT_PUSH"
-  labels   = ["autoattach:homelab"]
-  body     = file("${path.module}/policies/push-track-head.rego")
+  space_id    = spacelift_space.homelab.id
+  name        = "push-track-head"
+  type        = "GIT_PUSH"
+  engine_type = "REGO_V1"
+  labels      = ["autoattach:homelab"]
+  body        = file("${path.module}/policies/push-track-head.rego")
 }

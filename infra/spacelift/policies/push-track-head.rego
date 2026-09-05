@@ -1,8 +1,5 @@
 package spacelift
 
-import future.keywords.if
-import future.keywords.in
-
 # Advance every stack's tracked head on each push to its branch, and
 # start a run only when the push touches the stack's own files - the
 # same affected-files rule Spacelift applies without a policy. Without
