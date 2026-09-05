@@ -259,5 +259,3 @@ resource "spacelift_stack_dependency" "this" {
   stack_id            = spacelift_stack.this[each.value.child].id
   depends_on_stack_id = spacelift_stack.this[each.value.parent].id
 }
-policies/push-track-head.rego")
-}
