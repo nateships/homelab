@@ -24,6 +24,12 @@ COPY mise.toml /etc/mise/config.toml
 RUN curl -fsSL https://mise.run | MISE_VERSION="v${MISE_VERSION}" sh \
     && mise trust /etc/mise/config.toml \
     && mise install \
+    # The data dir belongs to the runtime user: a run whose checkout
+    # pins a tool version newer than this image's bake (the stack head
+    # advanced past the last image build) then self-heals by installing
+    # it, instead of dying on a root-owned directory. mise verifies
+    # checksums and attestations on install.
+    && chown -R spacelift:spacelift "${MISE_DATA_DIR}" \
     && chmod -R a+rX "${MISE_DATA_DIR}" \
     # smoke-test the tools the stacks depend on
     && op --version && tailscale --version \
