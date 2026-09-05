@@ -1,0 +1,20 @@
+---
+# omnictl apply -f filesystem-trim.yaml (the omni-resources stack does)
+# Weekly fstrim on every mounted filesystem (Talos 1.14). The VM disks
+# are thin zvols with discard enabled in the machine classes, so
+# trimmed blocks return to the PVE zpool.
+# TODO: move back to an omni_config_patch in infra/stacks/cluster once
+# terraform-provider-omni ships a release with machinery >= 1.14.0-rc.1
+# (alpha.3 predates the FilesystemTrimConfig registration and rejects
+# the document client-side).
+metadata:
+  namespace: default
+  type: ConfigPatches.omni.sidero.dev
+  id: 500-filesystem-trim
+  labels:
+    omni.sidero.dev/cluster: homelab
+spec:
+  data: |
+    apiVersion: v1alpha1
+    kind: FilesystemTrimConfig
+    interval: 168h0m0s

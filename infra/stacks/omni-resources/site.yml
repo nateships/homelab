@@ -17,6 +17,7 @@
         set -eu
         omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/control-plane.yaml"
         omnictl apply -f "{{ playbook_dir }}/../../../omni/machine-classes/worker.yaml"
+        omnictl apply -f "{{ playbook_dir }}/../../../omni/patches/filesystem-trim.yaml"
       changed_when: true
 
     # Renders R2 credentials into a temp file; Omni validates them by
