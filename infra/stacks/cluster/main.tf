@@ -57,11 +57,6 @@ resource "omni_machine_set" "workers" {
   }
 }
 
-# No install-disk patch: Omni 1.11 ignores machine.install in config
-# patches (install disk is a dedicated per-machine resource now), and
-# its resolver picks the disk automatically. The VMs carry exactly one
-# disk, so automatic selection cannot pick wrong.
-
 # Cilium comes via ArgoCD; disable the default CNI and kube-proxy.
 resource "omni_config_patch" "disable_default_cni" {
   name    = "disable-default-cni"
