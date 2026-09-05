@@ -173,9 +173,11 @@ annotationAutodiscovery:
       - workqueue_.+
       - rest_client_.+
       - controller_runtime_.+
-      # Per-public-host latency histograms from the cloudflared fork;
-      # the _sum/_count pairs still give average latency per host.
-      - cloudflared_tunnel_host_.+_bucket
+      # Per-public-host latency and body-size histograms from the
+      # cloudflared fork, buckets and averages both: request counts and
+      # status codes remain for the traffic-by-hostname dashboard.
+      - cloudflared_tunnel_host_.+_duration_.+
+      - cloudflared_tunnel_host_.+_size_.+
       # Velero operation histograms; _sum/_count keep the averages the
       # backup alerts use.
       - velero_.+_bucket
@@ -203,20 +205,6 @@ integrations:
 collectors:
   alloy-metrics:
     presets: [small, clustered, statefulset]
-    # Parameterized scrapes the annotation autodiscovery cannot
-    # express (?target= / ?module= / ?auth=).
-    extraConfig: |
-      prometheus.scrape "pve" {
-        targets = [{
-          "__address__"    = "pve-exporter.pve-exporter.svc:9221",
-          "__param_target" = "10.16.10.55", // site-specific: PVE host LAN address
-          "__param_module" = "default",
-          "instance"       = "pve1",
-        }]
-        metrics_path = "/pve"
-        job_name     = "integrations/proxmox"
-        forward_to   = [prometheus.remote_write.grafana_cloud_metrics.receiver]
-      }
   alloy-singleton:
     presets: [singleton]
   alloy-logs:
