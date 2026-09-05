@@ -57,20 +57,10 @@ resource "omni_machine_set" "workers" {
   }
 }
 
-# Talos 1.13+ requires an explicit install disk. Without it, VMs stop
-# at stage=UPGRADING with no error. Proxmox virtio-scsi is /dev/sda.
-resource "omni_config_patch" "install_disk" {
-  name    = "install-disk"
-  cluster = omni_cluster.homelab.name
-
-  data = yamlencode({
-    machine = {
-      install = {
-        disk = "/dev/sda"
-      }
-    }
-  })
-}
+# No install-disk patch: Omni 1.11 ignores machine.install in config
+# patches (install disk is a dedicated per-machine resource now), and
+# its resolver picks the disk automatically. The VMs carry exactly one
+# disk, so automatic selection cannot pick wrong.
 
 # Cilium comes via ArgoCD; disable the default CNI and kube-proxy.
 resource "omni_config_patch" "disable_default_cni" {
