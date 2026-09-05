@@ -259,3 +259,13 @@ resource "spacelift_stack_dependency" "this" {
   stack_id            = spacelift_stack.this[each.value.child].id
   depends_on_stack_id = spacelift_stack.this[each.value.parent].id
 }
+
+# Head-tracking push policy: see policies/push-track-head.rego. Attaches
+# to every hydrated stack through the shared label.
+resource "spacelift_policy" "push_track_head" {
+  space_id = spacelift_space.homelab.id
+  name     = "push-track-head"
+  type     = "GIT_PUSH"
+  labels   = ["autoattach:homelab"]
+  body     = file("${path.module}/policies/push-track-head.rego")
+}
