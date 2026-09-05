@@ -173,9 +173,11 @@ annotationAutodiscovery:
       - workqueue_.+
       - rest_client_.+
       - controller_runtime_.+
-      # Per-public-host latency histograms from the cloudflared fork;
-      # the _sum/_count pairs still give average latency per host.
-      - cloudflared_tunnel_host_.+_bucket
+      # Per-public-host latency and body-size histograms from the
+      # cloudflared fork, buckets and averages both: request counts and
+      # status codes remain for the traffic-by-hostname dashboard.
+      - cloudflared_tunnel_host_.+_duration_.+
+      - cloudflared_tunnel_host_.+_size_.+
       # Velero operation histograms; _sum/_count keep the averages the
       # backup alerts use.
       - velero_.+_bucket
