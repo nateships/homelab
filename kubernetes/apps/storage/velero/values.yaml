@@ -15,6 +15,13 @@ credentials:
   useSecret: true
   existingSecret: velero-r2
 configuration:
+  # One finished kopia-maintenance job kept per repo (default is
+  # three): every kept job is a completed pod kube-state-metrics
+  # keeps exporting.
+  repositoryMaintenanceJob:
+    repositoryConfigData:
+      global:
+        keepLatestMaintenanceJobs: 1
   # Kopia file-system backup; no CSI snapshots.
   defaultVolumesToFsBackup: true
   backupStorageLocation:

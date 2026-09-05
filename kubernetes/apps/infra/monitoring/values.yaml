@@ -34,14 +34,38 @@ clusterMetrics:
     metricsTuning:
       excludeMetrics:
         - kube_pod_restart_policy
-        - kube_replicaset_created
-        - kube_replicaset_metadata_generation
         # Label/annotation mirrors: one series per object that restates
         # metadata the API already holds.
         - kube_.+_labels
         - kube_.+_annotations
         - kube_pod_tolerations
         - kube_pod_status_qos_class
+        # ReplicaSets: one set per deployment revision (history keeps
+        # ten). Only the owner mapping feeds the workload dashboards.
+        - kube_replicaset_(created|metadata_generation|spec_.+|status_.+)
+        # Jobs: velero keeps finished kopia-maintenance jobs around.
+        # KubeJobFailed alerts on status_failed + owner; the rest is
+        # bookkeeping of runs that already succeeded.
+        - kube_job_(complete|created|info|spec_.+|status_(active|succeeded|start_time|completion_time))
+        # Nothing charts configmap or secret object metadata.
+        - kube_configmap_.+
+        - kube_secret_.+
+  # Kubelet's operational-latency histograms chart internals (cgroup
+  # manager, pod workers, PLEG) on a dashboard this cluster never
+  # opens; pod_start_duration stays as the useful signal.
+  kubelet:
+    metricsTuning:
+      excludeMetrics:
+        - kubelet_cgroup_manager_duration_seconds_bucket
+        - kubelet_pod_worker_duration_seconds_bucket
+        - kubelet_pleg_relist_interval_seconds_bucket
+        - kubelet_pleg_relist_duration_seconds_bucket
+  # Per-container fs op COUNTS; the byte totals keep the disk-io panels.
+  cadvisor:
+    metricsTuning:
+      excludeMetrics:
+        - container_fs_reads_total
+        - container_fs_writes_total
   # The Grafana Cloud CoreDNSDown alert expects this exact job label;
   # without the scrape, absent() fires forever. Keep the request and
   # forward duration histograms (the latency alerts feed on them);
