@@ -24,6 +24,6 @@ zizmor = "1.30.0"
 "aqua:tailscale/tailscale" = "1.102.3"
 # uv powers the pipx backend
 uv = "0.12.10"
-"pipx:ansible-core" = "2.21.3"
+"pipx:ansible-core" = "2.21.4"
 # Spacelift's ansible workflow drives playbooks through ansible-runner
 "pipx:ansible-runner" = "2.4.3"
