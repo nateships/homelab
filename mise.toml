@@ -9,7 +9,7 @@ omnictl = "1.11.0"
 talosctl = "1.14.0"
 # within one minor of kubernetes_version in infra/stacks/cluster/main.tf
 kubectl = "1.37.0"
-helm = "4.2.4"
+helm = "4.3.0"
 kubeconform = "0.8.0"
 # Exact version required: this aqua package cannot enumerate releases.
 # Renovate tracks it through the 1password/op Docker image tags.
