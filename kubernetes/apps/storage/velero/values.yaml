@@ -7,7 +7,7 @@ initContainers:
     # main build: every release through v1.14.2 sends an empty
     # x-amz-tagging header that R2 rejects (fixed on main 2026-05-21,
     # unreleased). Swap back to a release pin once one contains it.
-    image: velero/velero-plugin-for-aws:main@sha256:152c9158c9bb4fd5e0ff455de4afd2242a9b55bf9d15bf981e6114ecdb4a75ca
+    image: velero/velero-plugin-for-aws:main@sha256:50c32c2a2a3d788f03ae74ba7869774b1d1fdb767f490e8be55fe4e4edd6b297
     volumeMounts:
       - mountPath: /target
         name: plugins
