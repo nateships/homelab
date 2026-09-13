@@ -181,6 +181,12 @@ annotationAutodiscovery:
       # Velero operation histograms; _sum/_count keep the averages the
       # backup alerts use.
       - velero_.+_bucket
+      # node-agent per-PodVolumeBackup latency series: the operation
+      # label is the unique PVB name, so every backup adds ~400 series
+      # that never expire while the node-agent pod lives. Nothing
+      # charts them. Kopia's blob latency buckets are the same shape.
+      - podVolume_.+
+      - kopia_blob_storage_latency_ms_bucket
 
 # The collectors' own health metrics (the "Grafana Alloy" status
 # card feeds on alloy_build_info).
