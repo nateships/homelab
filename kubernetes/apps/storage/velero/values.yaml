@@ -45,7 +45,9 @@ schedules:
     disabled: false
     schedule: "0 4 * * *"
     template:
-      ttl: 168h
+      # Three days of daily config snapshots. Kopia dedups the base,
+      # so TTL mostly bounds how many days of churn the repo carries.
+      ttl: 72h
       includedNamespaces:
         - "*"
       # kube-system is fully declarative (git and the Omni bootstrap
