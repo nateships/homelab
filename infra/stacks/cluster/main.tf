@@ -28,7 +28,9 @@ resource "omni_cluster" "homelab" {
   kubernetes_version = local.kubernetes_version
   talos_version      = local.talos_version
 
-  backup_interval = "1h"
+  # etcd is ~50 MB per snapshot; four a day is plenty for a homelab
+  # whose state is otherwise in git.
+  backup_interval = "6h"
 
 }
 
