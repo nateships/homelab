@@ -68,7 +68,7 @@ services:
 
   omni-infra-provider:
     container_name: omni-infra-provider
-    image: ghcr.io/siderolabs/omni-infra-provider-proxmox:latest@sha256:5dcddc67c3793aa9f0ea693733e1293639b036595ed599c46e30033b5e112e3c
+    image: ghcr.io/siderolabs/omni-infra-provider-proxmox:latest@sha256:ff37c3d4cdd41c9a38cc04f1a32c475d5bbd85cdb851ccccc8e5ebb7955b4b08
     volumes:
       - ./provider-config.yaml:/config.yaml:ro
     network_mode: "host"
