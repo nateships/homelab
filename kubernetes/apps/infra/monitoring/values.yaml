@@ -50,6 +50,30 @@ clusterMetrics:
         # Nothing charts configmap or secret object metadata.
         - kube_configmap_.+
         - kube_secret_.+
+    # Label-level trims the name filter cannot express. Succeeded pods
+    # are finished jobs; the Pending/Running/Failed/Unknown phases feed
+    # KubePodNotReady and the pod-resource recording rules.
+    # KubeDeploymentRolloutStuck reads condition=Progressing status=false;
+    # Available and the status=unknown rows chart nothing.
+    extraMetricProcessingRules: |
+      rule {
+        source_labels = ["__name__", "phase"]
+        separator     = ";"
+        regex         = "kube_pod_status_phase;Succeeded"
+        action        = "drop"
+      }
+      rule {
+        source_labels = ["__name__", "condition"]
+        separator     = ";"
+        regex         = "kube_deployment_status_condition;Available"
+        action        = "drop"
+      }
+      rule {
+        source_labels = ["__name__", "status"]
+        separator     = ";"
+        regex         = "kube_deployment_status_condition;unknown"
+        action        = "drop"
+      }
   # Kubelet's operational-latency histograms chart internals (cgroup
   # manager, pod workers, PLEG) on a dashboard this cluster never
   # opens; pod_start_duration stays as the useful signal.
@@ -88,6 +112,17 @@ hostMetrics:
   collector: alloy-metrics
   linuxHosts:
     enabled: true
+    # One node_network_* series per interface per node. Cilium makes an
+    # lxc* veth per pod and the kernel ships a handful of stub devices;
+    # together they were 111 of 135 devices per metric. Keep eth0,
+    # bond0, lo and siderolink.
+    extraMetricProcessingRules: |
+      rule {
+        source_labels = ["__name__", "device"]
+        separator     = ";"
+        regex         = "node_network_.+;(lxc.+|cilium_.+|tunl0|teql0|sit0|ip6tnl0|dummy0)"
+        action        = "drop"
+      }
 
 clusterEvents:
   enabled: true
@@ -200,13 +235,19 @@ integrations:
             - alloy-metrics
             - alloy-singleton
             - alloy-logs
-        # The two component histograms are ~60% of the alloy job's
-        # series; the status card only needs alloy_build_info.
+        # Keep what the alloy alerts read: build_info, config_hash,
+        # controller_running_components, evaluation_slow_seconds, and
+        # the loki_write dropped counters. The rest is Alloy internals.
         metrics:
           tuning:
             excludeMetrics:
               - alloy_component_dependencies_wait_seconds_bucket
-              - alloy_component_evaluation_seconds_bucket
+              - alloy_component_evaluation_seconds_.+
+              - loki_write_request_duration_seconds_bucket
+              - prometheus_remote_storage_sent_batch_duration_seconds_bucket
+              - prometheus_target_.+
+              - go_.+
+              - process_.+
 
 collectors:
   alloy-metrics:
@@ -223,7 +264,17 @@ collectors:
         }]
         metrics_path = "/pve"
         job_name     = "integrations/proxmox"
-        forward_to   = [prometheus.remote_write.grafana_cloud_metrics.receiver]
+        forward_to   = [prometheus.relabel.pve.receiver]
+      }
+      // HA and lock state are one series per guest per possible state;
+      // a single-node PVE has no HA and the alerts read pve_disk_*.
+      prometheus.relabel "pve" {
+        forward_to = [prometheus.remote_write.grafana_cloud_metrics.receiver]
+        rule {
+          source_labels = ["__name__"]
+          regex         = "pve_(ha|lock)_state"
+          action        = "drop"
+        }
       }
   alloy-singleton:
     presets: [singleton]
