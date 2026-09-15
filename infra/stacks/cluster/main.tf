@@ -2,7 +2,7 @@ locals {
   # renovate: datasource=github-releases depName=kubernetes/kubernetes extractVersion=^v(?<version>.+)$
   kubernetes_version = "1.37.0"
   # renovate: datasource=github-releases depName=siderolabs/talos extractVersion=^v(?<version>.+)$
-  talos_version = "1.14.0"
+  talos_version = "1.14.1"
 }
 
 data "onepassword_vault" "homelab" {
