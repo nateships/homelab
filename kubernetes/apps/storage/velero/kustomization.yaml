@@ -17,7 +17,7 @@ helmCharts:
     valuesFile: values.yaml
   - name: velero-ui
     repo: https://helm.otwld.com
-    version: 0.15.0
+    version: 0.16.0
     releaseName: velero-ui
     namespace: velero
     valuesFile: values-ui.yaml
