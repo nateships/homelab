@@ -1,7 +1,7 @@
 # Spacelift runner image. mise installs the toolchain from mise.toml.
 # Spacelift's launcher mounts the tofu binary and the workspace; the
 # image provides the environment and the spacelift user.
-FROM debian:13-slim@sha256:e27e3dbef3b2064bed82f2fef343c0d02a4b8d5675e5b2c511883442e001630d
+FROM debian:13-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
