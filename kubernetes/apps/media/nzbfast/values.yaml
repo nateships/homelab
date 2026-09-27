@@ -5,7 +5,7 @@ controllers:
         image:
           repository: ghcr.io/nzbfast/nzbfast
           # renovate: datasource=docker depName=ghcr.io/nzbfast/nzbfast
-          tag: 1.7.0@sha256:51bbfa7c14a29c1e4eabef59019ae330b4455b41313a632a870302a054ab888f
+          tag: 1.7.1@sha256:8ab00ae0caf39c08f2fc32c02fcff6424331f930b10634474e9843d36a9025f6
         env:
           TZ: America/New_York
           # nzbfast writes at the final path from the first article on;
