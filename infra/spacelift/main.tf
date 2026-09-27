@@ -161,7 +161,7 @@ resource "spacelift_environment_variable" "shared_tfvars" {
 # context attaches by label.
 # Manifest keys (must be a non-empty YAML map):
 #   description: ...
-#   autodeploy: true          # default false: plan on push, apply on confirm
+#   autodeploy: false         # default true: apply on push; false = confirm
 #   labels: [op]              # extra labels; "op" opts into the 1Password token
 #   depends_on: [omni]        # run ordering; values are other stacks' dir keys
 #   type: ansible             # default terraform; ansible runs playbook below
@@ -180,7 +180,7 @@ locals {
 
   stack_defaults = {
     description   = null
-    autodeploy    = false
+    autodeploy    = true
     labels        = []
     depends_on    = []
     type          = "terraform"
