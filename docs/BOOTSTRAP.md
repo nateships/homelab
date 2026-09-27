@@ -123,7 +123,8 @@ two environment variables. Contexts attach to stacks through
 4. Trigger a run. The run creates the `homelab` space, the `homelab` context
    (Proxmox and Tailscale credentials, run hooks, label `autoattach:homelab`),
    and the `homelab-omni` stack (label `homelab`).
-5. Confirm the `homelab-omni` run. The run creates the Omni LXC.
+5. The `homelab-omni` run applies on its own (stacks autodeploy by
+   default). The run creates the Omni LXC.
 
 ## 3. Omni deployment (the Ansible stack)
 
@@ -153,7 +154,7 @@ One-time preparation:
    ```
    Keep the key in your GPG keyring too; without it, etcd data is
    unrecoverable.
-4. Trigger `homelab-omni-config` and confirm the run.
+4. Trigger `homelab-omni-config`.
 
 Login uses Tailscale identity through tsidp (an OIDC provider that runs
 next to Omni and joins the tailnet). The setup has two phases: you can
@@ -192,10 +193,10 @@ login screen, update the field, and re-run the stack.
    Omni encrypts each backup with a per-cluster key before upload, so R2
    never holds plaintext cluster data. The key lives in Omni's database.
    Only Omni can restore the backups.
-5. Confirm the `homelab-omni-resources` run. It applies the machine classes
+5. Trigger the `homelab-omni-resources` run. It applies the machine classes
    and the etcd backup configuration with omnictl. Omni validates the R2
    credentials by listing the bucket.
-6. Confirm the `homelab-cluster` run. It creates the cluster, machine sets,
+6. Trigger the `homelab-cluster` run. It creates the cluster, machine sets,
    config patches, extensions, and the one-time Cilium bootstrap manifest.
    The `install-disk` patch is mandatory on Talos 1.13+. Without it, the
    VMs stop at `stage=UPGRADING` and show no error.
@@ -205,7 +206,7 @@ login screen, update the field, and re-run the stack.
 
 ## 5. ArgoCD and apps
 
-Confirm the `homelab-k8s-bootstrap` run. The run fetches a
+Trigger the `homelab-k8s-bootstrap` run. The run fetches a
 service-account kubeconfig from Omni. It installs ArgoCD together with
 the ApplicationSet. It creates the one secret that ESO needs: the
 1Password token, taken from the run environment. Nothing here is manual.

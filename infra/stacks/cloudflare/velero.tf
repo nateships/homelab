@@ -3,6 +3,12 @@
 resource "cloudflare_r2_bucket" "velero" {
   account_id = local.cloudflare_account_id
   name       = "velero-backups"
+
+  lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
+  }
 }
 
 data "cloudflare_account_api_token_permission_groups_list" "all" {

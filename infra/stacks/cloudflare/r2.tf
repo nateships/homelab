@@ -4,6 +4,12 @@
 resource "cloudflare_r2_bucket" "etcd_backups" {
   account_id = local.cloudflare_account_id
   name       = var.r2_bucket
+
+  lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
+  }
 }
 
 resource "cloudflare_r2_bucket_lifecycle" "etcd_backups" {
