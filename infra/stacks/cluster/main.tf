@@ -32,6 +32,11 @@ resource "omni_cluster" "homelab" {
   # whose state is otherwise in git.
   backup_interval = "6h"
 
+  lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
+  }
 }
 
 resource "omni_machine_set" "control_planes" {
@@ -41,6 +46,12 @@ resource "omni_machine_set" "control_planes" {
   machine_class = {
     name = "proxmox-control-plane"
     size = 3
+  }
+
+  lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
   }
 }
 
@@ -56,6 +67,12 @@ resource "omni_machine_set" "workers" {
   machine_class = {
     name = "proxmox-worker"
     size = 3
+  }
+
+  lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
   }
 }
 

@@ -34,6 +34,10 @@ resource "proxmox_virtual_environment_container" "omni" {
   }
 
   lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
+
     # operating_system: a template bump must not recreate the container.
     # The template only matters at creation; rebuild with -replace.
     ignore_changes = [features, device_passthrough, operating_system]

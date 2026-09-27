@@ -16,4 +16,11 @@ resource "tailscale_acl" "tailnet" {
 
   # First apply takes ownership of the console policy.
   overwrite_existing_content = true
+
+  # Destroy resets the tailnet to the default allow-all policy.
+  lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
+  }
 }

@@ -33,4 +33,12 @@ resource "cloudflare_zone_dnssec" "zones" {
   for_each = local.all_zone_ids
   zone_id  = each.value
   status   = "active"
+
+  # Dropping DNSSEC while the registrar still publishes DS breaks
+  # resolution for the zone.
+  lifecycle {
+    # Guard: autodeploy applies unreviewed. Delete this line first to
+    # destroy or replace on purpose.
+    prevent_destroy = true
+  }
 }
