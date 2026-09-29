@@ -198,11 +198,9 @@ login screen, update the field, and re-run the stack.
    configuration (Omni validates the R2 credentials by listing the
    bucket), the machine classes, the cluster, machine sets, config
    patches, extensions, and the one-time Cilium bootstrap manifest.
-   The `install-disk` patch is mandatory on Talos 1.13+. Without it, the
-   VMs stop at `stage=UPGRADING` and show no error.
 6. Wait until the VMs provision and the cluster reports Ready in Omni.
    Automatic etcd backups start when the cluster is Ready; the cluster
-   stack sets a 1 hour interval. Check: Omni UI → cluster → Backups.
+   stack sets a 6 hour interval. Check: Omni UI → cluster → Backups.
 
 ## 5. ArgoCD and apps
 
