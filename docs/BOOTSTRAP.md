@@ -188,19 +188,19 @@ login screen, update the field, and re-run the stack.
    - R2 → Create bucket, for example `omni-etcd-backups`.
    - R2 → Manage R2 API Tokens → Create. Permission **Object Read & Write**,
      scoped to that bucket only.
-   - Fill the `cloudflare-r2` item: `bucket`, `account-id` (from the R2
-     endpoint), username = Access Key ID, password = Secret Access Key.
+   - Fill the `cloudflare-r2` item: `account-id` (from the R2 endpoint),
+     username = Access Key ID, password = Secret Access Key. The bucket
+     name is `r2_bucket` in the site item.
    Omni encrypts each backup with a per-cluster key before upload, so R2
    never holds plaintext cluster data. The key lives in Omni's database.
    Only Omni can restore the backups.
-5. Trigger the `homelab-omni-resources` run. It applies the machine classes
-   and the etcd backup configuration with omnictl. Omni validates the R2
-   credentials by listing the bucket.
-6. Trigger the `homelab-cluster` run. It creates the cluster, machine sets,
-   config patches, extensions, and the one-time Cilium bootstrap manifest.
+5. Trigger the `homelab-cluster` run. It creates the etcd backup
+   configuration (Omni validates the R2 credentials by listing the
+   bucket), the machine classes, the cluster, machine sets, config
+   patches, extensions, and the one-time Cilium bootstrap manifest.
    The `install-disk` patch is mandatory on Talos 1.13+. Without it, the
    VMs stop at `stage=UPGRADING` and show no error.
-7. Wait until the VMs provision and the cluster reports Ready in Omni.
+6. Wait until the VMs provision and the cluster reports Ready in Omni.
    Automatic etcd backups start when the cluster is Ready; the cluster
    stack sets a 1 hour interval. Check: Omni UI → cluster → Backups.
 

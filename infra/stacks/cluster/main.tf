@@ -32,6 +32,9 @@ resource "omni_cluster" "homelab" {
   # whose state is otherwise in git.
   backup_interval = "6h"
 
+  # Backups start when the cluster is Ready; the target must exist first.
+  depends_on = [omni_etcd_backup_s3_config.r2]
+
   lifecycle {
     # Guard: autodeploy applies unreviewed. Delete this line first to
     # destroy or replace on purpose.
@@ -44,7 +47,7 @@ resource "omni_machine_set" "control_planes" {
   role    = "controlplane"
 
   machine_class = {
-    name = "proxmox-control-plane"
+    name = omni_machine_class.control_plane.name
     size = 3
   }
 
@@ -65,7 +68,7 @@ resource "omni_machine_set" "workers" {
   }
 
   machine_class = {
-    name = "proxmox-worker"
+    name = omni_machine_class.worker.name
     size = 3
   }
 
@@ -191,7 +194,24 @@ resource "omni_machine_extensions" "workers" {
   ]
 }
 
-# The weekly FilesystemTrimConfig patch is omnictl-applied from
-# omni/patches/ (the omni-resources stack): provider alpha.3 predates
-# the document's registration and rejects it client-side. Fold it back
-# here when a newer provider release ships.
+# Weekly fstrim on every mounted filesystem (Talos 1.14). The VM disks
+# are thin zvols with discard enabled in the machine classes, so trimmed
+# blocks return to the PVE zpool.
+# Adopted from the retired omni-resources stack (omnictl); the import
+# block is a no-op once the patch is in state and can be removed.
+import {
+  to = omni_config_patch.filesystem_trim
+  id = "500-filesystem-trim"
+}
+
+resource "omni_config_patch" "filesystem_trim" {
+  name    = "filesystem-trim"
+  weight  = 500
+  cluster = omni_cluster.homelab.name
+
+  data = <<-EOT
+    apiVersion: v1alpha1
+    kind: FilesystemTrimConfig
+    interval: 168h0m0s
+  EOT
+}
