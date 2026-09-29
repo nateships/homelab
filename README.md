@@ -21,7 +21,7 @@ immutable Talos nodes on Proxmox, and ArgoCD deploys everything under
 | IaC | [OpenTofu](https://opentofu.org/) on [Spacelift](https://spacelift.io/) |
 | Secrets | [1Password](https://1password.com/) service account + [External Secrets Operator](https://external-secrets.io/) |
 | Storage | [proxmox-csi](https://github.com/sergelogvinov/proxmox-csi-plugin) (ZFS-backed PVCs) + NFS media exports |
-| Backups | [Velero](https://velero.io/) → Cloudflare R2; hourly Omni etcd snapshots → R2 |
+| Backups | [Velero](https://velero.io/) → Cloudflare R2; Omni etcd snapshots every 6 hours → R2 |
 | Observability | [Grafana Cloud](https://grafana.com/products/cloud/) via Alloy; SNMP, PVE, UniFi, ArgoCD exporters; IRM paging |
 | CI / updates | GitHub Actions ([mise](https://mise.jdx.dev/)-pinned tools) + [Renovate](https://docs.renovatebot.com/) |
 
@@ -35,16 +35,33 @@ immutable Talos nodes on Proxmox, and ArgoCD deploys everything under
 
 ```
 infra/spacelift/    Admin stack: hydrates one Spacelift stack per infra/stacks/<name>/
-infra/stacks/       One dir per OpenTofu stack; Spacelift runs each via Tailscale
-  omni/             Omni LXC on Proxmox; stack.yaml = hydration manifest + overrides
-omni/               Self-hosted Omni: compose file, env template, machine classes
+infra/stacks/       One dir per stack; stack.yaml = hydration manifest; Spacelift runs each via Tailscale
+  omni/             Omni LXC on Proxmox (OpenTofu)
+  omni-config/      Omni LXC setup and deploy (Ansible)
+  cluster/          Talos cluster on Omni: machine classes, machine sets, patches,
+                    etcd backup target (OpenTofu)
+  k8s-bootstrap/    ArgoCD, the ApplicationSet, and the ESO secret (Ansible)
+  cloudflare/       DNS records, R2 buckets, minted API tokens (OpenTofu)
+  tailscale/        Tailnet policy file and OAuth clients (OpenTofu)
+omni/               Self-hosted Omni: compose file, env template, infra provider config
 kubernetes/
   bootstrap/        One-time ArgoCD install + the ApplicationSet
-  apps/             One config.yaml per app; the ApplicationSet generates each Application
-.github/workflows/  CI: tofu fmt/validate, appset schema, kubeconform; Spacelift runner image build
+  apps/             <category>/<app>/: config.yaml (Application) + kustomization.yaml (content)
+.github/workflows/  CI: prek hooks, image scan, tofu fmt/validate, appset schema + kubeconform;
+                    weekly Trivy scan; Spacelift runner image build
 docs/BOOTSTRAP.md   Bring-up guide, zero to cluster
 docs/SITE.md        Every site-specific value: what a fork must change
 ```
+
+## Apps
+
+| Category | Apps |
+|---|---|
+| infra | argocd, external-secrets, intel-gpu-plugin, metrics-server, monitoring, pve-exporter, reloader |
+| network | cilium, cloudflare-tunnel, tailscale-operator |
+| storage | proxmox-csi, velero |
+| media | nzbfast, plex, profilarr, prowlarr, radarr, seerr, sonarr, tautulli |
+| utility | birdnet-go, ladder |
 
 ## So you want to run this
 
