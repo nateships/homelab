@@ -5,7 +5,7 @@ terraform {
     omni = {
       source = "registry.terraform.io/siderolabs/omni"
       # Alpha provider; prerelease versions need an exact pin.
-      version = "0.1.0-alpha.3"
+      version = "0.1.0-beta.0"
     }
     onepassword = {
       source  = "1Password/onepassword"
