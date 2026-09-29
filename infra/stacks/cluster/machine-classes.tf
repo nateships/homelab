@@ -1,18 +1,6 @@
 # Machine classes: what the Proxmox infra provider builds when a machine
 # set scales. provider_data reaches the provider as YAML. Changes only
 # affect machines provisioned afterwards.
-# Adopted from the retired omni-resources stack (omnictl); the import
-# blocks are no-ops once the classes are in state and can be removed.
-import {
-  to = omni_machine_class.control_plane
-  id = "proxmox-control-plane"
-}
-
-import {
-  to = omni_machine_class.worker
-  id = "proxmox-worker"
-}
-
 locals {
   # Shared by both classes.
   # site-specific: bridge, VLAN id, and datastore selector name this PVE

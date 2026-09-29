@@ -197,13 +197,6 @@ resource "omni_machine_extensions" "workers" {
 # Weekly fstrim on every mounted filesystem (Talos 1.14). The VM disks
 # are thin zvols with discard enabled in the machine classes, so trimmed
 # blocks return to the PVE zpool.
-# Adopted from the retired omni-resources stack (omnictl); the import
-# block is a no-op once the patch is in state and can be removed.
-import {
-  to = omni_config_patch.filesystem_trim
-  id = "500-filesystem-trim"
-}
-
 resource "omni_config_patch" "filesystem_trim" {
   name    = "filesystem-trim"
   weight  = 500
