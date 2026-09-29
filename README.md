@@ -39,7 +39,7 @@ infra/stacks/       One dir per stack; stack.yaml = hydration manifest; Spacelif
   omni/             Omni LXC on Proxmox (OpenTofu)
   omni-config/      Omni LXC setup and deploy (Ansible)
   cluster/          Talos cluster on Omni: machine classes, machine sets, patches,
-                    etcd backup target (OpenTofu)
+                    infra provider, etcd backup target (OpenTofu)
   k8s-bootstrap/    ArgoCD, the ApplicationSet, and the ESO secret (Ansible)
   cloudflare/       DNS records, R2 buckets, minted API tokens (OpenTofu)
   tailscale/        Tailnet policy file and OAuth clients (OpenTofu)

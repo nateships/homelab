@@ -25,7 +25,7 @@ resource "omni_machine_class" "control_plane" {
   name = "proxmox-control-plane"
 
   auto_provision = {
-    provider_id = "proxmox"
+    provider_id = omni_infra_provider.proxmox.name
 
     provider_data = yamlencode(merge(local.proxmox_vm, {
       cores     = 4
@@ -39,7 +39,7 @@ resource "omni_machine_class" "worker" {
   name = "proxmox-worker"
 
   auto_provision = {
-    provider_id = "proxmox"
+    provider_id = omni_infra_provider.proxmox.name
 
     # Probe the iGPU VF with xe; xe support for this generation needs
     # force_probe. Pods request the GPU as gpu.intel.com/xe.

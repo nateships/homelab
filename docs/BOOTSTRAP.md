@@ -176,15 +176,13 @@ login screen, update the field, and re-run the stack.
 
 ## 4. Proxmox infra provider and cluster
 
-1. Omni UI → Infrastructure Providers → Create Provider (id `proxmox`).
-   Copy the key. This is an **infrastructure provider key**, not a service
-   account key. Store it as the password of the `omni-infra-provider` item.
-2. Omni UI → Settings → Service Accounts → create one with the Admin role.
+1. Omni UI → Settings → Service Accounts → create one with the Admin role.
    Store the key as the password of the `omni-service-account` item.
-3. Re-run `homelab-omni-config`. It deploys the
-   [provider container](https://github.com/siderolabs/omni-infra-provider-proxmox)
-   next to Omni, configured from 1Password.
-4. Create the etcd backup target in Cloudflare R2:
+2. Create the `omni-infra-provider` item (category Password) with any
+   placeholder password. omni-config renders this item into `omni.env`,
+   so it must exist before the next run. The cluster stack replaces the
+   placeholder with the real key.
+3. Create the etcd backup target in Cloudflare R2:
    - R2 → Create bucket, for example `omni-etcd-backups`.
    - R2 → Manage R2 API Tokens → Create. Permission **Object Read & Write**,
      scoped to that bucket only.
@@ -194,10 +192,18 @@ login screen, update the field, and re-run the stack.
    Omni encrypts each backup with a per-cluster key before upload, so R2
    never holds plaintext cluster data. The key lives in Omni's database.
    Only Omni can restore the backups.
-5. Trigger the `homelab-cluster` run. It creates the etcd backup
-   configuration (Omni validates the R2 credentials by listing the
-   bucket), the machine classes, the cluster, machine sets, config
-   patches, extensions, and the one-time Cilium bootstrap manifest.
+4. Trigger the `homelab-cluster` run. It registers the Proxmox infra
+   provider and writes its key into the `omni-infra-provider` item. It
+   also creates the etcd backup configuration (Omni validates the R2
+   credentials by listing the bucket), the machine classes, the cluster,
+   machine sets, config patches, extensions, and the one-time Cilium
+   bootstrap manifest. On a from-zero rebuild, first add an import block
+   for the placeholder item (`onepassword_item.omni_infra_provider`, id
+   `vaults/<vault id>/items/<item id>`). Without it, the stack creates a
+   second item with the same title.
+5. Re-run `homelab-omni-config`. It deploys the
+   [provider container](https://github.com/siderolabs/omni-infra-provider-proxmox)
+   next to Omni with the new key.
 6. Wait until the VMs provision and the cluster reports Ready in Omni.
    Automatic etcd backups start when the cluster is Ready; the cluster
    stack sets a 6 hour interval. Check: Omni UI → cluster → Backups.
