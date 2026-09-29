@@ -3,13 +3,6 @@
 # The cloudflare stack owns the bucket (same r2_bucket TF_VAR); the R2
 # API token and account id live in the cloudflare-r2 item. R2 ignores
 # the region; "auto" is the documented value.
-# Adopted from the retired omni-resources stack (omnictl); the import
-# block is a no-op once the config is in state and can be removed.
-import {
-  to = omni_etcd_backup_s3_config.r2
-  id = "etcd-backup-s3-conf"
-}
-
 data "onepassword_item" "cloudflare_r2" {
   vault = data.onepassword_vault.homelab.uuid
   title = "cloudflare-r2"
