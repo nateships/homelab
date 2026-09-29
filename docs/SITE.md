@@ -29,10 +29,10 @@ grep -rn "site-specific:" --include="*.yaml" --include="*.tf" --include="*.hujso
 | `10.16.101.224/27` | `kubernetes/apps/network/cilium/lb-ipam.yaml` | Service VIP pool on the node VLAN, above the DHCP scope |
 | `10.16.101.225` | `kubernetes/apps/media/plex/values.yaml` | Pinned plex VIP from the pool (LB annotation) |
 | R2 endpoint | `kubernetes/apps/storage/velero/values.yaml` (`s3Url`) | Account-scoped R2 S3 endpoint for velero backups |
-| `network_bridge: vmbr0`, `vlan: 101` | `omni/machine-classes/*.yaml` | PVE bridge and VLAN id the cluster VMs attach to |
-| `storage_selector: name == "zpool"` | `omni/machine-classes/*.yaml` | CEL selector naming the PVE datastore for VM disks |
-| `xe.force_probe=a780` | `omni/machine-classes/worker.yaml` | PCI device id of the host iGPU (xe driver probe) |
-| `mapping: vGPU` | `omni/machine-classes/worker.yaml` | Name of the hand-made Proxmox PCI resource mapping |
+| `network_bridge: vmbr0`, `vlan: 101` | `infra/stacks/cluster/machine-classes.tf` | PVE bridge and VLAN id the cluster VMs attach to |
+| `storage_selector: name == "zpool"` | `infra/stacks/cluster/machine-classes.tf` | CEL selector naming the PVE datastore for VM disks |
+| `xe.force_probe=a780` | `infra/stacks/cluster/machine-classes.tf` | PCI device id of the host iGPU (xe driver probe) |
+| `mapping: vGPU` | `infra/stacks/cluster/machine-classes.tf` | Name of the hand-made Proxmox PCI resource mapping |
 
 These values stay in git because ArgoCD and Omni render only committed
 manifests. Everything terraform-applied arrives as TF_VAR_* instead

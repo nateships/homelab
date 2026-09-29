@@ -8,3 +8,8 @@ variable "proxmox_node" {
   description = "Proxmox node name; the workers' topology zone label"
   type        = string
 }
+
+variable "r2_bucket" {
+  description = "R2 bucket for Omni etcd backups"
+  type        = string
+}
