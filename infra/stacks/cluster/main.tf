@@ -96,7 +96,7 @@ resource "omni_config_patch" "worker_labels" {
   cluster = omni_cluster.homelab.name
 
   selector = {
-    machine_set = omni_machine_set.workers.name
+    machine_set = omni_machine_set.workers.id
   }
 
   # Workers can only self-set kubelet-allowlisted labels; the earlier
@@ -120,7 +120,7 @@ resource "omni_config_patch" "control_plane_labels" {
   cluster = omni_cluster.homelab.name
 
   selector = {
-    machine_set = omni_machine_set.control_planes.name
+    machine_set = omni_machine_set.control_planes.id
   }
 
   data = yamlencode({
@@ -179,7 +179,7 @@ resource "omni_machine_extensions" "workers" {
   cluster = omni_cluster.homelab.name
 
   selector = {
-    machine_set = omni_machine_set.workers.name
+    machine_set = omni_machine_set.workers.id
   }
 
   extensions = [
