@@ -7,19 +7,6 @@
 #
 # Rotate: change renew_trigger. Omni issues a new key and the provider
 # keeps its identity. A key expires after ttl.
-#
-# Adopted from the Omni UI; the import blocks are no-ops once the
-# resources are in state and can be removed. An imported provider has
-# no key in state, so the first apply renews it (renew_trigger).
-import {
-  to = omni_infra_provider.proxmox
-  id = "proxmox"
-}
-
-import {
-  to = onepassword_item.omni_infra_provider
-  id = "vaults/nepmh5li3casah74lu46ip74ym/items/3cp4avfutqptyjkpt5wnnwg2ly"
-}
 
 resource "omni_infra_provider" "proxmox" {
   name          = "proxmox"
