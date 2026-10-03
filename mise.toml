@@ -13,7 +13,7 @@ helm = "4.3.0"
 kubeconform = "0.8.0"
 # Exact version required: this aqua package cannot enumerate releases.
 # Renovate tracks it through the 1password/op Docker image tags.
-"aqua:1password/cli" = "2.39.0"
+"aqua:1password/cli" = "2.40.0"
 prek = "0.5.4"
 trufflehog = "3.97.9"
 trivy = "0.75.0"
