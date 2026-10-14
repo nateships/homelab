@@ -5,6 +5,8 @@ resources:
   - external-secret.yaml
   # OIDC client env for velero-ui (ESO)
   - external-secret-ui.yaml
+  # JWT signing key for velero-ui (ESO generator)
+  - external-secret-ui-jwt.yaml
   # The chart's ingress is host-based; tailscale needs host-less.
   - ui-ingress.yaml
 helmCharts:
