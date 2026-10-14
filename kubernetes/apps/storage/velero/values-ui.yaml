@@ -7,3 +7,8 @@ image:
 envFrom:
   - secretRef:
       name: velero-ui-oidc
+configuration:
+  general:
+    secretPassPhrase:
+      existingSecret: velero-ui-jwt
+      key: password # the ESO Password generator output key
