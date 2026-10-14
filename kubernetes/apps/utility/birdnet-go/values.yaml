@@ -90,7 +90,7 @@ persistence:
           - path: /config
   data:
     accessMode: ReadWriteOnce
-    size: 5Gi
+    size: 10Gi # the app needs 1GB free on /data to start
     advancedMounts:
       birdnet-go:
         app:
