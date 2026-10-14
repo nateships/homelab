@@ -7,8 +7,18 @@ image:
 envFrom:
   - secretRef:
       name: velero-ui-oidc
+# SSO only. The app refuses to start with default local credentials.
+env:
+  - name: BASIC_AUTH_ENABLED
+    value: "false"
 configuration:
   general:
     secretPassPhrase:
       existingSecret: velero-ui-jwt
       key: password # the ESO Password generator output key
+  # SSO users get no permissions without a rule. tsidp signs in only
+  # tailnet users, so every signed-in user gets full access.
+  policies:
+    enabled: true
+    value: |
+      u,*,manage,all
