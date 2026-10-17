@@ -145,7 +145,7 @@ data "helm_template" "cilium_bootstrap" {
   repository = "https://helm.cilium.io"
   chart      = "cilium"
   # renovate: datasource=helm registryUrl=https://helm.cilium.io depName=cilium
-  version      = "1.20.2"
+  version      = "1.20.3"
   namespace    = "kube-system"
   kube_version = local.kubernetes_version
   values       = [file("${path.module}/../../../kubernetes/apps/network/cilium/values.yaml")]
