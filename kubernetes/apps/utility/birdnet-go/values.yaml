@@ -18,6 +18,13 @@ controllers:
             enabled: true
           readiness:
             enabled: true
+          # A cold OpenVINO GPU compile of the v3 model takes more than
+          # 30 seconds. This probe gives the first start 10 minutes.
+          startup:
+            enabled: true
+            spec:
+              periodSeconds: 10
+              failureThreshold: 60
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
