@@ -85,7 +85,8 @@ locals {
   tailscale_up = [
     "(tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --outbound-http-proxy-listen=localhost:1056 --state=/tmp/tailscaled.state --socket=/tmp/tailscaled.sock >/tmp/tailscaled.log 2>&1 &)",
     # Wait for the daemon socket; a fixed sleep flakes on slow workers.
-    "timeout 15 sh -c 'until [ -S /tmp/tailscaled.sock ]; do sleep 0.2; done'",
+    # On timeout, print the daemon log, then fail with exit code 124.
+    "(timeout 15 sh -c 'until [ -S /tmp/tailscaled.sock ]; do sleep 0.2; done' || { cat /tmp/tailscaled.log; exit 124; })",
     "tailscale --socket=/tmp/tailscaled.sock up --auth-key=\"$${TAILSCALE_AUTH_KEY}?ephemeral=true&preauthorized=true\" --advertise-tags=tag:spacelift --hostname=spacelift-run --accept-routes",
   ]
 }
