@@ -4,7 +4,7 @@
 opentofu = "1.13.2"
 # MUST match OMNI_IMG_TAG in omni/omni.env.example; mismatched omnictl fails
 # with obscure gRPC errors
-omnictl = "1.12.4"
+omnictl = "1.13.0"
 # match talos_version in infra/stacks/cluster/main.tf
 talosctl = "1.14.5"
 # within one minor of kubernetes_version in infra/stacks/cluster/main.tf
