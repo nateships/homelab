@@ -21,7 +21,7 @@ zizmor = "1.31.1"
 "pipx:yamllint" = "1.38.0"
 
 # Runner-image tools (runner/Dockerfile installs this whole file via mise)
-"aqua:tailscale/tailscale" = "1.104.2"
+"aqua:tailscale/tailscale" = "1.104.4"
 # uv powers the pipx backend
 uv = "0.13.6"
 "pipx:ansible-core" = "2.21.5"
