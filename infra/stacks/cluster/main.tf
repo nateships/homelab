@@ -1,6 +1,6 @@
 locals {
   # renovate: datasource=github-releases depName=kubernetes/kubernetes extractVersion=^v(?<version>.+)$
-  kubernetes_version = "1.37.1"
+  kubernetes_version = "1.37.2"
   # renovate: datasource=github-releases depName=siderolabs/talos extractVersion=^v(?<version>.+)$
   talos_version = "1.14.5"
 }
