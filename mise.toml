@@ -8,7 +8,7 @@ omnictl = "1.13.0"
 # match talos_version in infra/stacks/cluster/main.tf
 talosctl = "1.14.5"
 # within one minor of kubernetes_version in infra/stacks/cluster/main.tf
-kubectl = "1.37.1"
+kubectl = "1.37.2"
 helm = "4.3.1"
 kubeconform = "0.8.0"
 # Exact version required: this aqua package cannot enumerate releases.
