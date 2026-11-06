@@ -16,7 +16,7 @@ kubeconform = "0.8.0"
 "aqua:1password/cli" = "2.42.0"
 prek = "0.5.10"
 trufflehog = "3.99.8"
-trivy = "0.76.1"
+trivy = "0.76.2"
 zizmor = "1.32.0"
 "pipx:yamllint" = "1.38.0"
 
