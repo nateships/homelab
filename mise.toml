@@ -17,7 +17,7 @@ kubeconform = "0.8.0"
 prek = "0.5.11"
 trufflehog = "3.100.0"
 trivy = "0.76.2"
-zizmor = "1.33.0"
+zizmor = "1.33.1"
 "pipx:yamllint" = "1.38.0"
 
 # Runner-image tools (runner/Dockerfile installs this whole file via mise)
